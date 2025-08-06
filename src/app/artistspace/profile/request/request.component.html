@@ -1,0 +1,261 @@
+<div class="w-full max-w-full overflow-hidden">
+    <!-- About Section -->
+
+    <div class="bg-white rounded-lg p-1 shadow-md mb-4">
+        <div class="grid grid-cols-2 gap-2">
+            <div class="p-1 m-1 bg-gray-100 rounded-lg shadow-sm cursor-pointer text-center">
+                <p class="font-medium">New Request</p>
+            </div>
+            <div class="p-1 m-1 bg-white rounded-lg cursor-pointer text-center">
+                <p class="font-medium">All Request</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 shadow-md mb-4" *ngIf="activeTab === 1">
+        <div class="flex flex-row justify-between items-center mb-4">
+            <h1 class="text-xl font-medium">Submit new event request</h1>
+        </div>
+
+        <div class="space-y-4 mt-6">
+
+<div>
+                <p class="mb-2 font-medium">Type of the Event</p>
+                  <select class="w-full p-2 border border-gray-300 rounded-lg mt-2">
+                    <option value="" disabled selected>Select Event Type</option>
+                    <option value="concert">Concert</option>
+                    <option value="recital">Exhibition</option>
+                    </select>
+                    
+
+
+            </div>
+
+
+
+            <div>
+                <p class="mb-2 font-medium">Title of the Event</p>
+                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                    placeholder="e.g., Classical Concert" />
+            </div>
+
+            <div>
+                <p class="mb-2 font-medium">Instruments</p>
+                <div class="flex flex-row gap-2">
+                    <input type="text" class="w-4/5 p-2 border border-gray-300 rounded-lg"
+                        placeholder="e.g., Classical Concert" />
+                    <div class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer">
+                        Add
+                    </div>
+                </div>
+
+                <div class="space-y-4 mt-4">
+                    <div class="flex flex-wrap gap-2">
+                        <span
+                            class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">Solo
+                            Vocal</span>
+                        <span
+                            class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">Chamber
+                            Music</span>
+                        <span
+                            class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">Orchestral
+                            Performances</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <p class="mb-2 mt-6 font-medium">Short Description</p>
+
+                <textarea class="w-full p-2 border border-gray-300 rounded-lg mt-2"
+                    placeholder="Provide a brief description of the event"></textarea>
+            </div>
+
+            <div class="mt-6">
+                <p class="mb-2 mt-6 font-medium">Long Description</p>
+
+                <textarea class="w-full h-40 p-2 border border-gray-300 rounded-lg mt-2" rows="6"
+                    placeholder="Provide a brief description of the event"></textarea>
+            </div>
+
+            <div>
+                <p class="mb-2 font-medium">Proposed Date</p>
+                <div class="flex flex-row gap-2">
+                    <input type="date" class="w-4/5 p-2 border border-gray-300 rounded-lg"
+                        placeholder="e.g., Classical Concert" />
+                    <div class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer">
+                        Add
+                    </div>
+                </div>
+
+                <div class="space-y-4 mt-4">
+                    <div class="flex flex-wrap gap-2">
+                        <span class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">
+                            25 Aug 2025</span>
+                        <span class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">
+                            26 Aug 2025</span>
+                        <span class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">
+                            27 Aug 2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="bg-pont-rust w-full text-white font-medium rounded-lg mt-6 p-2">
+                Next Step
+            </button>
+        </div>
+    </div>
+
+    <div class="" *ngIf="activeTab === 2">
+        <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+            <p class="font-medium">Video for Event</p>
+            <div class="flex space-x-2 flex-row mt-2">
+                <div class="bg-gray-100 rounded-lg p-4 mt-2 w-3/4">
+                    <p class="text-lg font-medium">Add Video</p>
+                    <input type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                        placeholder="Enter Name of Video video" />
+
+                    <input type="text" class="w-full p-2 mt-4 border border-gray-300 rounded-md"
+                        placeholder="Enter video URL or upload video" />
+
+                    <input type="file" class="w-full p-2 mt-4 border border-gray-300 rounded-md" accept="video/*" />
+                    <button class="bg-gray-300 text-black p-2 rounded-lg mt-4 w-full">
+                        Upload Video
+                    </button>
+                </div>
+
+                <div class="bg-gray-100 rounded-lg p-4 mt-2 w-1/4">
+                    <div class="flex flex-col space-y-2">
+                        <p class="text-lg font-medium">Video List</p>
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
+                            <p class="text-sm">Video 1</p>
+                            <p class="text-red-900 text-xs">Remove</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
+                            <p class="text-sm">Video 2</p>
+                            <p class="text-red-900 text-xs">Remove</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
+                            <p class="text-sm">Video 3</p>
+                            <p class="text-red-900 text-xs">Remove</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+            <p class="font-medium">Event CDs</p>
+            <div class="flex space-x-2 flex-row mt-2">
+                <div class="bg-gray-100 rounded-lg p-4 mt-2 w-3/4">
+                    <p class="text-lg font-medium">Add CDs</p>
+                    <input type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                        placeholder="Name of Music Albumn" />
+
+                    <input type="text" class="w-full p-2 mt-4 border border-gray-300 rounded-md"
+                        placeholder="Enter CD URL" />
+
+                    <input type="file" class="w-full p-2 mt-4 border border-gray-300 rounded-md" accept="video/*" />
+                    <button class="bg-gray-300 text-black font-medium p-2 rounded-lg mt-4 w-full">
+                        Add CD Info
+                    </button>
+                </div>
+
+                <div class="bg-gray-100 rounded-lg p-4 mt-2 w-1/4">
+                    <div class="flex flex-col space-y-2">
+                        <p class="text-lg font-medium">CD List</p>
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
+                            <p class="text-sm">CD 1</p>
+                            <p class="text-red-900 text-xs">Remove</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
+                            <p class="text-sm">CD 2</p>
+                            <p class="text-red-900 text-xs">Remove</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
+                            <p class="text-sm">CD 3</p>
+                            <p class="text-red-900 text-xs">Remove</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-row justify-end space-x-4 mt-4 w-full">
+            <button class="w-1/2 bg-pont-rust text-white p-2 rounded-lg">Back</button>
+
+            <button class="w-1/2 bg-pont-green text-white p-2 rounded-lg">
+                Submit Request
+            </button>
+        </div>
+    </div>
+
+    <div class="" *ngIf="activeTab === 3">
+        <div class="bg-white rounded-xl p-12 shadow-md h-64 mb-4">
+            <div class="flex flex-col justify-center items-center mb-4">
+                <h1 class="text-xl font-medium">Thanks, your request is submitted</h1>
+                <p>Request ID</p>
+                <pre>asd234-23424sdf-1234mafdk3-234</pre>
+                <button class="bg-pont-green text-white p-2 rounded-lg mt-4">
+                    Go to Requests
+                </button>
+            </div>
+        </div>
+    </div>
+<div class="" *ngIf="activeTab === 4">
+  <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <!-- Status Labels -->
+    <div class="flex flex-row mb-6 space-x-6">
+      <div class="w-auto bg-yellow-200 text-yellow-800 p-2 rounded-full text-xs">
+        <p>Pending</p>
+      </div>
+      <div class="w-auto bg-green-200 text-green-800 p-2 rounded-full text-xs">
+        <p>Approved</p>
+      </div>
+      <div class="w-auto bg-red-200 text-red-800 p-2 rounded-full text-xs">
+        <p>Rejected</p>
+      </div>
+    </div>
+
+    <!-- Dynamic Event List -->
+    <div
+      *ngFor="let event of events"
+      class="border-2 border-gray-300 rounded-lg mt-4 pb-8"
+    >
+      <div class="flex flex-row justify-between items-center p-4">
+        <h1 class="text-xl font-medium">{{ event.title }}</h1>
+
+        <div class="flex flex-col space-y-2">
+          <div
+            [ngClass]="{
+              'bg-yellow-200 text-yellow-800': event.status === 'Pending',
+              'bg-green-200 text-green-800': event.status === 'Approved',
+              'bg-red-200 text-red-800': event.status === 'Rejected'
+            }"
+            class="p-2 rounded-lg"
+          >
+            <p class="text-sm font-medium">Status: {{ event.status }}</p>
+          </div>
+
+          <div class="bg-gray-200 text-gray-800 p-2 mt-3 rounded-lg cursor-pointer">
+            <p class="text-sm text-center font-medium">Edit</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-row space-x-6 px-4">
+        <div class="flex flex-row space-x-2">
+          <i class="fas fa-calendar-days mt-2 text-lg text-gray-500"></i>
+          <p class="text-lg text-gray-500">Event Date: {{ event.eventDate }}</p>
+        </div>
+
+        <div class="flex flex-row space-x-2">
+          <i class="fas fa-clock mt-2 text-lg text-gray-500"></i>
+          <p class="text-lg text-gray-500">Submitted: {{ event.submittedDate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>

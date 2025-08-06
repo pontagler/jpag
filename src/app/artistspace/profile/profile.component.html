@@ -1,0 +1,59 @@
+<app-header></app-header>
+
+<main class="min-h-screen bg-cream">
+  <div class="flex flex-col lg:flex-row gap-4 px-4 lg:px-36 pt-16 pb-8">
+    <div class="w-full lg:w-1/5 flex-shrink-0">
+      <div class="flex flex-col bg-white rounded-xl p-4 items-center justify-center shadow-md">
+        <img
+          src="https://pekaexfrnhysdntbyqbl.supabase.co/storage/v1/object/sign/artists/images.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lZTQ0OTQ1Yy0xY2QyLTQ3NjAtOTcxMS1hMDdhNzQxZjUzNGEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnRpc3RzL2ltYWdlcy5qcGciLCJpYXQiOjE3NTQ0MDMyMzEsImV4cCI6NDg3NjQ2NzIzMX0.0rRbhLNNhYnAtrnlMVNTa1reHEvJfiLN1yRuZ_cOUjY"
+          alt="profile" class="w-32 h-32 lg:w-56 lg:h-56 rounded-full object-cover" />
+        <h1 class="text-xl lg:text-2xl font-bold mb-0 mt-4 text-center">John Doe</h1>
+        <p class="text-md lg:text-lg font-medium text-pont-rust text-center">Classical Violin</p>
+      </div>
+
+      <div class="flex flex-col space-y-1 bg-white rounded-xl p-4 shadow-md mt-6">
+        
+        <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(1)"
+        [ngClass]="{'bg-black text-white': activeTab === 1, 'bg-white text-black hover:bg-gray-50': activeTab !== 1}">
+          <i class="fas fa-user mt-1 text-md"></i>
+          <p class="text-md font-medium">Profile</p>
+        </div>
+
+      
+
+          <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(2)"
+        [ngClass]="{'bg-black text-white': activeTab === 2, 'bg-white text-black hover:bg-gray-50': activeTab !== 2}">
+          <i class="fas fa-music mt-2 text-md"></i>
+          <p class="text-md font-medium">Instruments</p>
+        </div>
+
+
+          <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(3)"
+        [ngClass]="{'bg-black text-white': activeTab === 3, 'bg-white text-black hover:bg-gray-50': activeTab !== 3}">
+          <i class="fas fa-video mt-1 text-md"></i>
+          <p class="text-md font-medium">Media</p>
+        </div>
+  <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(4)"
+        [ngClass]="{'bg-black text-white': activeTab === 4, 'bg-white text-black hover:bg-gray-50': activeTab !== 4}">
+          <i class="fas fa-list mt-1 text-md"></i>
+          <p class="text-md font-medium">Request</p>
+        </div>
+
+        <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(5)"
+        [ngClass]="{'bg-black text-white': activeTab === 5, 'bg-white text-black hover:bg-gray-50': activeTab !== 5}">
+          <i class="fas fa-calendar-days mt-1 text-md"></i>
+          <p class="text-md font-medium">Events</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="w-full lg:w-4/5 min-h-0 overflow-hidden">
+      <div class="h-full max-w-full">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer></app-footer>

@@ -1,1 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+
+$font-weights: 100, 200, 300, 400, 500, 600, 700, 800, 900;
+
+@each $weight in $font-weights {
+  .montserrat-#{$weight} {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: $weight;
+    font-style: normal;
+  }
+}
+html, body {
+  font-family: 'Montserrat', sans-serif;
+}
+

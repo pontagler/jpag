@@ -1,3 +1,7 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+    {path: '', redirectTo: 'home', pathMatch: 'full'},
+    {path: 'home', loadChildren: () => import('./end-user/end-user.module').then(m => m.EndUserModule)},   
+    {path: 'artistspace', loadChildren: () => import('./artistspace/artistspace.module').then(m => m.ArtistspaceModule)},
+];

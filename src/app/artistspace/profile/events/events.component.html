@@ -1,0 +1,60 @@
+<div class="w-full max-w-full overflow-hidden">
+    <!-- About Section -->
+
+   
+    
+  
+
+<div class="" >
+  <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <!-- Status Labels -->
+    <div class="flex flex-row mb-6 space-x-6">
+      <div class="w-auto bg-yellow-200 text-yellow-800 px-4 py-2 rounded-full text-xs">
+        <p>Upcoming</p>
+      </div>
+      <div class="w-auto bg-green-200 text-green-800 px-4 py-2 rounded-full text-xs">
+        <p>Past</p>
+      </div>
+     
+    </div>
+
+    <!-- Dynamic Event List -->
+    <div
+      *ngFor="let event of events"
+      class="border-2 border-gray-300 rounded-lg mt-4 pb-8"
+    >
+      <div class="flex flex-row justify-between items-center p-4">
+        <h1 class="text-xl font-medium">{{ event.title }}</h1>
+
+        <div class="flex flex-col space-y-2">
+          <div
+            [ngClass]="{
+              'bg-yellow-200 text-yellow-800': event.status === 'Pending',
+              'bg-green-200 text-green-800': event.status === 'Approved',
+              'bg-red-200 text-red-800': event.status === 'Rejected'
+            }"
+            class="p-2 rounded-lg"
+          >
+            <p class="text-sm font-medium">Status: {{ event.status }}</p>
+          </div>
+
+          
+        </div>
+      </div>
+
+      <div class="flex flex-row space-x-6 px-4">
+        <div class="flex flex-row space-x-2">
+          <i class="fas fa-calendar-days mt-2 text-lg text-gray-500"></i>
+          <p class="text-lg text-gray-500">Event Date: {{ event.eventDate }}</p>
+        </div>
+
+        <div class="flex flex-row space-x-2">
+          <i class="fas fa-clock mt-2 text-lg text-gray-500"></i>
+          <p class="text-lg text-gray-500">Submitted: {{ event.submittedDate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>

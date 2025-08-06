@@ -1,0 +1,128 @@
+<div
+  class="backdrop-blur-md py-4 px-4 border-b border-gray-100 shadow-sm sticky top-0 z-50 bg-cream"
+>
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <img
+          src="../../../assets/images/logo/logo.jpg"
+          alt="Pont Ar Gler Logo"
+          class="shadow-md absolute top-4 w-24 h-24"
+        />
+      </div>
+
+      <div class="md:hidden ml-auto" (click)="isMenuOpen = !isMenuOpen">
+        <img
+          src="../../../assets/images/icons/menu.svg"
+          alt="Menu Icon"
+          class="w-8 h-8"
+        />
+      </div>
+      <nav class="hidden md:flex items-center space-x-10">
+        <a
+          href="/"
+          [ngClass]="
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            getMenuItemClass(1)
+          "
+        >
+          Discover
+        </a>
+        <a
+          href="/concerts"
+          [ngClass]="
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            getMenuItemClass(2)
+          "
+        >
+          Events
+        </a>
+        <a
+          href="/artists"
+          [ngClass]="
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            getMenuItemClass(3)
+          "
+        >
+          Artists
+        </a>
+
+        <a
+          href="/venues"
+          [ngClass]="
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            getMenuItemClass(4)
+          "
+        >
+          Locations
+        </a>
+        <a
+          href="/about"
+          [ngClass]="
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            getMenuItemClass(5)
+          "
+        >
+          About
+        </a>
+      </nav>
+
+     <div class="hidden md:flex items-center space-x-4" >
+        <Button *ngIf="urlID !== 21"
+          class="bg-gradient-to-r from-lime-600 to-lime-700 hover:from-pont-rust/90 hover:to-pont-rust text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          Artist Login
+        </Button>
+      </div>
+
+          <div class="hidden md:flex items-center space-x-4" >
+        <Button  *ngIf="urlID == 21"  (click)="logout()"
+          class="bg-pont-rust hover:from-pont-rust/90 hover:to-pont-rust text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+         Logout
+        </Button>
+      </div> 
+
+      <button
+        class="md:hidden p-2 text-gray-700 hover:text-pont-green transition-colors rounded-lg hover:bg-pont-green/5"
+      ></button>
+    </div>
+
+    <div
+      class="absolute top-16 right-0 h-auto w-1/2 bg-pont-green shadow-lg md:hidden"
+      *ngIf="isMenuOpen"
+    >
+      <nav class="flex flex-col items-start space-y-4 p-4">
+        <a
+          href="/"
+          [ngClass]="'text-white text-lg font-medium relative group '"
+        >
+          Discover
+        </a>
+        <a
+          href="/concerts"
+          [ngClass]="'text-white text-lg font-medium relative group '"
+        >
+          Events
+        </a>
+        <a
+          href="/artists"
+          [ngClass]="'text-white text-lg font-medium relative group '"
+        >
+          Artists
+        </a>
+        <a
+          href="/venues"
+          [ngClass]="'text-white text-lg font-medium relative group '"
+        >
+          Locations
+        </a>
+        <a
+          href="/about"
+          [ngClass]="'text-white text-lg font-medium relative group '"
+        >
+          About
+        </a>
+      </nav>
+    </div>
+  </div>
+</div>

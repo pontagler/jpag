@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { ArtistService } from '../../services/artist.service';
 
 @Component({
   selector: 'app-profile',
@@ -9,13 +11,35 @@ import { Router } from '@angular/router';
 })
 export class ProfileComponent implements OnInit {
 
-constructor(private router: Router) { }
+constructor(private router: Router,
+  private authSerivce: AuthService,
+  private artistService: ArtistService // Assuming you have an ArtistService to fetch artist data 
+
+) { }
   ngOnInit(): void {
-this.isActiveTab(4);
+this.artistProfileID = this.authSerivce.sigUserID();
+this.getArtistProfile();
+this.isActiveTab(1);
   }
 
+
+  getArtistProfile() {
+  this.artistService.getArtistProfile(this.artistProfileID).then(profile => {
+    this.artistProfile = profile[0];
+    console.log('Artist Profile:', this.artistProfile);
+    this.artistService.setArtistProfile(profile[0]);
+    this.artistService.setArtistID(profile[0].id);
+  }).catch(error => {
+    console.error('Error fetching artist profile:', error);
+  });
+}
+
+
+profileArtist:any = signal<string[]>([]);
 activeTab:number = 1;
 
+artistProfileID:any;
+artistProfile:any = [];
 
  
 

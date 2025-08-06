@@ -3,6 +3,11 @@ module.exports = {
  content: [
     "./src/**/*.{html,ts}",
   ],
+    safelist: [
+    {
+      pattern: /(bg|text|border)-(blue|green|rose|red|yellow|indigo|pink|purple|gray)-(100|200|800)/,
+    }
+  ],
   theme: {
     container: {
       center: true,

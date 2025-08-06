@@ -5,10 +5,10 @@
     <div class="w-full lg:w-1/5 flex-shrink-0">
       <div class="flex flex-col bg-white rounded-xl p-4 items-center justify-center shadow-md">
         <img
-          src="https://pekaexfrnhysdntbyqbl.supabase.co/storage/v1/object/sign/artists/images.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9lZTQ0OTQ1Yy0xY2QyLTQ3NjAtOTcxMS1hMDdhNzQxZjUzNGEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnRpc3RzL2ltYWdlcy5qcGciLCJpYXQiOjE3NTQ0MDMyMzEsImV4cCI6NDg3NjQ2NzIzMX0.0rRbhLNNhYnAtrnlMVNTa1reHEvJfiLN1yRuZ_cOUjY"
+          [src]="artistProfile.photo"
           alt="profile" class="w-32 h-32 lg:w-56 lg:h-56 rounded-full object-cover" />
-        <h1 class="text-xl lg:text-2xl font-bold mb-0 mt-4 text-center">John Doe</h1>
-        <p class="text-md lg:text-lg font-medium text-pont-rust text-center">Classical Violin</p>
+        <h1 class="text-xl lg:text-2xl font-bold mb-0 mt-4 text-center">{{artistProfile.fname | titlecase}} {{artistProfile.lname | titlecase}}</h1>
+        <p class="text-md lg:text-lg font-medium text-pont-rust text-center">{{artistProfile.tagline | titlecase}}</p>
       </div>
 
       <div class="flex flex-col space-y-1 bg-white rounded-xl p-4 shadow-md mt-6">

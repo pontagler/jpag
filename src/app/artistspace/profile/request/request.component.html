@@ -3,140 +3,138 @@
 
     <div class="bg-white rounded-lg p-1 shadow-md mb-4">
         <div class="grid grid-cols-2 gap-2">
-            <div class="p-1 m-1 bg-gray-100 rounded-lg shadow-sm cursor-pointer text-center">
+            <div (click)="isActiveTab(1)" class="p-1 m-1 rounded-lg shadow-sm cursor-pointer text-center" black
+                [ngClass]="{
+          'bg-gray-100 text-black': activeTab() === 1,
+          'text-black': activeTab() !== 1
+        }">
                 <p class="font-medium">New Request</p>
             </div>
-            <div class="p-1 m-1 bg-white rounded-lg cursor-pointer text-center">
+            <div (click)="isActiveTab(4)" class="p-1 m-1 rounded-lg cursor-pointer text-center" [ngClass]="{
+          'bg-gray-100 text-black': activeTab() === 4,
+          'text-black': activeTab() !== 4
+        }">
                 <p class="font-medium">All Request</p>
             </div>
         </div>
     </div>
 
- 
-<div *ngIf="activeTab() === 1" class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <div *ngIf="activeTab() === 1" class="bg-white rounded-xl p-4 shadow-md mb-4">
+        <!-- Event Type -->
+        <div>
+            <p class="mb-2 font-medium">Type of the Event</p>
+            <select class="w-full p-2 border border-gray-300 rounded-lg mt-2" [(ngModel)]="selectedRequestType"
+                [ngModelOptions]="{ standalone: true }">
+                <option [ngValue]="null" disabled selected>Select Event Type</option>
+                <option *ngFor="let x of requestType" [value]="x.id">
+                    {{ x.name }}
+                </option>
+            </select>
+        </div>
 
-  <!-- Event Type -->
-  <div>
-    <p class="mb-2 font-medium">Type of the Event</p>
-    <select class="w-full p-2 border border-gray-300 rounded-lg mt-2"
-            [(ngModel)]="selectedRequestType"
-            [ngModelOptions]="{standalone: true}">
-      <option [ngValue]="null" disabled selected>Select Event Type</option>
-      <option *ngFor="let x of requestType" [value]="x.id">{{ x.name }}</option>
-    </select>
-  </div>
+        <!-- Title -->
+        <div class="mt-4">
+            <p class="mb-2 font-medium">
+                Title of the Event
+                <span class="text-xs text-gray-400">(50 Characters Only)</span>
+            </p>
+            <input type="text" maxlength="50" class="w-full p-2 border border-gray-300 rounded-lg"
+                [value]="eventTitle()" (input)="eventTitle.set($any($event.target).value)" />
+            <div class="text-xs text-gray-500 mt-1 text-right">
+                {{ eventTitle().length }}/50
+            </div>
+        </div>
 
-  <!-- Title -->
-  <div class="mt-4">
-    <p class="mb-2 font-medium">
-      Title of the Event
-      <span class="text-xs text-gray-400">(50 Characters Only)</span>
-    </p>
-    <input type="text" maxlength="50"
-           class="w-full p-2 border border-gray-300 rounded-lg"
-           [value]="eventTitle()"
-           (input)="eventTitle.set($any($event.target).value)" />
-    <div class="text-xs text-gray-500 mt-1 text-right">{{ eventTitle().length }}/50</div>
-  </div>
+        <!-- Instruments -->
+        <div class="mt-6">
+            <p class="mb-2 font-medium">Instruments</p>
 
-  <!-- Instruments -->
-  <div class="mt-6">
-    <p class="mb-2 font-medium">Instruments</p>
+            <!-- Dropdown and Add Button -->
+            <div class="flex flex-row gap-2">
+                <select [(ngModel)]="selectedInstrument" [ngModelOptions]="{ standalone: true }"
+                    class="w-4/5 p-2 border border-gray-300 rounded-lg">
+                    <option value="" disabled selected>Select instrument</option>
+                    <option *ngFor="let instrument of sysInstruments" [value]="instrument.name">
+                        {{ instrument.name }}
+                    </option>
+                </select>
 
-    <!-- Dropdown and Add Button -->
-    <div class="flex flex-row gap-2">
-      <select [(ngModel)]="selectedInstrument"
-              [ngModelOptions]="{standalone: true}"
-              class="w-4/5 p-2 border border-gray-300 rounded-lg">
-        <option value="" disabled selected>Select instrument</option>
-        <option *ngFor="let instrument of sysInstruments" [value]="instrument.name">
-          {{ instrument.name }}
-        </option>
-      </select>
+                <div class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer"
+                    (click)="addInstrument()">
+                    Add
+                </div>
+            </div>
 
-      <div class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer"
-           (click)="addInstrument()">
-        Add
-      </div>
+            <!-- Display Selected Instruments -->
+            <div class="space-y-4 mt-4">
+                <div class="flex flex-wrap gap-2">
+                    <span *ngFor="let ins of selectedInstruments" class="text-sm font-medium py-1 px-3 rounded-full"
+                        [ngClass]="[
+              'bg-' + ins.color + '-100',
+              'text-' + ins.color + '-800',
+              'border',
+              'border-' + ins.color + '-200'
+            ]">
+                        {{ ins.name }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Short Description -->
+        <div class="mt-6">
+            <p class="mb-2 font-medium">
+                Short Description
+                <span class="text-xs text-gray-400">(Max 100 Characters)</span>
+            </p>
+            <textarea maxlength="100" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
+                [value]="shortDescription()" (input)="shortDescription.set($any($event.target).value)"></textarea>
+            <div class="text-xs text-gray-500 mt-1 text-right">
+                {{ shortDescription().length }}/100
+            </div>
+        </div>
+
+        <!-- Long Description -->
+        <div class="mt-6">
+            <p class="mb-2 font-medium">
+                Long Description
+                <span class="text-xs text-gray-400">(Max 200 Characters)</span>
+            </p>
+            <textarea maxlength="200" rows="5" class="w-full p-2 border border-gray-300 rounded-lg"
+                [value]="longDescription()" (input)="longDescription.set($any($event.target).value)"></textarea>
+            <div class="text-xs text-gray-500 mt-1 text-right">
+                {{ longDescription().length }}/200
+            </div>
+        </div>
+
+        <!-- Proposed Dates -->
+        <div class="mt-6">
+            <p class="mb-2 font-medium">Proposed Date</p>
+            <div class="flex flex-row gap-2">
+                <input type="date" class="w-4/5 p-2 border border-gray-300 rounded-lg" [(ngModel)]="selectedDate"
+                    [ngModelOptions]="{ standalone: true }" />
+                <div class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer"
+                    (click)="addProposedDate()">
+                    Add
+                </div>
+            </div>
+
+            <div class="space-y-4 mt-4">
+                <div class="flex flex-wrap gap-2">
+                    <span *ngFor="let date of proposedDates"
+                        class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">
+                        {{ date | date : "dd MMM yyyy" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Step Button -->
+        <button class="bg-pont-rust w-full text-white font-medium rounded-lg mt-6 p-2 cursor-pointer"
+            (click)="nextStep()">
+            Next Step
+        </button>
     </div>
-
-    <!-- Display Selected Instruments -->
-    <div class="space-y-4 mt-4">
-      <div class="flex flex-wrap gap-2">
-        <span *ngFor="let ins of selectedInstruments" class="text-sm font-medium py-1 px-3 rounded-full"
-              [ngClass]="[
-                'bg-' + ins.color + '-100',
-                'text-' + ins.color + '-800',
-                'border',
-                'border-' + ins.color + '-200'
-              ]">
-          {{ ins.name }}
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Short Description -->
-  <div class="mt-6">
-    <p class="mb-2 font-medium">
-      Short Description
-      <span class="text-xs text-gray-400">(Max 100 Characters)</span>
-    </p>
-    <textarea maxlength="100" rows="3"
-              class="w-full p-2 border border-gray-300 rounded-lg"
-              [value]="shortDescription()"
-              (input)="shortDescription.set($any($event.target).value)"></textarea>
-    <div class="text-xs text-gray-500 mt-1 text-right">{{ shortDescription().length }}/100</div>
-  </div>
-
-  <!-- Long Description -->
-  <div class="mt-6">
-    <p class="mb-2 font-medium">
-      Long Description
-      <span class="text-xs text-gray-400">(Max 200 Characters)</span>
-    </p>
-    <textarea maxlength="200" rows="5"
-              class="w-full p-2 border border-gray-300 rounded-lg"
-              [value]="longDescription()"
-              (input)="longDescription.set($any($event.target).value)"></textarea>
-    <div class="text-xs text-gray-500 mt-1 text-right">{{ longDescription().length }}/200</div>
-  </div>
-
-  <!-- Proposed Dates -->
-  <div class="mt-6">
-    <p class="mb-2 font-medium">Proposed Date</p>
-    <div class="flex flex-row gap-2">
-      <input type="date" 
-             class="w-4/5 p-2 border border-gray-300 rounded-lg"
-             [(ngModel)]="selectedDate"
-             [ngModelOptions]="{standalone: true}" />
-      <div class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer"
-           (click)="addProposedDate()">
-        Add
-      </div>
-    </div>
-
-    <div class="space-y-4 mt-4">
-      <div class="flex flex-wrap gap-2">
-        <span *ngFor="let date of proposedDates"
-              class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">
-          {{ date | date:'dd MMM yyyy' }}
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Next Step Button -->
-  <button class="bg-pont-rust w-full text-white font-medium rounded-lg mt-6 p-2 cursor-pointer"
-          
-          (click)="nextStep()">
-    Next Step
-  </button>
-
-</div>
-
-
-
 
     <div class="" *ngIf="activeTab() === 2">
         <div class="bg-white rounded-xl p-4 shadow-md mb-4">
@@ -144,33 +142,51 @@
             <div class="flex space-x-2 flex-row mt-2">
                 <div class="bg-gray-100 rounded-lg p-4 mt-2 w-3/4">
                     <p class="text-lg font-medium">Add Video</p>
-                    <input type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                    <input type="text " [(ngModel)]="videoTitle" class="w-full p-2 border border-gray-300 rounded-lg"
                         placeholder="Enter Name of Video video" />
 
-                    <input type="text" class="w-full p-2 mt-4 border border-gray-300 rounded-md"
+                    <input type="text" [(ngModel)]="videoUrl" class="w-full p-2 mt-4 border border-gray-300 rounded-md"
                         placeholder="Enter video URL or upload video" />
 
-                    <input type="file" class="w-full p-2 mt-4 border border-gray-300 rounded-md" accept="video/*" />
-                    <button class="bg-gray-300 text-black p-2 rounded-lg mt-4 w-full">
-                        Upload Video
+                    <input id="fileInput" type="file" (change)="onFileChange($event)"
+                        class="w-full p-2 mt-4 border border-gray-300 rounded-md" accept="video/*" />
+                    <button (click)="upload()" class="bg-gray-300 text-black p-2 rounded-lg mt-4 w-full">
+                        
+                         <span *ngIf="!videoUpload">Submit</span>
+                <div *ngIf="videoUpload" class="flex justify-center items-center w-full">
+  <span class="animate-spin text-black">
+    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .spinner_ajPY {
+          transform-origin: center;
+          animation: spinner_AtaB 0.75s infinite linear;
+        }
+        @keyframes spinner_AtaB {
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
+      <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+      <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_ajPY"/>
+    </svg>
+  </span>
+</div>
+
                     </button>
                 </div>
 
                 <div class="bg-gray-100 rounded-lg p-4 mt-2 w-1/4">
                     <div class="flex flex-col space-y-2">
                         <p class="text-lg font-medium">Video List</p>
+                      
+                        @for(x of videoList; track x) {
                         <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
-                            <p class="text-sm">Video 1</p>
-                            <p class="text-red-900 text-xs">Remove</p>
+                            <p class="text-sm">{{x.title}}</p>
+                            <p class="text-red-900 text-xs" (click)="removeUpload(x.id)">Remove</p>
                         </div>
-                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
-                            <p class="text-sm">Video 2</p>
-                            <p class="text-red-900 text-xs">Remove</p>
-                        </div>
-                        <div class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center">
-                            <p class="text-sm">Video 3</p>
-                            <p class="text-red-900 text-xs">Remove</p>
-                        </div>
+                        }
+
                     </div>
                 </div>
             </div>
@@ -234,6 +250,7 @@
             </div>
         </div>
     </div>
+
     <div class="" *ngIf="activeTab() === 4">
         <div class="bg-white rounded-xl p-4 shadow-md mb-4">
             <!-- Status Labels -->

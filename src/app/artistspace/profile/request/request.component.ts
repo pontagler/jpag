@@ -1,4 +1,4 @@
-import { CommonModule, NgClass, NgForOf, NgIf } from '@angular/common';
+import { CommonModule, NgClass, NgFor, NgForOf, NgIf } from '@angular/common';
 import { Component, effect, signal } from '@angular/core';
 import { ArtistRequest, ArtistService } from '../../../services/artist.service';
 import { FormsModule } from '@angular/forms';
@@ -6,24 +6,14 @@ import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'app-request',
-  imports: [FormsModule, NgClass, NgIf, NgForOf, CommonModule],
+  imports: [FormsModule, NgClass, NgForOf,NgFor, CommonModule],
   templateUrl: './request.component.html',
 })
 export class RequestComponent {
   // Use signal for activeTab
-  activeTab = signal(1);
+  activeTab = signal(2);
 
-  constructor(private artistService: ArtistService, private alertService: AlertService) {
-     effect(() => {
-    this.artistID = this.artistService.getArtistID();
-   
-  });
-  }
-artistID:any= [];
-  ngOnInit(): void {
-    this.getInstrumentName();
-  }
-
+  // Declare artistID as a signal
   events = [
     {
       title: 'Concert Cloud Nine',
@@ -38,16 +28,39 @@ artistID:any= [];
       submittedDate: '26 Aug 2025',
     },
   ];
-
   requestType = [
     { id: 1, name: 'Concert' },
     { id: 2, name: 'Exhibition' },
   ];
+  eventTitle = signal('');                      // Event Title
+  sysInstruments: any[] = [];                   // System Instruments       
+  artistID:any= [];                             // Artist ID
+  selectedInstrument: string = '';              // Selected Instrument
+  selectedInstruments: { name: string; color: string }[] = [];
+  selectedDate: string = '';                    // Selected Date
+  proposedDates: string[] = [];                 // Proposed Dates  
+  shortDescription = signal('');                // Short Description
+  longDescription = signal('');                 // Long Description
+  selectedRequestType: number | null = null;    // Selected Request Type 
+selectedFile: File | null = null;
+            // Selected File for upload
+ 
+  constructor(
+    private artistService: ArtistService, 
+    private alertService: AlertService) {
+     effect(() => {
+    this.artistID = this.artistService.getArtistID();
+  });
+  }
 
-  eventTitle = signal('');
 
-  sysInstruments: any[] = [];
+  ngOnInit(): void {
+    this.getInstrumentName();
+  }
 
+
+ // Get Instrument Names
+  // This method fetches the list of instruments from the service
   async getInstrumentName() {
     console.log('Fetching instruments...');
     this.artistService.getInstruments().subscribe({
@@ -61,9 +74,8 @@ artistID:any= [];
     });
   }
 
-  selectedInstrument: string = '';
-  selectedInstruments: { name: string; color: string }[] = [];
-
+// Method to add Instrument
+  // This method adds the selected instrument to the list of selected instruments
   addInstrument() {
     const instrument = this.sysInstruments.find(
       (i: any) => i.name === this.selectedInstrument
@@ -82,9 +94,8 @@ artistID:any= [];
     }
   }
 
-  selectedDate: string = '';
-  proposedDates: string[] = [];
-
+// Method to add proposed date
+  // This method adds the selected date to the list of proposed dates
   addProposedDate() {
     if (this.selectedDate && !this.proposedDates.includes(this.selectedDate)) {
       this.proposedDates.push(this.selectedDate);
@@ -92,16 +103,7 @@ artistID:any= [];
     }
   }
 
-  shortDescription = signal('');
-  longDescription = signal('');
-
-  // Next step method that validates and updates activeTab
-
-
-  selectedRequestType: number | null = null;
-
-
-  
+  // Next step method that validates and updates activeTab 
 canProceed() {
   return (
     this.selectedRequestType != null &&
@@ -145,6 +147,74 @@ canProceed() {
     }
   }
 
+// Method to switch New Request and All Requests tabs
 
+  isActiveTab(tab: number) {
+    this.activeTab.set(tab);  
+  };
+
+  //Method to upload the image and save data
+  onFileChange(event: any) {
+ const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    this.selectedFile = input.files[0];
+  } else {
+    this.selectedFile = null;
+  }  
+}
+
+  videoTitle:any;
+  videoUrl:any;
+  idRequest:any = 1;
+  createdBy:any = '409ced25-d7b5-4d8d-a644-7392d0908736'; // Example user ID
+  authID:any = '409ced25-d7b5-4d8d-a644-7392d0908736';
+
+async upload() {
+  this.videoUpload = true;
+
+  const result = await this.artistService.uploadImageAndSaveData(
+    this.selectedFile ?? null, // allow null file
+    this.videoTitle,
+    this.videoUrl,
+    this.idRequest,
+    this.createdBy,
+    this.authID
+  );
+
+  this.videoUpload = false;
+
+  if (result.success) {
+    console.log('Upload successful:', result.imageUrl);
+
+    // Add to video list
+    this.videoList.push({
+      title: this.videoTitle,
+      id: result.id,
+    });
+
+    // ✅ Clear the input fields
+    this.videoTitle = '';
+    this.videoUrl = '';
+    this.selectedFile = null;
+
+    // ✅ Reset file input
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+
+  } else {
+    console.error('Upload error:', result.error);
+  }
+}
+
+
+
+  videoList: any[] = []; // List to hold uploaded videos
+removeUpload(id: number) {
+  this.videoList = this.videoList.filter(video => video.id !== id);
+  console.log(`Removed video with ID: ${id}`);  
+}
+videoUpload:any = false; // Signal to track upload state
 
 }

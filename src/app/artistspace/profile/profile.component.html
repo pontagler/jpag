@@ -45,6 +45,12 @@
           <p class="text-md font-medium">Events</p>
         </div>
 
+             <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(6)"
+        [ngClass]="{'bg-black text-white': activeTab === 6, 'bg-white text-black hover:bg-gray-50': activeTab !== 6}">
+          <i class="fas fa-cloud mt-1 text-md"></i>
+          <p class="text-md font-medium">Account</p>
+        </div>
+
       </div>
     </div>
 

@@ -1,0 +1,249 @@
+<div class="w-full max-w-full overflow-hidden">
+  <!-- Profile Photo Section -->
+  <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <div class="flex flex-row justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Profile Photo</h2>
+      <div *ngIf="!editPhoto" (click)="toggleEditPhoto()"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <i class="fas fa-pen-to-square text-md"></i>
+        <p class="text-sm">Edit Photo</p>
+      </div>
+
+      <div *ngIf="editPhoto" (click)="updatePhoto()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!photoClick" class="text-sm">Update</p>
+
+        <span *ngIf="photoClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="flex flex-col items-center">
+        <img [src]="editPhoto ? tempPhotoUrl : artistProfile.photo" alt="Profile Photo" 
+             class="w-32 h-32 rounded-full object-cover mb-4 border-4 border-gray-200">
+        
+        <div *ngIf="editPhoto" class="space-y-2">
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" 
+                 class="hidden" id="photo-upload">
+          <label for="photo-upload" 
+                 class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-200 inline-block">
+            <i class="fas fa-upload mr-2"></i>Upload New Photo
+          </label>
+          <p class="text-sm text-gray-500">Or paste image URL below:</p>
+          <input type="url" [(ngModel)]="tempPhotoUrl" placeholder="Enter image URL"
+                 class="w-full p-2 border border-gray-300 rounded-lg">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Name Section -->
+  <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <div class="flex flex-row justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Name</h2>
+      <div *ngIf="!editName" (click)="toggleEditName()"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <i class="fas fa-pen-to-square text-md"></i>
+        <p class="text-sm">Edit Name</p>
+      </div>
+
+      <div *ngIf="editName" (click)="updateName()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!nameClick" class="text-sm">Update</p>
+
+        <span *ngIf="nameClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div *ngIf="!editName" class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-500 mb-1">First Name</p>
+          <p class="text-lg font-medium">{{ artistProfile.fname | titlecase }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500 mb-1">Last Name</p>
+          <p class="text-lg font-medium">{{ artistProfile.lname | titlecase }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="editName" class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-gray-500 mb-1 block">First Name</label>
+          <input type="text" [(ngModel)]="artistProfile.fname" 
+                 class="w-full p-2 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="text-sm text-gray-500 mb-1 block">Last Name</label>
+          <input type="text" [(ngModel)]="artistProfile.lname" 
+                 class="w-full p-2 border border-gray-300 rounded-lg">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tagline Section -->
+  <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <div class="flex flex-row justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Tagline</h2>
+      <div *ngIf="!editTagline" (click)="toggleEditTagline()"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <i class="fas fa-pen-to-square text-md"></i>
+        <p class="text-sm">Edit Tagline</p>
+      </div>
+
+      <div *ngIf="editTagline" (click)="updateTagline()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!taglineClick" class="text-sm">Update</p>
+
+        <span *ngIf="taglineClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <p *ngIf="!editTagline" class="text-lg text-gray-700 leading-relaxed">
+          {{ artistProfile.tagline | titlecase }}
+        </p>
+
+        <textarea *ngIf="editTagline" maxlength="100" rows="2" 
+                  [(ngModel)]="artistProfile.tagline" 
+                  class="w-full p-2 border border-gray-300 rounded-lg"
+                  placeholder="Enter your professional tagline"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Section -->
+  <div class="bg-white rounded-xl p-4 shadow-md">
+    <div class="flex flex-row justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Security</h2>
+      <div *ngIf="!changePassword" (click)="toggleChangePassword()"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <i class="fas fa-lock text-md"></i>
+        <p class="text-sm">Change Password</p>
+      </div>
+
+      <div *ngIf="changePassword" (click)="updatePassword()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!passwordClick" class="text-sm">Update Password</p>
+
+        <span *ngIf="passwordClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div *ngIf="!changePassword" class="flex flex-row items-center space-x-4">
+        <i class="fas fa-shield-alt text-lg text-pont-green"></i>
+        <div>
+          <p class="text-lg font-medium">Password</p>
+          <p class="text-sm text-gray-500">Last updated: Never</p>
+        </div>
+      </div>
+
+      <div *ngIf="changePassword" class="space-y-4">
+  
+
+        <div>
+          <label class="text-sm text-gray-500 mb-1 block">New Password</label>
+          <input type="password" [(ngModel)]="newPassword" 
+                 class="w-full p-2 border border-gray-300 rounded-lg"
+                 placeholder="Enter new password">
+        </div>
+
+        <div>
+          <label class="text-sm text-gray-500 mb-1 block">Confirm New Password</label>
+          <input type="password" [(ngModel)]="confirmPassword" 
+                 class="w-full p-2 border border-gray-300 rounded-lg"
+                 placeholder="Confirm new password">
+        </div>
+
+        <div *ngIf="newPassword && confirmPassword && newPassword !== confirmPassword" 
+             class="text-red-500 text-sm">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          Passwords do not match
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

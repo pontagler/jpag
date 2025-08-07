@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service'; // Adjust the import path as necessary
 import { AlertService } from '../../services/alert.service';
 import { Router } from '@angular/router';
+import { ArtistService } from '../../services/artist.service';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ export class LoginComponent {
   password: string = 'p';
 
   constructor(
+    private artistService: ArtistService,
     private authService: AuthService,
     private alertService: AlertService, // Inject the AlertService
 private router: Router // Inject the Router if you need to navigate after login
@@ -31,8 +33,7 @@ private router: Router // Inject the Router if you need to navigate after login
 
     this.authService.signIn(this.email, this.password)
       .then(data => {
-      
-
+        this.artistService.setArtistProfileID(data.id_user);
         console.log('Login successful', data);
         // Handle successful login, e.g., redirecting the user
           this.alertService.showAlert('Login Successful', 'Welcome back!', 'success');    

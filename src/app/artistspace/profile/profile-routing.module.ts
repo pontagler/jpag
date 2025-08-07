@@ -7,6 +7,7 @@ import { RequestComponent } from './request/request.component';
 import { EventsComponent } from './events/events.component';
 import { InstrumentsComponent } from './instruments/instruments.component';
 import { MediaComponent } from './media/media.component';
+import { AccountComponent } from './account/account.component';
 
 const routes: Routes = [
   {path: '', component: ProfileComponent,
@@ -18,6 +19,7 @@ const routes: Routes = [
     {path: 'media', component: MediaComponent, },
     {path: 'requests', component: RequestComponent, },
     {path: 'events', component: EventsComponent, },
+    {path: 'account', component: AccountComponent },
   ]
     
 

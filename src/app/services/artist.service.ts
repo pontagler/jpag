@@ -46,6 +46,7 @@ export class ArtistService {
     this.artistID.set(id);
   }
 
+
   getArtistID() {
     return this.artistID();
   }
@@ -97,72 +98,6 @@ export class ArtistService {
     if (error) throw error;
     return data?.[0]; // return just the inserted row (optional)
   }
-/*
-async uploadImageAndSaveData(
-  file: File,
-  videoTitle: string,
-  videoUrl: string,
-  idRequest: number,
-  createdBy: string,
-  authID: string
-) {
-  try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `${fileName}`;
-
-    // 1. Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from('artistrequest')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    // 2. Get Public URL
-    const { data: publicUrlData } = supabase.storage
-      .from('artistrequest')
-      .getPublicUrl(filePath);
-
-    const publicImageUrl = publicUrlData.publicUrl;
-
-    // 3. Insert into artist_request_media
-    const { data: insertData, error: insertError } = await supabase
-      .from('artist_request_media')
-      .insert([{
-        id_media: 1,
-        id_request: idRequest,
-        title: videoTitle,
-        image: publicImageUrl,
-        description: videoUrl,
-        created_by: createdBy,
-        last_updated_by: createdBy,
-        id_auth: authID
-      }])
-      .select('id') // 👈 Only return the `id` column
-
-    if (insertError) throw insertError;
-    const insertedId = insertData?.[0]?.id;
-
-    return { success: true, imageUrl: publicImageUrl, id: insertedId };
-  } catch (err) {
-    // ✅ Fix for TS18046:
-    let message = 'Unknown error';
-    if (err instanceof Error) {
-      message = err.message;
-    } else if (typeof err === 'string') {
-      message = err;
-    } else {
-      try {
-        message = JSON.stringify(err);
-      } catch {
-        message = 'Unhandled error';
-      }
-    }
-
-    return { success: false, error: message };
-  }
-}
-*/
 
 async uploadImageAndSaveData(
   file: File | null,
@@ -170,7 +105,8 @@ async uploadImageAndSaveData(
   videoUrl: string,
   idRequest: number,
   createdBy: string,
-  authID: string
+  authID: string,
+  id_media:number
 ) {
   try {
     let publicImageUrl: string | null = null;
@@ -198,7 +134,7 @@ async uploadImageAndSaveData(
     const { data, error: insertError } = await supabase
       .from('artist_request_media')
       .insert([{
-        id_media: 1,
+        id_media: id_media,
         id_request: idRequest,
         title: videoTitle,
         image: publicImageUrl, // will be null if no file
@@ -235,7 +171,117 @@ async uploadImageAndSaveData(
   }
 }
 
+async deleteMedia(id: number) {
+  try {
+    // 1. Fetch the media entry to get image URL (if any)
+    const { data, error: fetchError } = await supabase
+      .from('artist_request_media')
+      .select('image')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const imageUrl: string | null = data?.image || null;
+
+    // 2. If image URL exists, parse it to get the file path & delete from storage
+    if (imageUrl) {
+      // Example image URL: https://xxxx.supabase.co/storage/v1/object/public/artistrequest/yourfile.jpg
+      const filePath = imageUrl.split('/artistrequest/')[1];
+      if (filePath) {
+        const { error: storageDeleteError } = await supabase.storage
+          .from('artistrequest')
+          .remove([filePath]);
+
+        if (storageDeleteError) throw storageDeleteError;
+      }
+    }
+
+    // 3. Delete the DB row
+    const { error: deleteError } = await supabase
+      .from('artist_request_media')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) throw deleteError;
+
+    return { success: true };
+
+  } catch (err) {
+    let message = 'Unknown error';
+    if (err instanceof Error) {
+      message = err.message;
+    } else if (typeof err === 'string') {
+      message = err;
+    } else {
+      try {
+        message = JSON.stringify(err);
+      } catch {
+        message = 'Unhandled error';
+      }
+    }
+
+    return { success: false, error: message };
+  }
+}
+
+async getArtistRequests(artistId: string) {
+  const { data, error } = await supabase
+    .from('artist_request')
+    .select()
+    .eq('id_artist', artistId)
+    .order('created_on', { ascending: false }); // sort descending (latest first)
+
+  if (error) throw error;
+  return data;
+}
+
+async delArtistRequest(id_request:number){
+  const{data, error} = await supabase.from('artist_request').delete().eq('id', id_request)
+
+  if(error){
+    throw error;
+  }else{
+    await supabase.from('artist_request_media').delete().eq('id', id_request)
+    if (error) throw error
+    return data;
+  }
+}
+
+getCurrentTimestamp() {
+  const now = new Date();
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const year = now.getFullYear();
+  const month = pad(now.getMonth() + 1); // Months are 0-based
+  const day = pad(now.getDate());
+  const hours = pad(now.getHours());
+  const minutes = pad(now.getMinutes());
+  const seconds = pad(now.getSeconds());
+  const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
 
 
+
+
+async updateShortBio(id_artist:any, short_bio:any, userID:any){
+  const{data, error} = await supabase.from ('artists').update({short_bio: short_bio, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  if(error) throw error
+  return data;
+}
+
+async updateLongBio(id_artist:any, long_bio:any, userID:any){
+  const{data, error} = await supabase.from ('artists').update({long_bio: long_bio, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  if(error) throw error
+  return data;
+}
+
+async updateContact(id_artist:any, userID:any, email:any, phone:any, website:any, city:any, country:any){
+  const{data, error} = await supabase.from ('artists').update({email: email,  website:website, phone:phone, city:city, country:country, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  if(error) throw error
+  return data;
+}
 
 }

@@ -2,24 +2,53 @@
   <!-- About Section -->
   <div class="bg-white rounded-xl p-4 shadow-md mb-4">
     <div class="flex flex-row justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">About {{artistProfile.fname | titlecase}}</h1>
-      <div
-        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer"
-      >
+      <h1 class="text-2xl font-bold">
+        About {{ artistProfile.fname | titlecase }}
+      </h1>
+      <div *ngIf="!shortBio" (click)="shortBio = true"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
         <i class="fas fa-pen-to-square text-md"></i>
         <p class="text-sm">Edit Profile</p>
+      </div>
+
+      <div *ngIf="shortBio" (click)="updateShortBio()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!shortBioClick" class="text-sm">Update</p>
+
+        <span *ngIf="shortBioClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
       </div>
     </div>
 
     <div class="space-y-4">
       <div>
         <p class="text-lg text-black font-medium mb-2">Biography</p>
-        <p class="text-sm text-gray-700 leading-relaxed">
-          {{artistProfile.short_bio | titlecase}}
+        <p *ngIf="!shortBio" class="text-sm text-gray-700 leading-relaxed">
+          {{ artistProfile.short_bio | titlecase }}
         </p>
-      </div>
 
-  
+        <textarea *ngIf="shortBio" maxlength="100" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
+          [(ngModel)]="artistProfile.short_bio"></textarea>
+      </div>
     </div>
   </div>
 
@@ -27,18 +56,50 @@
   <div class="bg-white rounded-xl p-4 shadow-md">
     <div class="flex flex-row justify-between items-center mb-4">
       <h2 class="text-xl font-medium">Long Biography</h2>
-      <div
-        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer"
-      >
+      <div *ngIf="!longBio" (click)="longBio = true"
+       class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
         <i class="fas fa-pen-to-square text-md"></i>
         <p class="text-sm">Edit Profile</p>
       </div>
+
+       <div *ngIf="longBio" (click)="updateLongBio()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!longBioClick" class="text-sm">Update</p>
+
+        <span *ngIf="longBioClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
+      </div>
+
+      
     </div>
 
     <div class="space-y-4">
-      <p class="text-sm text-gray-700 leading-relaxed">
-         {{artistProfile.long_bio | titlecase}} </p>
-     
+      <p *ngIf="!longBio" class="text-sm text-gray-700 leading-relaxed">
+        {{ artistProfile.long_bio | titlecase }}
+      </p>
+
+       <textarea *ngIf="longBio" maxlength="500" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
+          [(ngModel)]="artistProfile.long_bio"></textarea>
+
     </div>
   </div>
 
@@ -49,9 +110,7 @@
         <h2 class="text-xl font-medium">Performance Type</h2>
       </div>
 
-      <div
-        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer"
-      >
+      <div class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
         <i class="fas fa-pen-to-square text-md"></i>
         <p class="text-sm">Edit Profile</p>
       </div>
@@ -59,11 +118,10 @@
 
     <div class="space-y-4">
       <div class="flex flex-wrap gap-2">
-       @for (x of artistProfile.performance_type; track x) {
-    <span
-      class="bg-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm"
-      >{{ x.performance_type | titlecase }}</span>
-  }
+        @for (x of artistProfile.performance_type; track x) {
+        <span class="bg-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">{{ x.performance_type |
+          titlecase }}</span>
+        }
       </div>
     </div>
 
@@ -74,23 +132,19 @@
     </div>
     <div class="space-y-4 mt-4">
       <div class="flex flex-col gap-2">
-
         @for (y of artistProfile.education; track y) {
         <div class="flex flex-row space-x-2 mb-0">
           <i class="fas fa-graduation-cap text-md text-gray-300 mt-1"></i>
           <p class="text-lg text-gray-700 font-medium mb-0">
-            {{y.school | titlecase}}
+            {{ y.school | titlecase }}
           </p>
         </div>
         <p class="text-md text-gray-500 ml-8 mb-0">
-          {{y.course | titlecase}}
+          {{ y.course | titlecase }}
         </p>
-        <p class="text-md text-gray-500 ml-8 mb-4">Graduated {{y.year}}</p>
-      }
+        <p class="text-md text-gray-500 ml-8 mb-4">Graduated {{ y.year }}</p>
+        }
       </div>
-    
-
-   
     </div>
 
     <hr class="mt-8 mb-8" />
@@ -100,60 +154,103 @@
     </div>
     <div class="space-y-4 mt-4">
       <div class="flex flex-col">
-         @for (y of artistProfile.awards; track y) {
+        @for (y of artistProfile.awards; track y) {
         <div class="flex flex-row space-x-2 mb-0">
           <i class="fas fa-star text-md text-gray-300 mt-1"></i>
           <p class="text-lg text-gray-700 font-medium mb-0">
-            {{y.award | titlecase}}
+            {{ y.award | titlecase }}
           </p>
         </div>
         <p class="text-md text-gray-500 ml-8 mb-6">
-           {{y.description | titlecase}} - Year{{y.year}}
+          {{ y.description | titlecase }} - Year{{ y.year }}
         </p>
-      }
+        }
       </div>
-
-     
     </div>
   </div>
 
   <div class="bg-white rounded-xl p-4 shadow-md mt-4">
     <div class="flex flex-row justify-between items-center mb-4">
       <h2 class="text-xl font-bold">Contact Information</h2>
-      <div
-        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer"
-      >
+      <div  *ngIf="!contactList" (click)="contactList = true"  class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
         <i class="fas fa-pen-to-square text-md"></i>
         <p class="text-sm">Edit Profile</p>
       </div>
+
+
+             <div *ngIf="contactList" (click)="updateContact()"
+        class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p *ngIf="!contactClick" class="text-sm">Update</p>
+
+        <span *ngIf="contactClick" class="animate-spin text-white">
+          <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>
+              .spinner_ajPY {
+                transform-origin: center;
+                animation: spinner_AtaB 0.75s infinite linear;
+              }
+
+              @keyframes spinner_AtaB {
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+              opacity=".25" />
+            <path fill="currentColor"
+              d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+              class="spinner_ajPY" />
+          </svg>
+        </span>
+      </div>
+
+
+
+
     </div>
 
     <div class="space-y-4">
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-row space-x-2 mb-0">
           <i class="fas fa-envelope text-lg text-pont-green mt-1"></i>
-          <p class="text-lg text-gray-700 font-regular mb-0">
-            {{artistProfile.email}}
+          <p *ngIf="!contactList" class="text-lg text-gray-700 font-regular mb-0">
+            {{ artistProfile.email }}
           </p>
+            <input *ngIf="contactList" type="text" [(ngModel)]="artistProfile.email" class="text-lg text-gray-700 border-2 rounded-lg border-gray-600 w-full font-regular mb-0" />
         </div>
 
         <div class="flex flex-row space-x-2 mb-0">
           <i class="fas fa-phone text-lg text-pont-green mt-1"></i>
-          <p class="text-lg text-gray-700 font-regular mb-0"> {{artistProfile.phone}}</p>
+          <p *ngIf="!contactList" class="text-lg text-gray-700 font-regular mb-0">
+            {{ artistProfile.phone }}
+          </p>
+          <input *ngIf="contactList" type="text" [(ngModel)]="artistProfile.phone" class="text-lg text-gray-700 font-regular mb-0 border-2 rounded-lg border-gray-600 w-full" />
         </div>
 
         <div class="flex flex-row space-x-2 mb-0">
           <i class="fas fa-globe text-lg text-pont-green mt-1"></i>
-          <p class="text-lg text-gray-700 font-regular mb-0">
-             {{artistProfile.website}}
+          <p *ngIf="!contactList"  class="text-lg text-gray-700 font-regular mb-0">
+            {{ artistProfile.website }}
           </p>
+                 <input *ngIf="contactList" type="text" [(ngModel)]="artistProfile.website" class="text-lg text-gray-700 font-regular mb-0 border-2 rounded-lg border-gray-600 w-full" />
         </div>
 
-        <div class="flex flex-row space-x-2 mb-0">
+        <div  class="flex flex-row space-x-2 mb-0">
           <i class="fas fa-location-dot text-lg text-pont-green mt-1"></i>
-          <p class="text-lg text-gray-700 font-regular mb-0">
-             {{artistProfile.city | titlecase}}, {{artistProfile.country | titlecase}}
+          <p *ngIf="!contactList" class="text-lg text-gray-700 font-regular mb-0">
+            {{ artistProfile.city | titlecase }},
+            {{ artistProfile.country | titlecase }}
+
+           
+
           </p>
+
+            <input *ngIf="contactList" type="text" [(ngModel)]="artistProfile.city" class="text-lg text-gray-700 font-regular mb-0 border-2 rounded-lg border-gray-600 w-full" />
+
+            <input *ngIf="contactList" type="text" [(ngModel)]="artistProfile.country" class="text-lg text-gray-700 font-regular mb-0 border-2 rounded-lg border-gray-600 w-full" />
+
+          
         </div>
       </div>
     </div>

@@ -69,6 +69,11 @@ case 5:
   console.log(id);
     this.router.navigate(['/artistspace/profile/events']);
 break;
+
+case 6:
+
+    this.router.navigate(['/artistspace/profile/account']);
+break;
 default:
     this.router.navigate(['/artistspace/profile/artist']);
 }

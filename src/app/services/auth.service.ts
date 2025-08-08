@@ -87,4 +87,15 @@ async changePassword(new_password:any){
 
 }
 
+
+async createNewUser(email:any, password:any = 'qwerty'){
+  console.log(email);
+  const {data, error} = await supabase.auth.signUp({
+    email: email,
+    password: password
+  })
+  if(error) throw error
+  return data;
+}
+
 }

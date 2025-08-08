@@ -1,0 +1,94 @@
+<div class="p-4 md:p-6 bg-white rounded-xl shadow-md">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+    <h2 class="text-xl font-semibold">Artists</h2>
+    <button (click)="createNew()" class="px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800">Create New</button>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Search by name</label>
+      <input [(ngModel)]="nameQuery" type="text" placeholder="Type name..." class="w-full border rounded-lg px-3 py-2" />
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Filter by Status</label>
+      <select [(ngModel)]="statusFilter" class="w-full border rounded-lg px-3 py-2">
+        <option value="All">All</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Filter by City</label>
+      <select [(ngModel)]="cityFilter" class="w-full border rounded-lg px-3 py-2">
+        <option value="All">All</option>
+        <option *ngFor="let c of uniqueCities" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-600 mb-1">Filter by Upcoming Events</label>
+      <select [(ngModel)]="upcomingFilter" class="w-full border rounded-lg px-3 py-2">
+        <option value="All">All</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+      <thead class="bg-gray-50 text-left">
+        <tr>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('id')">Artist ID</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('name')">Artist Name</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('phone')">Phone</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('email')">Email</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('city')">City</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('country')">Country</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('isFeatured')">Is Featured</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('upcomingEvents')">Upcoming Events</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('totalEvents')">Total Events</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('status')">Status</th>
+          <th class="px-4 py-3 cursor-pointer text-xs" (click)="setSort('createdOn')">Created On</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of displayedArtists; let i = index" class="border-t">
+          <td class="px-4 py-3 text-xs">{{ a.id }}</td>
+          <td class="px-4 py-3 text-xs">{{ a.name }}</td>
+          <td class="px-4 py-3 text-xs">{{ a.phone }}</td>
+          <td class="px-4 py-3 text-xs">{{ a.email }}</td>
+          <td class="px-4 py-3 text-xs">{{ a.city }}</td>
+          <td class="px-4 py-3 text-xs">{{ a.country }}</td>
+          <td class="px-4 py-3 text-xs">
+            <span class="px-2 py-1 rounded text-xs" [ngClass]="a.isFeatured ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+              {{ a.isFeatured ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs">{{ a.upcomingEvents }}</td>
+          <td class="px-4 py-3 text-xs">{{ a.totalEvents }}</td>
+          <td class="px-4 py-3 text-xs">
+            <span class="px-2 py-1 rounded text-xs" [ngClass]="a.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+              {{ a.status }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs">{{ a.createdOn | date: 'MMM d, y' }}</td>
+        </tr>
+        <tr *ngIf="displayedArtists.length === 0">
+          <td colspan="11" class="px-4 py-6 text-center text-gray-500">No artists found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- <div class="absolute top-20 min-h-screen shadow-md w-2/5 z-50 bg-white right-0">
+  
+  
+</div> -->

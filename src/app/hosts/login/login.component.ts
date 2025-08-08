@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from '../../services/alert.service';
+import { AuthService } from '../../services/auth.service';
+import { ArtistService } from '../../services/artist.service';
 
 @Component({
   selector: 'app-login',
@@ -9,36 +11,53 @@ import { AlertService } from '../../services/alert.service';
   templateUrl: './login.component.html'
 })
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
+  email: string = 'saurtrash@gmail.com';
+  password: string = 'p';
   loading: boolean = false;
 
   constructor(
     private alertService: AlertService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private artistService: ArtistService
   ) {}
 
   ngOnInit() {
     // Initialization logic can go here
   }
 
-  login() {
+  async login() {
     this.loading = true;
     console.log('Host login attempt:', this.email, this.password);
     
-    // Simulate login process (no database connection)
-    setTimeout(() => {
-      if (this.email && this.password) {
-        console.log('Host login successful');
-        this.alertService.showAlert('Login Successful', 'Welcome to your host dashboard!', 'success');
-        // Navigate to host dashboard (adjust route as needed)
-        // this.router.navigate(['/hosts/dashboard']);
+          if (this.email && this.password) {
+            await this.authService.signIn(this.email, this.password).then((res)=>{
+              const rolename = res.rolename;
+              if(rolename == 'admin'){
+ this.alertService.showAlert('Login Successful', 'Welcome to your host dashboard!', 'success');
+ this.loading = false;
+              }else{
+                 this.alertService.showAlert('Login Failed', 'You are not a registered host', 'error');
+                 this.loading = false;
+              }
+
+              this.artistService.setArtistProfileID(res.id);
+              this.router.navigate(['hosts/console/artists']);
+              
+
+
+              
+                             
+            }).catch(error=>{
+        this.alertService.showAlert('Login Failed', error.message, 'error');
         this.loading = false;
-      } else {
-        console.error('Host login failed - missing credentials');
-        this.alertService.showAlert('Login Failed', 'Please enter both email and password.', 'error');
-        this.loading = false;
-      }
-    }, 1000); // Simulate network delay
-  }
+
+            })
+
+
+          }
+        }
+
+   
+  
 }

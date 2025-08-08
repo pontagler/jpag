@@ -2,6 +2,7 @@ import { Injectable, signal, effect } from '@angular/core';
 import { supabase } from '../core/supabase';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { AuthService } from './auth.service';
 
 
 
@@ -25,7 +26,25 @@ export interface ArtistRequest {
 
 export class ArtistService {
 
-  constructor() { }
+  constructor(
+    private authService: AuthService
+  ) { }
+  
+  async uploadPublicProfilePhoto(file: File): Promise<string> {
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${uuidv4()}.${ext}`;
+    const filePath = `profiles/${fileName}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('artistrequest')
+      .upload(filePath, file);
+    if (uploadError) throw uploadError;
+    
+    const { data: publicUrlData } = supabase.storage
+      .from('artistrequest')
+      .getPublicUrl(filePath);
+    return publicUrlData.publicUrl;
+  }
   //Fetch artist profile by ID
   async getArtistProfile(artistId: string): Promise<any> {
     const { data, error } = await supabase.rpc('get_artist_profile', { artist_id: artistId });
@@ -283,5 +302,209 @@ async updateContact(id_artist:any, userID:any, email:any, phone:any, website:any
   if(error) throw error
   return data;
 }
+
+
+async updateInfo(
+  id_artist:any, 
+  userID:any, 
+  f_name:any, 
+  l_name:any, 
+  tagline:any){
+  const{data, error} = await supabase.from ('artists').update({fname: f_name,  lname:l_name, tagline:tagline, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  if(error) throw error
+  return data;
+}
+
+
+
+
+async replaceArtistPhoto(
+  artistId: string,
+  authID:string,
+  oldPhotoUrl: string | null,
+  file: File
+): Promise<string> {
+  try {
+    // ✅ Delete old file only if it exists
+    if (oldPhotoUrl && oldPhotoUrl.includes('/storage/v1/object/')) {
+      const decodedUrl = decodeURIComponent(oldPhotoUrl);
+      const path = decodedUrl.split('/object/')[1].split('?')[0];
+
+      if (path) {
+        await supabase.storage.from('artistrequest').remove([path]);
+      }
+    }
+
+    // New file path
+    const fileName = `${artistId}-${Date.now()}-${file.name}`;
+    const filePath = `artists/${fileName}`;
+
+    // Upload new file (upsert in case path already exists)
+    const { error: uploadError } = await supabase.storage
+      .from('artistrequest')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    // Generate signed URL (1 year expiry)
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from('artistrequest')
+      .createSignedUrl(filePath, 60 * 60 * 24 * 365);
+
+    if (signedError) throw signedError;
+
+    // signedData.signedUrl;
+
+     const {data, error } = await supabase
+    .from('artists')
+    .update({
+      photo: signedData.signedUrl,
+      last_updated: new Date().toISOString(),
+      last_updated_by: authID
+    })
+    .eq('id', artistId);
+
+      if (error) throw error
+    
+    return signedData.signedUrl;
+
+  } catch (err) {
+    console.error('Replace photo error:', err);
+    throw err;
+  }
+}
+
+
+async createSingleArtist_temp(arrData: any) {
+  console.log(arrData);
+  return arrData
+}
+
+async createSingleArtist_step01(arrData: any) {
+  console.log('Signup stage initiated');
+
+  let signupData: any;
+
+  try {
+    signupData = await this.authService.createNewUser(arrData.personal.email).then((res)=>{
+      return { code: 1, data:res}
+    })
+  } catch (error: any) {
+    return { code: 0, data: error.message };
+  }
+
+  console.log('Signup response:', signupData);
+
+  if (signupData.code !== 1) {
+    return signupData; // Stop if signup failed
+  }
+
+  console.log('Signup stage cleared', signupData);
+
+  // Step 2: Create profile
+  const idProfile = uuidv4();
+
+  const profileData = {
+    id: idProfile,
+    id_user: signupData.data.user.id, // From created Supabase user
+    id_role: 'c9b3a78d-a288-42ce-9a88-a1d9a11bef08',
+    first_name: arrData.personal.firstName,
+    last_name: arrData.personal.lastName,
+    email: arrData.personal.email, // fixed typo
+    phone: arrData.personal.phone,
+    city: arrData.personal.city,
+    proviance: arrData.personal.province,
+    country: arrData.personal.country,
+    created_by: arrData.id_auth
+  };
+
+  console.log('Profile stage initiated', profileData);
+
+  const resCode = await this.createProfile(profileData);
+
+  if (resCode.code !== 1) {
+    return resCode; // Stop if profile creation failed
+  }
+
+  console.log('Profile stage cleared', resCode);
+
+  // Step 3: Create artist
+  const artistData = {
+    id: uuidv4(),
+    id_profile: profileData.id, // fixed to use profile ID only
+    fname: arrData.personal.firstName,
+    lname: arrData.personal.lastName,
+    tagline: arrData.personal.tagline,
+    short_bio: arrData.personal.shortBio,
+    long_bio: arrData.personal.longBio,
+    email: arrData.personal.email,
+    phone: arrData.personal.phone,
+    website: arrData.personal.website,
+    city: arrData.personal.city,
+    proviance: arrData.personal.province,
+    country: arrData.personal.country,
+    photo: arrData.personal.profilePic,
+    created_by: arrData.id_auth
+  };
+
+  console.log('Artist stage initiated', artistData);
+
+  const artCode = await this.createArtist(artistData);
+
+  console.log('Artist stage cleared', artCode);
+
+  return artCode;
+}
+
+
+async createProfile(profileArr:any){
+
+  let profileData = {
+    id: profileArr.id,
+    id_user: profileArr.id_user,
+    id_role: profileArr.id_role,
+    first_name: profileArr.first_name,
+    last_name: profileArr.last_name,
+    email: profileArr.email,
+    phone: profileArr.phone,
+    city: profileArr.city,
+    proviance: profileArr.proviance,
+    country: profileArr.country,
+    created_by: profileArr.created_by
+  }
+   console.log('Profile Stage started', profileData);
+
+
+try {
+    const { data, error } = await supabase
+      .from('user_profile')
+      .insert(profileData);
+
+    if (error) {
+      return { code: 0, data: error.message };
+    }
+    return { code: 1, data };
+  } catch (err: any) {
+    return { code: 0, data: err.message };
+  }
+}
+
+async createArtist(arr:any){
+
+ console.log('Artist Sage started', arr);
+  try {
+    const { data, error } = await supabase
+      .from('artists')
+      .insert(arr);
+
+    if (error) {
+      return { code: 0, data: error.message };
+    }
+    return { code: 1, data };
+  } catch (err: any) {
+    return { code: 0, data: err.message };
+  }
+}
+
 
 }

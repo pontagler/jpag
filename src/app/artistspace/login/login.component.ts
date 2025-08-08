@@ -12,7 +12,7 @@ import { ArtistService } from '../../services/artist.service';
 export class LoginComponent {
   // Declare any properties needed for the component here
   email: string = 'a@a.com';
-  password: string = 'p';
+  password: string = 'qwerty';
 
   constructor(
     private artistService: ArtistService,
@@ -47,7 +47,7 @@ private router: Router // Inject the Router if you need to navigate after login
         this.alertService.showAlert('Login Failed', 'Please check your credentials and try again.', 'error');
         this.loading = false;
         this.email = 'a@a.com';
-        this.password = 'p';
+        this.password = 'qwerty';
         // Handle login error, e.g., showing an error message to the user
       });
 

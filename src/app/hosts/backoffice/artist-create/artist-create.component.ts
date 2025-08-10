@@ -1,33 +1,44 @@
-import { Component, effect } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, effect, OnInit } from '@angular/core';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { ArtistService } from '../../../services/artist.service';
 import { AuthService } from '../../../services/auth.service';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'app-artist-create',
   templateUrl: './artist-create.component.html',
-  standalone: false
+  standalone: false,
+  
 })
-export class ArtistCreateComponent {
-  stepIndex: number = 0;
+export class ArtistCreateComponent implements OnInit {
+  stepIndex: number = 1;
 
   form: FormGroup;
   isUploadingProfile: boolean = false;
   profilePreviewUrl: string | null = null;
-  id_auth:any;
+  id_auth: any;
   constructor(
-    private fb: FormBuilder, 
-    private router: Router, 
+    private fb: FormBuilder,
+    private router: Router,
     private artistService: ArtistService,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertService: AlertService
   ) {
-
-      effect(() => {
+    effect(() => {
       this.id_auth = this.artistService.getArtistProfileID();
-      
     });
-    
+
+
+
+
     this.form = this.fb.group({
       personal: this.fb.group({
         email: ['', [Validators.required, Validators.email]],
@@ -41,7 +52,7 @@ export class ArtistCreateComponent {
         city: [''],
         province: [''],
         country: [''],
-        profilePic: ['']
+        profilePic: [''],
       }),
       portfolio: this.fb.group({
         instruments: this.fb.array([]),
@@ -51,7 +62,7 @@ export class ArtistCreateComponent {
         cds: this.fb.array([
           // empty by default
         ]),
-        performanceTypes: this.fb.array([])
+        performanceTypes: this.fb.array([]),
       }),
       achievements: this.fb.group({
         education: this.fb.array([
@@ -59,32 +70,46 @@ export class ArtistCreateComponent {
         ]),
         awards: this.fb.array([
           // { title, description, year }
-        ])
-      })
+        ]),
+      }),
     });
   }
 
-
-
   ngOnInit(): void {
     this.id_auth = this.artistService.getArtistProfileID();
-
+    this.getInstrumentName();
   }
   // Convenience getters
-  get personalGroup(): FormGroup { return this.form.get('personal') as FormGroup; }
-  get portfolioGroup(): FormGroup { return this.form.get('portfolio') as FormGroup; }
-  get achievementsGroup(): FormGroup { return this.form.get('achievements') as FormGroup; }
+  get personalGroup(): FormGroup {
+    return this.form.get('personal') as FormGroup;
+  }
+  get portfolioGroup(): FormGroup {
+    return this.form.get('portfolio') as FormGroup;
+  }
+  get achievementsGroup(): FormGroup {
+    return this.form.get('achievements') as FormGroup;
+  }
 
   get instruments(): FormArray<FormControl> {
     return this.portfolioGroup.get('instruments') as FormArray<FormControl>;
   }
   get performanceTypes(): FormArray<FormControl> {
-    return this.portfolioGroup.get('performanceTypes') as FormArray<FormControl>;
+    return this.portfolioGroup.get(
+      'performanceTypes'
+    ) as FormArray<FormControl>;
   }
-  get videos(): FormArray<FormGroup> { return this.portfolioGroup.get('videos') as FormArray<FormGroup>; }
-  get cds(): FormArray<FormGroup> { return this.portfolioGroup.get('cds') as FormArray<FormGroup>; }
-  get education(): FormArray<FormGroup> { return this.achievementsGroup.get('education') as FormArray<FormGroup>; }
-  get awards(): FormArray<FormGroup> { return this.achievementsGroup.get('awards') as FormArray<FormGroup>; }
+  get videos(): FormArray<FormGroup> {
+    return this.portfolioGroup.get('videos') as FormArray<FormGroup>;
+  }
+  get cds(): FormArray<FormGroup> {
+    return this.portfolioGroup.get('cds') as FormArray<FormGroup>;
+  }
+  get education(): FormArray<FormGroup> {
+    return this.achievementsGroup.get('education') as FormArray<FormGroup>;
+  }
+  get awards(): FormArray<FormGroup> {
+    return this.achievementsGroup.get('awards') as FormArray<FormGroup>;
+  }
 
   // Adders
   addInstrument(value: string): void {
@@ -93,9 +118,7 @@ export class ArtistCreateComponent {
     this.instruments.push(new FormControl(trimmed));
   }
 
-  removeInstrument(index: number): void {
-    this.instruments.removeAt(index);
-  }
+
 
   addPerformanceType(value: string): void {
     const trimmed = (value || '').trim();
@@ -108,11 +131,13 @@ export class ArtistCreateComponent {
   }
 
   addVideo(): void {
-    this.videos.push(this.fb.group({
-      title: ['', Validators.required],
-      url: ['', Validators.required],
-      photo: ['']
-    }));
+    this.videos.push(
+      this.fb.group({
+        title: ['', Validators.required],
+        url: ['', Validators.required],
+        photo: [''],
+      })
+    );
   }
 
   removeVideo(index: number): void {
@@ -120,11 +145,13 @@ export class ArtistCreateComponent {
   }
 
   addCd(): void {
-    this.cds.push(this.fb.group({
-      title: ['', Validators.required],
-      url: ['', Validators.required],
-      photo: ['']
-    }));
+    this.cds.push(
+      this.fb.group({
+        title: ['', Validators.required],
+        url: ['', Validators.required],
+        photo: [''],
+      })
+    );
   }
 
   removeCd(index: number): void {
@@ -132,11 +159,13 @@ export class ArtistCreateComponent {
   }
 
   addEducation(): void {
-    this.education.push(this.fb.group({
-      school: ['', Validators.required],
-      course: ['', Validators.required],
-      year: ['', Validators.required]
-    }));
+    this.education.push(
+      this.fb.group({
+        school: ['', Validators.required],
+        course: ['', Validators.required],
+        year: ['', Validators.required],
+      })
+    );
   }
 
   removeEducation(index: number): void {
@@ -144,11 +173,13 @@ export class ArtistCreateComponent {
   }
 
   addAward(): void {
-    this.awards.push(this.fb.group({
-      title: ['', Validators.required],
-      description: [''],
-      year: ['', Validators.required]
-    }));
+    this.awards.push(
+      this.fb.group({
+        title: ['', Validators.required],
+        description: [''],
+        year: ['', Validators.required],
+      })
+    );
   }
 
   removeAward(index: number): void {
@@ -160,7 +191,6 @@ export class ArtistCreateComponent {
     this.setp1();
 
     if (this.stepIndex < 3) this.stepIndex += 1;
-
   }
 
   back(): void {
@@ -175,7 +205,7 @@ export class ArtistCreateComponent {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files[0];
     if (!file) return;
-    
+
     // local preview
     this.profilePreviewUrl = URL.createObjectURL(file);
     this.isUploadingProfile = true;
@@ -188,6 +218,21 @@ export class ArtistCreateComponent {
     } finally {
       this.isUploadingProfile = false;
     }
+  }
+
+  allInstruments: any = [];
+
+  async getInstrumentName() {
+    console.log('Fetching instruments...');
+    this.artistService.getInstruments().subscribe({
+      next: (data: any) => {
+        this.allInstruments = data;
+        console.log('Fetched instruments:', this.allInstruments);
+      },
+      error: (err) => {
+        console.error('Error fetching instruments:', err);
+      },
+    });
   }
 
   submit(): void {
@@ -210,41 +255,70 @@ export class ArtistCreateComponent {
     });
   }
 
-
-  setp1(){
+  setp1() {
     let email = this.form.value['personal'].email;
 
-   this.form.addControl('id_auth', new FormControl(this.id_auth));
+    this.form.addControl('id_auth', new FormControl(this.id_auth));
+
+    const dataX = this.artistService
+      .createSingleArtist_step01(this.form.value)
+      .then((res) => {
+        return res;
+      })
+      .catch((error) => {
+        return error.message;
+      });
+
+    console.log(dataX);
+  }
+
+  selectedInstrumentID: string = '0';
+  selectedInstArr: any[] = [];  // Your selected instruments array
 
 
-const dataX = this.artistService.createSingleArtist_step01(this.form.value).then((res)=>{
-  return res
-}).catch(error=>{
-  return error.message
-})
-
-console.log(dataX);
-
-
+  onChangeInst(e: any) {
+    this.selectedInstrumentID = e.target.value;
   }
 
 
- 
+
+  addIntrumentData(): void {
+    let arr = {
+      id_artist: '507e574a-dc95-432d-abae-38091cc52b97',
+      id_instrument: this.selectedInstrumentID,
+      created_by: '507e574a-dc95-432d-abae-38091cc52b97'
+    }
+
+    try {
+      this.artistService.addInstruments(arr).then((res) => {
+        let row: any = this.allInstruments.find((item: any) => item.id == this.selectedInstrumentID);
+        this.selectedInstArr.push(row);
+        this.selectedInstrumentID = '0';
+        return res;
+      })
+    } catch (error: any) {
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+  }
 
 
 
-
-
-
-
-
-
-
-
-
-
+  removeInstrument(id: number): void {
+    let arr = {
+      id_artist: '507e574a-dc95-432d-abae-38091cc52b97',
+      id_instrument: id
+    };
+  
+    try {
+      this.artistService.delInstruments(arr.id_artist, arr.id_instrument).then((res) => {
+        this.selectedInstArr = this.selectedInstArr.filter(item => item.id !== id);
+        this.selectedInstrumentID = '0';  // Reset selected ID as well
+        return res;
+      });
+    } catch (error: any) {
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+  }
 
 
 }
-
-

@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BackofficeRoutingModule } from './backoffice-routing.module';
 import { BackofficeComponent } from './backoffice.component';
-import { ArtistComponent } from './artist/artist.component';
+import { ArtistComponent, TruncatePipe } from './artist/artist.component';
 import { SharedModule } from '../../shared/shared.module';
 import { ArtistCreateComponent } from './artist-create/artist-create.component';
 
@@ -20,7 +20,8 @@ import { ArtistCreateComponent } from './artist-create/artist-create.component';
     FormsModule,
     ReactiveFormsModule,
     BackofficeRoutingModule,
-    SharedModule
-  ]
+    SharedModule,
+    TruncatePipe
+]
 })
 export class BackofficeModule { }

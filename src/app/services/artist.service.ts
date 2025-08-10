@@ -65,7 +65,6 @@ export class ArtistService {
     this.artistID.set(id);
   }
 
-
   getArtistID() {
     return this.artistID();
   }
@@ -282,9 +281,6 @@ getCurrentTimestamp() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-
-
-
 async updateShortBio(id_artist:any, short_bio:any, userID:any){
   const{data, error} = await supabase.from ('artists').update({short_bio: short_bio, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
   if(error) throw error
@@ -303,7 +299,6 @@ async updateContact(id_artist:any, userID:any, email:any, phone:any, website:any
   return data;
 }
 
-
 async updateInfo(
   id_artist:any, 
   userID:any, 
@@ -314,9 +309,6 @@ async updateInfo(
   if(error) throw error
   return data;
 }
-
-
-
 
 async replaceArtistPhoto(
   artistId: string,
@@ -373,7 +365,6 @@ async replaceArtistPhoto(
     throw err;
   }
 }
-
 
 async createSingleArtist_temp(arrData: any) {
   console.log(arrData);
@@ -504,6 +495,28 @@ async createArtist(arr:any){
   } catch (err: any) {
     return { code: 0, data: err.message };
   }
+}
+
+//Get all the artists
+async getAllArtists(){
+  const {data, error} = await supabase.from('vw_get_all_artists').select()
+  if(error) throw error
+  return data;
+}
+
+//Add instruments
+async addInstruments(arr:any){
+  const {data, error} = await supabase.from('artist_instruments').insert(arr);
+  if(error) throw error
+  return data
+}
+
+//Delete instruments
+async delInstruments(id_artist:any, id_instrument:any){
+  const {data, error} = await supabase.from('artist_instruments').delete().eq('id_artist', id_artist).eq('id_instrument', id_instrument)
+  if(error) throw error
+  console.log(data);
+  return data;
 }
 
 

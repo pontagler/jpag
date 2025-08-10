@@ -6,22 +6,14 @@
 
   <!-- Simple internal stepper -->
   <div class="flex gap-2 mb-6">
-    <div
-      class="px-3 py-2 rounded-full text-xs"
-      [ngClass]="stepIndex === 0 ? 'bg-black text-white' : 'bg-gray-100'"
-    >1. Personal Details</div>
-    <div
-      class="px-3 py-2 rounded-full text-xs"
-      [ngClass]="stepIndex === 1 ? 'bg-black text-white' : 'bg-gray-100'"
-    >2. Portfolio</div>
-    <div
-      class="px-3 py-2 rounded-full text-xs"
-      [ngClass]="stepIndex === 2 ? 'bg-black text-white' : 'bg-gray-100'"
-    >3. Education & Awards</div>
-    <div
-      class="px-3 py-2 rounded-full text-xs"
-      [ngClass]="stepIndex === 3 ? 'bg-black text-white' : 'bg-gray-100'"
-    >4. Confirm</div>
+    <div class="px-3 py-2 rounded-full text-xs" [ngClass]="stepIndex === 0 ? 'bg-black text-white' : 'bg-gray-100'">1.
+      Personal Details</div>
+    <div class="px-3 py-2 rounded-full text-xs" [ngClass]="stepIndex === 1 ? 'bg-black text-white' : 'bg-gray-100'">2.
+      Portfolio</div>
+    <div class="px-3 py-2 rounded-full text-xs" [ngClass]="stepIndex === 2 ? 'bg-black text-white' : 'bg-gray-100'">3.
+      Education & Awards</div>
+    <div class="px-3 py-2 rounded-full text-xs" [ngClass]="stepIndex === 3 ? 'bg-black text-white' : 'bg-gray-100'">4.
+      Confirm</div>
   </div>
 
   <!-- Step 1: Personal Details -->
@@ -70,8 +62,11 @@
           <span *ngIf="isUploadingProfile" class="text-xs text-gray-500">Uploading...</span>
         </div>
         <div class="mt-2 flex items-center gap-3">
-          <img *ngIf="profilePreviewUrl || personalGroup.get('profilePic')?.value" [src]="profilePreviewUrl || personalGroup.get('profilePic')?.value" class="h-16 w-16 rounded-full object-cover border" alt="Preview" />
-          <input formControlName="profilePic" type="url" class="flex-1 border rounded-lg px-3 py-2" placeholder="Public URL will appear after upload" readonly />
+          <img *ngIf="profilePreviewUrl || personalGroup.get('profilePic')?.value"
+            [src]="profilePreviewUrl || personalGroup.get('profilePic')?.value"
+            class="h-16 w-16 rounded-full object-cover border" alt="Preview" />
+          <input formControlName="profilePic" type="url" class="flex-1 border rounded-lg px-3 py-2"
+            placeholder="Public URL will appear after upload" readonly />
         </div>
       </div>
       <div class="md:col-span-2">
@@ -95,13 +90,28 @@
     <div>
       <h3 class="text-sm font-semibold mb-2">Instruments</h3>
       <div class="flex gap-2 mb-3">
-        <input #instrumentInput type="text" placeholder="Add instrument" class="flex-1 border rounded-lg px-3 py-2" />
-        <button class="px-3 py-2 rounded-lg border" (click)="addInstrument(instrumentInput.value); instrumentInput.value = ''">Add</button>
+        <!-- <input #instrumentInput type="text" placeholder="Add instrument" class="flex-1 border rounded-lg px-3 py-2" /> -->
+        <select
+        class="flex-1 border rounded-lg px-3 py-2"
+        [(ngModel)]="selectedInstrumentID"
+        [ngModelOptions]="{standalone: true}"
+        name="selectedInstrumentID"
+        (change)="onChangeInst($event)"
+      >
+        <option value="0">Select Instrument</option>
+        @for (x of allInstruments; track x) {
+          <option [value]="x.id">{{ x.name }}</option>
+        }
+      </select>
+
+
+        <button class="px-3 py-2 rounded-lg border" (click)="addIntrumentData()">Add</button>
       </div>
       <div class="flex flex-wrap gap-2">
-        <span *ngFor="let inst of instruments.controls; let i = index" class="px-2 py-1 text-xs rounded-full bg-gray-100">
-          {{ inst.value }}
-          <button class="ml-1 text-red-600" (click)="removeInstrument(i)">x</button>
+        <span *ngFor="let inst of selectedInstArr; let i = index"
+          class="px-2 py-1 text-xs rounded-full bg-gray-100">
+          {{ inst.name }}
+          <button class="ml-1 text-red-600" (click)="removeInstrument(inst.id)">x</button>
         </span>
       </div>
     </div>
@@ -111,7 +121,8 @@
       <h3 class="text-sm font-semibold mb-2">Videos</h3>
       <button class="px-3 py-2 rounded-lg border mb-3" (click)="addVideo()">Add Video</button>
       <div class="space-y-3">
-        <div *ngFor="let v of videos.controls; let i = index" [formGroup]="v" class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
+        <div *ngFor="let v of videos.controls; let i = index" [formGroup]="v"
+          class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
           <input formControlName="title" type="text" placeholder="Video Title" class="border rounded-lg px-3 py-2" />
           <input formControlName="url" type="url" placeholder="Video URL" class="border rounded-lg px-3 py-2" />
           <input formControlName="photo" type="url" placeholder="Video Photo URL" class="border rounded-lg px-3 py-2" />
@@ -127,7 +138,8 @@
       <h3 class="text-sm font-semibold mb-2">CDs</h3>
       <button class="px-3 py-2 rounded-lg border mb-3" (click)="addCd()">Add CD</button>
       <div class="space-y-3">
-        <div *ngFor="let c of cds.controls; let i = index" [formGroup]="c" class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
+        <div *ngFor="let c of cds.controls; let i = index" [formGroup]="c"
+          class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
           <input formControlName="title" type="text" placeholder="CD Title" class="border rounded-lg px-3 py-2" />
           <input formControlName="url" type="url" placeholder="CD URL" class="border rounded-lg px-3 py-2" />
           <input formControlName="photo" type="url" placeholder="CD Photo URL" class="border rounded-lg px-3 py-2" />
@@ -143,10 +155,12 @@
       <h3 class="text-sm font-semibold mb-2">Performance Types</h3>
       <div class="flex gap-2 mb-3">
         <input #ptInput type="text" placeholder="Add performance type" class="flex-1 border rounded-lg px-3 py-2" />
-        <button class="px-3 py-2 rounded-lg border" (click)="addPerformanceType(ptInput.value); ptInput.value = ''">Add</button>
+        <button class="px-3 py-2 rounded-lg border"
+          (click)="addPerformanceType(ptInput.value); ptInput.value = ''">Add</button>
       </div>
       <div class="flex flex-wrap gap-2">
-        <span *ngFor="let pt of performanceTypes.controls; let i = index" class="px-2 py-1 text-xs rounded-full bg-gray-100">
+        <span *ngFor="let pt of performanceTypes.controls; let i = index"
+          class="px-2 py-1 text-xs rounded-full bg-gray-100">
           {{ pt.value }}
           <button class="ml-1 text-red-600" (click)="removePerformanceType(i)">x</button>
         </span>
@@ -168,7 +182,8 @@
         <button class="px-3 py-2 rounded-lg border mb-2" (click)="addEducation()">Add Education</button>
       </div>
       <div class="space-y-3">
-        <div *ngFor="let e of education.controls; let i = index" [formGroup]="e" class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
+        <div *ngFor="let e of education.controls; let i = index" [formGroup]="e"
+          class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
           <input formControlName="school" type="text" placeholder="School" class="border rounded-lg px-3 py-2" />
           <input formControlName="course" type="text" placeholder="Course" class="border rounded-lg px-3 py-2" />
           <input formControlName="year" type="text" placeholder="Year" class="border rounded-lg px-3 py-2" />
@@ -186,9 +201,11 @@
         <button class="px-3 py-2 rounded-lg border mb-2" (click)="addAward()">Add Award</button>
       </div>
       <div class="space-y-3">
-        <div *ngFor="let a of awards.controls; let i = index" [formGroup]="a" class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
+        <div *ngFor="let a of awards.controls; let i = index" [formGroup]="a"
+          class="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded-lg p-3">
           <input formControlName="title" type="text" placeholder="Title" class="border rounded-lg px-3 py-2" />
-          <input formControlName="description" type="text" placeholder="Description" class="border rounded-lg px-3 py-2" />
+          <input formControlName="description" type="text" placeholder="Description"
+            class="border rounded-lg px-3 py-2" />
           <input formControlName="year" type="text" placeholder="Year" class="border rounded-lg px-3 py-2" />
           <div class="md:col-span-3 text-right">
             <button class="text-red-600 text-xs" (click)="removeAward(i)">Remove</button>
@@ -215,5 +232,3 @@
     </div>
   </div>
 </div>
-
-

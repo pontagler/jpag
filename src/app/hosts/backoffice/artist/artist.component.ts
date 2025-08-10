@@ -1,6 +1,7 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { Router } from '@angular/router';
 import { ArtistService } from '../../../services/artist.service';
+import { AlertService } from '../../../services/alert.service';
 
 @Component({
   selector: 'app-artist',
@@ -8,12 +9,20 @@ import { ArtistService } from '../../../services/artist.service';
   templateUrl: './artist.component.html',
   standalone:false
 })
-export class ArtistComponent {
-  constructor(private router: Router, private artistService: ArtistService) {
+export class ArtistComponent implements OnInit {
+  constructor(
+    private router: Router, 
+    private artistService: ArtistService,
+    private alertService: AlertService
+  ) {
     effect(() => {
       this.profileID = this.artistService.getArtistProfileID();
       console.log(this.profileID);
     });
+  }
+
+  ngOnInit (){
+    this.getAllArtists(); 
   }
   // Filters
   profileID:any;
@@ -26,74 +35,6 @@ export class ArtistComponent {
   sortKey: keyof Artist = 'createdOn';
   sortDirection: 'asc' | 'desc' = 'desc';
 
-  // Mock data – replace with API integration later
-  artists: Artist[] = [
-    {
-      id: 'ART-1001',
-      name: 'Alice Johnson',
-      phone: '+1 555-0123',
-      email: 'alice@example.com',
-      city: 'New York',
-      country: 'USA',
-      isFeatured: true,
-      upcomingEvents: 2,
-      totalEvents: 12,
-      status: 'Active',
-      createdOn: new Date('2024-11-12')
-    },
-    {
-      id: 'ART-1002',
-      name: 'Bharat Singh',
-      phone: '+91 98765 43210',
-      email: 'bharat@example.in',
-      city: 'Mumbai',
-      country: 'India',
-      isFeatured: false,
-      upcomingEvents: 0,
-      totalEvents: 4,
-      status: 'Inactive',
-      createdOn: new Date('2023-08-01')
-    },
-    {
-      id: 'ART-1003',
-      name: 'Clara Gómez',
-      phone: '+34 600 123 456',
-      email: 'clara@example.es',
-      city: 'Madrid',
-      country: 'Spain',
-      isFeatured: true,
-      upcomingEvents: 1,
-      totalEvents: 7,
-      status: 'Active',
-      createdOn: new Date('2025-02-14')
-    },
-    {
-      id: 'ART-1004',
-      name: 'Diego Silva',
-      phone: '+55 21 99999-8888',
-      email: 'diego@example.br',
-      city: 'Rio de Janeiro',
-      country: 'Brazil',
-      isFeatured: false,
-      upcomingEvents: 3,
-      totalEvents: 20,
-      status: 'Active',
-      createdOn: new Date('2024-05-30')
-    },
-    {
-      id: 'ART-1005',
-      name: 'Emma Smith',
-      phone: '+44 20 7946 0958',
-      email: 'emma@example.co.uk',
-      city: 'London',
-      country: 'UK',
-      isFeatured: false,
-      upcomingEvents: 0,
-      totalEvents: 2,
-      status: 'Inactive',
-      createdOn: new Date('2022-12-22')
-    }
-  ];
 
   get uniqueCities(): string[] {
     const cities = new Set<string>();
@@ -165,6 +106,44 @@ export class ArtistComponent {
   createNew(): void {
     this.router.navigate(['/hosts/console/artists/create']);
   }
+
+artists: Artist[] = [] ;
+  allArtistArr:any = [];
+
+  async getAllArtists(){
+    try {
+      const res = await this.artistService.getAllArtists();
+      this.artists = (res || []).map((row: any) => {
+        const firstName = row.fname || row.first_name || '';
+        const lastName = row.lname || row.last_name || '';
+        const fullName = row.name || `${firstName} ${lastName}`.trim();
+
+        const createdOnRaw = row.createdon ?? row.created_on ?? row.created_at ?? null;
+        const createdOnDate = createdOnRaw ? new Date(createdOnRaw) : undefined as unknown as Date;
+
+        return {
+          id: row.id,
+          name: fullName,
+          phone: row.phone ?? '',
+          email: row.email ?? '',
+          city: row.city ?? '',
+          country: row.country ?? '',
+          isFeatured: (row.isFeatured ?? row.is_featured ?? false) as boolean,
+          upcomingEvents: (row.upcomingEvents ?? row.upcoming_events ?? 0) as number,
+          totalEvents: (row.totalEvents ?? row.total_events ?? 0) as number,
+          status: row.status ?? (row.is_active === false ? 'Inactive' : 'Active'),
+          createdOn: createdOnDate,
+        } as Artist;
+      });
+    } catch (error:any) {
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+  }
+
+
+
+
+
 }
 
 export interface Artist {
@@ -177,6 +156,20 @@ export interface Artist {
   isFeatured: boolean;
   upcomingEvents: number;
   totalEvents: number;
-  status: 'Active' | 'Inactive';
+  status: string;
   createdOn: Date;
+}
+
+
+@Pipe({
+  name: 'truncate'
+})
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, length: number = 8): string {
+    if (!value) return '';
+    return value.substring(0, length);
+  }
+
+
+
 }

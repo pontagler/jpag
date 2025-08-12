@@ -8,6 +8,7 @@ import { EventsComponent } from './events/events.component';
 import { LocationsComponent } from './locations/locations.component';
 import { HostsComponent } from './hosts/hosts.component';
 import { AccountComponent } from './account/account.component';
+import { ArtistDetailComponent } from './artist/artist-detail/artist-detail.component';
 
 const routes: Routes = [
   {path:'', component: BackofficeComponent, children:[
@@ -16,6 +17,7 @@ const routes: Routes = [
     {path:'events', component: EventsComponent, data:{urlID:42}},
     {path:'artists', component: ArtistComponent, data:{urlID:43}},
     {path:'artists/create', component: ArtistCreateComponent, data:{urlID:431}},
+    {path:'artists/:id', component: ArtistDetailComponent, data:{urlID:432}},
     {path:'locations', component: LocationsComponent, data:{urlID:44}},
     {path:'hosts', component: HostsComponent, data:{urlID:45}},
     {path:'account', component: AccountComponent, data:{urlID:46}},

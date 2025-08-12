@@ -1,0 +1,294 @@
+<div class="artist-info-container p-6 bg-white rounded-lg shadow-lg">
+
+    <!-- Tabs Navigation -->
+    <ul class="flex border-b mb-6">
+      <li class="mr-4" *ngFor="let tab of [
+        {id: 'details', label: 'Details'},
+        {id: 'portfolio', label: 'Portfolio'},
+        {id: 'education', label: 'Education & Awards'},
+        {id: 'system', label: 'System'},
+        {id: 'account', label: 'Account'}
+      ]">
+        <button
+          (click)="setActiveTab(tab.id)"
+          class="pb-2 px-4 font-medium transition-all"
+          [ngClass]="isActive(tab.id) 
+            ? 'border-b-2 border-blue-500 text-blue-600' 
+            : 'text-gray-600 hover:text-blue-500'">
+          {{ tab.label }}
+        </button>
+      </li>
+    </ul>
+  
+    <!-- Section 01: Details -->
+    <section *ngIf="isActive('details')" class="details-section">
+      <div class="flex justify-between">
+            <h2 class="text-lg font-bold mb-4">Artist Details</h2>
+<div (click)="updateDetailBtn = false" *ngIf="updateDetailBtn" class="flex gap-2 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+          <i class="fas fa-pen mt-1"></i>
+    <p class="">Edit</p>
+        </div>
+
+         <div (click)="updateDetail()" *ngIf="!updateDetailBtn" class="flex gap-2 bg-pont-green px-4 py-2 rounded-lg hover:bg-pont-green/90 cursor-pointer">
+          
+    <p class="text-white">Update</p>
+        </div>
+      </div>
+  
+      
+      <!-- Loading State -->
+      <div *ngIf="loading" class="text-center py-8">
+        <p class="text-gray-600">Loading artist details...</p>
+      </div>
+      
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="text-center py-8 text-red-600">
+        <p>{{ error }}</p>
+      </div>
+      
+      <!-- Artist Details -->
+      <div *ngIf="artistProfile && !loading" class="grid grid-cols-2 gap-4">
+        <div><strong>First Name:</strong> 
+                <span *ngIf="updateDetailBtn">{{ artistProfile.fname || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.fname" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" /></div>
+
+
+
+
+
+        <div><strong>Last Name:</strong>
+           <span *ngIf="updateDetailBtn">{{ artistProfile.lname || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.lname" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" />
+          </div>
+        <div><strong>Email:</strong> 
+        
+            <span *ngIf="updateDetailBtn">{{ artistProfile.email || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.email" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" />
+        </div>
+        <div><strong>Phone:</strong>
+           
+                   <span *ngIf="updateDetailBtn">{{ artistProfile.phone || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.phone" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" />
+        </div>
+        <div><strong>Tagline:</strong>
+         
+            <span *ngIf="updateDetailBtn">{{ artistProfile.tagline || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.tagline" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" />
+        
+        </div>
+        <div><strong>Website:</strong> 
+           <span *ngIf="updateDetailBtn">{{ artistProfile.website || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.website" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" />    
+        
+        </div>
+        <div><strong>City:</strong> 
+              <span *ngIf="updateDetailBtn">{{ artistProfile.city || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.city" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" />    
+          
+         
+        
+        </div>
+        <div><strong>Province:</strong> 
+        
+                 <span *ngIf="updateDetailBtn">{{ artistProfile.proviance || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.proviance" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" /> 
+        </div>
+        <div><strong>Country:</strong> 
+        
+          <span *ngIf="updateDetailBtn">{{ artistProfile.country || 'N/A' }}</span>
+            <input *ngIf="!updateDetailBtn" type=text [(ngModel)]="artistProfile.country" class="bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" /> 
+        </div>
+        <div>
+          <strong>Profile Picture:</strong>
+          <img [src]="artistProfile.photo || 'assets/default-profile.jpg'" 
+               [alt]="(artistProfile.fname || '') + ' ' + (artistProfile.lname || '')" 
+               class="w-24 h-24 object-cover rounded-full mt-2 border"
+               >
+        </div>
+          <strong>Short Bio:</strong>
+        <div class="col-span-2 bg-gray-100 rounded-lg p-4">
+        
+        
+
+           <span *ngIf="updateDetailBtn">{{ artistProfile.short_bio || 'N/A' }}</span>
+            <textarea *ngIf="!updateDetailBtn" maxlength="100" rows="3"  [(ngModel)]="artistProfile.short_bio" class="w-full bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" > </textarea>
+
+
+
+        </div>
+        <strong>Long Bio:</strong> 
+         <div class="col-span-2 bg-gray-100 rounded-lg p-4">
+
+                              <span *ngIf="updateDetailBtn">{{ artistProfile.long_bio || 'N/A' }}</span>
+            <textarea *ngIf="!updateDetailBtn" maxlength="100" rows="3" [(ngModel)]="artistProfile.long_bio" class=" w-full bg-white border-gray-300 border-2 rounded-lg p-1 ml-1" > </textarea>
+
+
+        </div>
+      </div>
+    </section>
+  
+    <!-- Section 02: Portfolio -->
+    <section *ngIf="isActive('portfolio')" class="portfolio-section">
+      <h2 class="text-lg font-bold mb-4">Portfolio</h2>
+      <div class="mb-4">
+        <strong>Instruments:</strong>
+        <!-- <ul class="list-disc ml-6 text-gray-700" >
+          <li>Guitar</li>
+          <li>Piano</li>
+        </ul> -->
+  <div class="flex flex-row space-x-2">
+  @for (x of instruments; track x) {
+    <p class="rounded-full px-3 py-1 text-sm font-medium shadow-md"
+       [ngClass]="[ 'bg-' + x.inst_color + '-200', 'text-' + x.inst_color + '-800' ]">
+      {{ x.instrument }}
+    </p>
+  }
+</div>
+
+
+    
+  
+  
+
+       
+      </div>
+  
+      <div class="mb-4">
+        <strong>Video Media:</strong>
+        <div class="bg-slate-50 p-4 ">
+        <div class="grid grid-cols-3 gap-4">
+@for (item of artistProfile.media_video; track $index) {
+          <div>
+            <img [src]="item.image" [alt]="item.title" 
+                 class="w-full h-32 object-cover rounded shadow">
+            <p class="mt-2 font-medium">{{item.title | titlecase}}</p>
+            <button class="text-xs bg-pont-green text-white px-4 py-1 rounded-lg" (click)="goTo(item.url)"> Visit</button>
+          </div>
+        }
+        </div>
+        </div>
+      </div>
+  
+      <div class="mb-4">
+         
+                 <strong>CD Media:</strong>
+      <div class="bg-slate-50 p-4 ">
+        <div class="grid grid-cols-3 gap-4">
+          @for (item of artistProfile.media_cd; track $index) {
+          <div>
+            <img [src]="item.image" [alt]="item.title" 
+                 class="w-full h-32 object-cover rounded shadow">
+            <p class="mt-2 text-md font-medium">{{item.title | titlecase}}</p>
+            <p class="mt-2 text-xs">{{item.description | titlecase}}</p>
+          <button class="text-xs bg-pont-green text-white px-4 py-1 rounded-lg" (click)="goTo(item.url)"> Visit</button>
+
+          </div>
+        }
+          </div>
+        </div>
+      </div>
+  
+      <div>
+        <strong>Performance Types:</strong>
+      <div class="flex flex-row space-x-4">
+  @for (x of artistProfile.performance_type; track x) {
+    <p class="rounded-full px-3 py-1 text-sm font-medium shadow-md">
+     
+      {{ x.performance_type }}
+    </p>
+  }
+</div>
+      </div>
+    </section>
+  
+    <!-- Section 03: Education & Awards -->
+    <section *ngIf="isActive('education')" class="education-awards-section">
+      <h2 class="text-lg font-bold mb-4">Education</h2>
+      <ul class="list-disc ml-6 mb-4 text-gray-700 space-y-4">
+        @for(x of artistProfile.education; track x){
+        <li>
+          <strong>School:</strong> {{ x.school | titlecase}} <br>
+          <strong>Course:</strong> {{ x.course | titlecase}} <br>
+          <strong>Year:</strong> {{ x.year | titlecase}}
+        </li>
+      }
+      </ul>
+
+      <hr class="">
+  
+      <h2 class="text-lg font-bold mb-4 mt-4">Awards</h2>
+      <ul class="list-disc ml-6 text-gray-700 space-y-4">
+          @for(x of artistProfile.awards; track x){
+        <li>
+          <strong>Name:</strong> {{ x.award | titlecase}} — 
+          <strong>Year:</strong> {{ x.year | titlecase}}  
+          <p class="mt-1">{{ x.description | titlecase}}</p>
+        </li>
+      }
+      </ul>
+    </section>
+  
+    <!-- Section 04: System -->
+    <section *ngIf="isActive('system')" class="system-settings-section">
+      <div class="flex justify-between">
+        <h2 class="text-lg font-bold mb-4">System Settings</h2>
+        <div (click)="changesystemFunction()" *ngIf="changeSystem" class="flex gap-2 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+          <i class="fas fa-pen mt-1"></i>
+    <p class="">Edit</p>
+        </div>
+
+         <div (click)="updateSystemFunction()" *ngIf="!changeSystem" class="flex gap-2 bg-pont-green px-4 py-2 rounded-lg hover:bg-pont-green/90 cursor-pointer">
+          
+    <p class="text-white">Update</p>
+        </div>
+    
+      </div>
+   
+      
+      <div *ngIf="loading" class="text-center py-8">
+        <p class="text-gray-600">Loading system settings...</p>
+      </div>
+      
+      <div *ngIf="artistProfile && !loading">
+        <div class="flex items-center mb-3">
+          <label class="mr-3 font-medium text-gray-700">Profile Active:</label>
+        
+          <input type="checkbox" [(ngModel)]="activeArtist"  [checked]="artistProfile.status == 1" [disabled]="changeSystem">
+          <span class="ml-2 text-sm text-gray-600">
+            {{ activeArtist == 1 ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+        <div class="flex items-center mb-3">
+          <label class="mr-3 font-medium text-gray-700">Featured:</label>
+          <input type="checkbox" [(ngModel)]="featureArtist"  [checked]="artistProfile.is_featured || false" [disabled]="changeSystem">
+          <span class="ml-2 text-sm text-gray-600">
+            {{ featureArtist ? 'True' : 'False' }}
+          </span>
+        </div>
+        <div class="mt-4 text-sm text-gray-600">
+          <p><strong>Created:</strong> {{ artistProfile.created_on | date:'medium' }}</p>
+          <p><strong>Last Updated:</strong> {{ artistProfile.last_updated | date:'medium'  }}</p>
+        </div>
+      </div>
+    </section>
+  
+    <!-- Section 05: Profile -->
+    <section *ngIf="isActive('account')" class="profile-info-section">
+      <h2 class="text-lg font-bold mb-4">Password Reset</h2>
+      
+      <div *ngIf="loading" class="text-center py-8">
+        <p class="text-gray-600">Loading profile info...</p>
+      </div>
+      
+      <div *ngIf="artistProfile && !loading">
+        
+        <div>
+          <button class="px-4 py-2 bg-pont-green text-white rounded-lg 
+                         hover:bg-pont-green/90 transition">
+            Send Password Reset Link
+          </button>
+        </div>
+      </div>
+    </section>
+  
+  </div>

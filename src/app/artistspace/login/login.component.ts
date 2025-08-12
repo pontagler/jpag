@@ -33,7 +33,10 @@ private router: Router // Inject the Router if you need to navigate after login
 
     this.authService.signIn(this.email, this.password)
       .then(data => {
+
+
         this.artistService.setArtistProfileID(data.id_user);
+
         console.log('Login successful', data);
         // Handle successful login, e.g., redirecting the user
           this.alertService.showAlert('Login Successful', 'Welcome back!', 'success');    

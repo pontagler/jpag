@@ -302,7 +302,6 @@ export class ArtistCreateComponent implements OnInit {
   }
 
 
-
   removeInstrument(id: number): void {
     let arr = {
       id_artist: '507e574a-dc95-432d-abae-38091cc52b97',

@@ -1,5 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { supabase } from '../core/supabase';
+import { supabase, supabase1 } from '../core/supabase';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from './auth.service';
@@ -53,13 +53,36 @@ export class ArtistService {
     return data;
   }
 
+
+  async getArtistProfile_v1(artistId: string): Promise<any> {
+    const { data, error } = await supabase.rpc('get_artist_profile_v1', { artist_id: artistId });
+
+    if (error) throw error;
+    return data;
+  }
+
+
   private artistProfileID = signal<string | null>(null);
   private artistProfile = signal<any>(null);
   private artistID = signal<string | null>(null);
+  private logedUserID = signal<string | null>(null);
 
   setArtistProfileID(id: string) {
     this.artistProfileID.set(id);
   }
+
+  setLogedUserID(id:string){
+       console.log('...ddddd...........', id)
+    this.logedUserID.set(id);
+    console.log('..............', id)
+
+  }
+
+ getLogedUserID(){
+   return  this.logedUserID();
+
+  }
+
 
   setArtistID(id: string) {
     this.artistID.set(id);
@@ -518,6 +541,40 @@ async delInstruments(id_artist:any, id_instrument:any){
   console.log(data);
   return data;
 }
+
+//update artist system 
+async updateArtistStatus(arr:any, id_artist:any){
+  const {data, error} = await supabase
+  .from('artists')
+  .update(arr)
+  .eq('id', id_artist)
+  if(error) throw error
+  return data;
+}
+
+// Ipdate artist Detail
+
+async updateArtistDetail(arr:any, id_artist:any, id:any){
+  await supabase
+  .from('artists')
+  .update(arr)
+  .eq('id', id_artist).then(async()=>{
+    const {data, error } = await supabase1.rpc('fx_update_email_auth_user', {
+      p_email: arr.email,
+      p_id_artist: id_artist
+    })
+    
+    if(error) throw error
+    return data;
+    
+  })
+  
+}
+
+
+
+
+
 
 
 }

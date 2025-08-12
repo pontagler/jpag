@@ -140,7 +140,9 @@ artists: Artist[] = [] ;
     }
   }
 
-
+navigateTo(id:any){
+  this.router.navigate([`hosts/console/artists/${id}`]);
+}
 
 
 

@@ -34,7 +34,7 @@ export class LoginComponent {
             await this.authService.signIn(this.email, this.password).then((res)=>{
               const rolename = res.rolename;
               if(rolename == 'admin'){
-                        this.artistService.setLogedUserID(res.id_user);
+                        this.artistService.setLoggedUserID(res.id_user);
 
  this.alertService.showAlert('Login Successful', 'Welcome to your host dashboard!', 'success');
  this.loading = false;

@@ -65,21 +65,21 @@ export class ArtistService {
   private artistProfileID = signal<string | null>(null);
   private artistProfile = signal<any>(null);
   private artistID = signal<string | null>(null);
-  private logedUserID = signal<string | null>(null);
+  private loggedUserID = signal<string | null>(null);
 
   setArtistProfileID(id: string) {
     this.artistProfileID.set(id);
   }
 
-  setLogedUserID(id:string){
+  setLoggedUserID(id:string){
        console.log('...ddddd...........', id)
-    this.logedUserID.set(id);
+    this.loggedUserID.set(id);
     console.log('..............', id)
 
   }
 
- getLogedUserID(){
-   return  this.logedUserID();
+ getLoggedUserID(){
+   return  this.loggedUserID();
 
   }
 
@@ -527,6 +527,14 @@ async getAllArtists(){
   return data;
 }
 
+//Get all the artists instruments
+async getArtistInstruments(arr:any){
+  const {data, error} = await supabase.from('vw_artist_instruments')
+  .select().eq('id_artist', arr.id_artist)
+  if(error) throw error
+  return data;
+}
+
 //Add instruments
 async addInstruments(arr:any){
   const {data, error} = await supabase.from('artist_instruments').insert(arr);
@@ -571,8 +579,119 @@ async updateArtistDetail(arr:any, id_artist:any, id:any){
   
 }
 
+async updateVideoMedia(
+  file: File | null,
+  videoTitle: string,
+  videoUrl: string,
+  idRequest: number,
+  createdBy: string,
+  authID: string,
+  id_media:number
+) {
+  try {
+    let publicImageUrl: string | null = null;
+
+    // 1. Upload only if file exists
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('artistrequest')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('artistrequest')
+        .getPublicUrl(filePath);
+
+      publicImageUrl = publicUrlData.publicUrl;
+    }
+
+    // 2. Insert into DB, with or without image
+    const { data, error: insertError } = await supabase
+      .from('artist_request_media')
+      .insert([{
+        id_media: id_media,
+        id_request: idRequest,
+        title: videoTitle,
+        image: publicImageUrl, // will be null if no file
+        description: videoUrl,
+        created_by: createdBy,
+        last_updated_by: createdBy,
+        id_auth: authID
+      }])
+      .select('id'); // get ID of inserted row
+
+    if (insertError) throw insertError;
+
+    return {
+      success: true,
+      imageUrl: publicImageUrl,
+      id: data?.[0]?.id || null
+    };
+
+  } catch (err) {
+    let message = 'Unknown error';
+    if (err instanceof Error) {
+      message = err.message;
+    } else if (typeof err === 'string') {
+      message = err;
+    } else {
+      try {
+        message = JSON.stringify(err);
+      } catch {
+        message = 'Unhandled error';
+      }
+    }
+
+    return { success: false, error: message };
+  }
+}
 
 
+async deleteArtistMedia(id:any){
+  const {data, error} = await supabase.from('artist_media').delete().eq('id', id)
+  if(error) throw error
+  return data
+}
+
+
+
+
+  getUniquePerfromance(id_artist:any): Observable<any[]> {
+    return new Observable(observer => {
+      supabase.rpc('get_unassigned_performance_types', {
+      artist_id: id_artist
+    })        .then(({ data, error }) => {
+          if (error) {
+            observer.error(error);
+          } else {
+            observer.next(data);
+            observer.complete();
+          }
+        });
+    });
+  }
+
+
+  async deleteArtistPerfromance(id:any){
+    
+  const {data, error} = await supabase.from('artist_performance').delete().eq('id', id)
+  if(error) throw error
+  return data
+}
+
+
+async addPerformance(arr:any){
+
+  const {data, error} = await supabase.from('artist_performance').insert(arr)
+   if(error) throw error
+  return data
+
+}
 
 
 

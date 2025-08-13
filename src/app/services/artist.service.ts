@@ -776,7 +776,42 @@ async resetPass(pass:any){
   })
   if(error) throw error
   return data;
-
 }
+
+
+
+//Get all the artists Requests
+async getAllArtistsRequests(){
+  const {data, error} = await supabase.from('vw_list_request').select()
+  if(error) throw error
+  return data;
+}
+
+//Get single artists Request detail
+async getRequestDetail(id:any){
+  const {data, error} = await supabase.rpc('get_artist_request_details', {p_request_id:id})
+  if(error) throw error
+  return data;
+}
+
+  // Update request status and optional comment
+  async updateRequestStatus(id: number, status: number, comment: string | null) {
+    const payload: any = {
+      status: status,
+      last_status_change: new Date().toISOString()
+    };
+    if (comment !== undefined) {
+      payload.comment = comment;
+    }
+    const { data, error } = await supabase
+      .from('artist_request')
+      .update(payload)
+      .eq('id', id)
+      .select('id, status, comment, last_status_change')
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
 
 }

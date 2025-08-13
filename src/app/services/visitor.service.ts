@@ -1,0 +1,26 @@
+import { Injectable, signal, effect } from '@angular/core';
+import { supabase, supabase1 } from '../core/supabase';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { AuthService } from './auth.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+
+export class VisitorService {
+
+  constructor(
+    private authService: AuthService
+  ) { }
+
+async getArtistForVisitor(){
+  const {data, error} = await supabase.rpc('get_artists_for_visitors')
+  if(error) throw error
+  return data;
+}
+
+
+
+}

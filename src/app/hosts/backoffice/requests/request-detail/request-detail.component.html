@@ -1,1 +1,139 @@
-<p>request-detail works!</p>
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+        <i class="fa-regular fa-clipboard"></i>
+      </span>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">{{requestArr?.title | titlecase}}</h2>
+        <p class="text-sm text-gray-500"> {{requestArr?.request_type | titlecase}} </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 border-b">
+    <button class="px-3 py-2 text-sm" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='details', 'text-gray-600': activeTab!=='details' }" (click)="activeTab='details'">Details</button>
+    <button class="px-3 py-2 text-sm" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='media', 'text-gray-600': activeTab!=='media' }" (click)="activeTab='media'">Media</button>
+    <button class="px-3 py-2 text-sm" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='comments', 'text-gray-600': activeTab!=='comments' }" (click)="activeTab='comments'">Comments</button>
+  </div>
+
+  <!-- Details Tab -->
+  <div *ngIf="activeTab==='details'" class="space-y-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Request ID</span>
+        <span class="font-mono text-gray-900">{{requestArr?.id}}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Request Type</span>
+        <span class="text-gray-900 capitalize">{{requestArr?.request_type}}</span>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Artist</span>
+        <div class="flex items-center gap-3 mt-1">
+          <img *ngIf="requestArr?.artist?.photo" [src]="requestArr.artist.photo" alt="Artist Photo" class="w-12 h-12 object-cover rounded-full ring-1 ring-gray-200" />
+          <div class="text-gray-900">{{requestArr?.artist?.fname}} {{requestArr?.artist?.lname}}</div>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Title</span>
+        <span class="text-gray-900">{{requestArr?.title}}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Status</span>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          [ngClass]="{
+            'bg-gray-100 text-gray-700': requestArr?.status === 1,
+            'bg-green-100 text-green-800': requestArr?.status === 2,
+            'bg-red-100 text-red-800': requestArr?.status === 3
+          }">
+          <i class="fa-solid" [ngClass]="{
+            'fa-circle-dot': requestArr?.status === 1,
+            'fa-circle-check': requestArr?.status === 2,
+            'fa-circle-xmark': requestArr?.status === 3
+          }"></i>
+          {{ getStatusLabel(requestArr?.status) }}
+        </span>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Short Description</span>
+        <p class="text-gray-900 mt-1 bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{requestArr?.short_desc}}</p>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Long Description</span>
+        <p class="text-gray-900 mt-1 whitespace-pre-line bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{requestArr?.long_desc}}</p>
+      </div>
+      <div>
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Proposed Date(s)</span>
+        <div class="flex flex-wrap gap-2 mt-1">
+          <span *ngFor="let d of requestArr?.propose_date" class="px-2.5 py-1 bg-gray-50 ring-1 ring-gray-200 text-gray-800 rounded">{{d | date:'yyyy-MM-dd'}}</span>
+        </div>
+      </div>
+      <div>
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Instruments</span>
+        <div class="flex flex-wrap gap-2 mt-1">
+          <span *ngFor="let ins of requestArr?.instrument" class="px-2.5 py-1 bg-gray-50 ring-1 ring-gray-200 text-gray-800 rounded">{{ins}}</span>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Last status change</span>
+        <span class="text-gray-900">{{requestArr?.last_status_change | date:'yyyy-MM-dd HH:mm'}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Tab -->
+  <div *ngIf="activeTab==='media'" class="space-y-6">
+    <div>
+      <h3 class="text-sm font-semibold text-gray-900">Videos</h3>
+      <div *ngIf="videos?.length; else noVideos" class="grid md:grid-cols-5 gap-4 mt-2">
+        <div *ngFor="let m of videos" class="p-3 rounded-lg ring-1 ring-gray-200">
+          <div class="font-semibold text-gray-900">{{m?.title}}</div>
+          <div class="text-sm text-gray-600">{{m?.description}}</div>
+          <div class="mt-2 text-blue-600 break-all" *ngIf="m?.video_url || m?.description">{{m?.video_url || m?.description}}</div>
+          <img *ngIf="m?.photo || m?.image" [src]="m?.photo || m?.image" alt="media" class="mt-2 w-full h-40 object-cover rounded" />
+        </div>
+      </div>
+      <ng-template #noVideos>
+        <div class="text-sm text-gray-500">No videos</div>
+      </ng-template>
+    </div>
+
+    <div>
+      <h3 class="text-sm font-semibold text-gray-900">CD</h3>
+      <div *ngIf="cds?.length; else noCds" class="grid md:grid-cols-5 gap-4 mt-2">
+        <div *ngFor="let m of cds" class="p-3 rounded-lg ring-1 ring-gray-200">
+          <div class="font-semibold text-gray-900">{{m?.title}}</div>
+          <div class="text-sm text-gray-600">{{m?.description}}</div>
+          <div class="mt-2 text-blue-600 break-all" *ngIf="m?.video_url || m?.description">{{m?.video_url || m?.description}}</div>
+          <img *ngIf="m?.photo || m?.image" [src]="m?.photo || m?.image" alt="media" class="mt-2 w-full h-40 object-cover rounded" />
+        </div>
+      </div>
+      <ng-template #noCds>
+        <div class="text-sm text-gray-500">No CDs</div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Comments Tab -->
+  <div *ngIf="activeTab==='comments'" class="space-y-3">
+    <div *ngIf="requestArr?.status === 1; else readOnlyComment">
+      <label class="block text-xs font-medium text-gray-600 uppercase tracking-wide">Add Comment</label>
+      <textarea [(ngModel)]="commentText" rows="4" class="w-full mt-1 p-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Write your comment..."></textarea>
+    </div>
+    <ng-template #readOnlyComment>
+      <div class="text-gray-700 whitespace-pre-line">{{requestArr?.comments || requestArr?.comment || 'No comment'}}</div>
+    </ng-template>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="flex flex-wrap items-center justify-end gap-3 border-t pt-4">
+    <button class="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="approve()">Approve</button>
+    <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="approveAndCreateEvent()">Approve & Create Event</button>
+    <button class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="reject()">Reject</button>
+  </div>
+
+  <!-- Debug -->
+  <!-- <pre class="text-xs bg-gray-50 p-2 rounded border">{{requestArr | json}}</pre> -->
+</div>

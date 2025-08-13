@@ -24,7 +24,7 @@ const routes: Routes = [
     {path:'hosts', component: HostsComponent, data:{urlID:45}},
     {path:'account', component: AccountComponent, data:{urlID:46}},
     {path:'requests', component: RequestsComponent, data:{urlID:47}},
-    {path:'requests/id', component: RequestDetailComponent, data:{urlID:48}},
+    {path:'requests/:id', component: RequestDetailComponent, data:{urlID:48}},
   ]}
 ];
 

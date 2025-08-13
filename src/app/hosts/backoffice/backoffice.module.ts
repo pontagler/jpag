@@ -21,7 +21,8 @@ import { ArtistCreateComponent } from './artist-create/artist-create.component';
     ReactiveFormsModule,
     BackofficeRoutingModule,
     SharedModule,
-    TruncatePipe
+    TruncatePipe,
+
 ]
 })
 export class BackofficeModule { }

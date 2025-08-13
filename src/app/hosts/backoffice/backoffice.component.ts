@@ -38,6 +38,10 @@ export class BackofficeComponent implements OnInit {
       case 6:
         this.router.navigate(['hosts/console/account']);
         break;
+        
+      case 7:
+        this.router.navigate(['hosts/console/requests']);
+        break;
     }
   }
 }

@@ -694,6 +694,89 @@ async addPerformance(arr:any){
 }
 
 
+async EditNewEduInfo(arr:any, id:any){
+  const {data, error} = await supabase.from('artist_education').update(arr).eq('id',id)
+   if(error) throw error
+  return data
+}
 
+  async delNewEduInfo(id:any){
+    
+  const {data, error} = await supabase.from('artist_education').delete().eq('id', id)
+  if(error) throw error
+  return data
+}
+
+
+async addNewEdu(arr:any){
+  const {data, error} = await supabase.from('artist_education').insert(arr)
+   if(error) throw error
+  return data
+
+}
+
+async addNewAwd(arr:any){
+  const {data, error} = await supabase.from('artist_awards').insert(arr)
+   if(error) throw error
+  return data
+
+}
+
+  async delNewAwaInfo(id:any){
+  const {data, error} = await supabase.from('artist_awards').delete().eq('id', id)
+  if(error) throw error
+  return data
+}
+
+async EditNewAwdInfo(arr:any, id:any){
+  console.log('-------....>', arr)
+  const {data, error} = await supabase.from('artist_awards').update(arr).eq('id',id)
+   if(error) throw error
+  return data
+}
+
+
+async addNewMediaVideo(arr:any){
+  const {data, error} = await supabase.from('artist_media').insert(arr)
+   if(error) throw error
+  return data
+
+}
+
+
+async addNewCDVideo(arr:any){
+  const {data, error} = await supabase.from('artist_media').insert(arr)
+   if(error) throw error
+  return data
+
+}
+
+async  sendPasswordResetLink(email: string): Promise<void> {
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {  redirectTo: 'http://localhost:4200/reset/'
+})
+    
+    if (error) {
+      throw new Error(`Error sending reset link: ${error.message}`)
+    }
+    
+    console.log('Password reset link sent successfully')
+    // Optionally show success message to user
+  } catch (error) {
+    console.error('Failed to send reset link:', error)
+    // Handle error appropriately
+    throw error
+  }
+}
+
+
+async resetPass(pass:any){
+  const {data, error}  = await supabase.auth.updateUser({
+    password: pass
+  })
+  if(error) throw error
+  return data;
+
+}
 
 }

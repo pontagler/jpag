@@ -9,6 +9,8 @@ import { LocationsComponent } from './locations/locations.component';
 import { HostsComponent } from './hosts/hosts.component';
 import { AccountComponent } from './account/account.component';
 import { ArtistDetailComponent } from './artist/artist-detail/artist-detail.component';
+import { RequestsComponent } from './requests/requests.component';
+import { RequestDetailComponent } from './requests/request-detail/request-detail.component';
 
 const routes: Routes = [
   {path:'', component: BackofficeComponent, children:[
@@ -21,6 +23,8 @@ const routes: Routes = [
     {path:'locations', component: LocationsComponent, data:{urlID:44}},
     {path:'hosts', component: HostsComponent, data:{urlID:45}},
     {path:'account', component: AccountComponent, data:{urlID:46}},
+    {path:'requests', component: RequestsComponent, data:{urlID:47}},
+    {path:'requests/id', component: RequestDetailComponent, data:{urlID:48}},
   ]}
 ];
 

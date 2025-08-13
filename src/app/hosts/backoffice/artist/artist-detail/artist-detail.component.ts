@@ -13,7 +13,8 @@ import { AlertService } from '../../../../services/alert.service';
 @Component({
   selector: 'app-artist-detail',
   imports: [NgClass, NgFor, NgIf, CommonModule, DatePipe, FormsModule],
-  templateUrl: './artist-detail.component.html'
+  templateUrl: './artist-detail.component.html',
+  
 })
 export class ArtistDetailComponent implements OnInit {
 
@@ -47,6 +48,7 @@ export class ArtistDetailComponent implements OnInit {
   featureArtist: any;                      // Featured artist status
   updateDetailBtn: boolean = true;         // Update detail button state
   allInstruments: any = [];                 // All instruments array
+  updateAwardBtn:boolean = true;
 
   /**
    * Sets the active tab for navigation
@@ -371,12 +373,283 @@ export class ArtistDetailComponent implements OnInit {
   }
 
 
+updateEdu(){
 
+}
 
   
+EditNewEduInfo(x:any){
+ let arr = {
+    course: x.course,
+    school: x.school,
+    year: x.year,
+    last_updated: new Date(),
+    last_updated_by: this.loggedUser
+ }
+
+ try{
+
+  this.artistService.EditNewEduInfo(arr, x.id).then(()=>{
+      this.alertService.showAlert('Successful', 'Education is updated', 'success');
+      
+      this.ngOnInit();
+      this.updateDetailBtn = true;
+  })
+
+ }catch(error:any){
+     this.alertService.showAlert('Internal Error', error.message, 'error');
+ }
+
+}
 
 
 
+  delNewEduInfo(id:any){
+     try{
+      this.artistService.delNewEduInfo(id).then(()=>{
+        this.artistProfile.education = this.artistProfile.education.filter((item: { id: any; }) => item.id !== id);
+        this.alertService.showAlert('Successful', 'Education is deleted', 'success');
+         this.updateDetailBtn = true;
+      
+      })
+    }catch(error:any){
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+  }
+
+addNewEdu(){
+
+this.OpenEduForm = true;
+
+}
+
+
+newEducation:any = [];
+
+closeForm(){
+this.OpenEduForm = false;
+this.OpenAwaForm = false;
+this.OpenMediaVideoForm = false;
+this.OpenMediaCDForm = false;
+};
+
+
+submitEducation(){
+
+  let arr = {
+    id_artist: this.artistID,
+    course: this.newEducation.course,
+    school: this.newEducation.school,
+    year: this.newEducation.year,
+    created_by: this.loggedUser,
+    created_on: new Date(),
+    last_updated: new Date(),
+    last_updated_by: this.loggedUser
+  }
+try{
+      this.artistService.addNewEdu(arr).then(()=>{
+        this.ngOnInit();
+        this.alertService.showAlert('Successful', 'Education is added', 'success');
+        this.ngOnInit();
+        this.OpenEduForm = false;
+         this.updateDetailBtn = true;
+      
+      })
+    }catch(error:any){
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+
+};
+OpenEduForm:boolean = false;
+
+clearForm(){
+  this.newAward = [];
+};
+
+
+
+
+delNewAwardInfo(id:any){
+ try{
+      this.artistService.delNewAwaInfo(id).then(()=>{
+        this.artistProfile.awards = this.artistProfile.awards.filter((item: { id: any; }) => item.id !== id);
+        this.alertService.showAlert('Successful', 'Award is deleted', 'success');
+         this.updateAwardBtn = true;
+      
+      })
+    }catch(error:any){
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+}
+
+editNewAwardInfo(x:any){
+     let arr = {
+    award: x.award,
+    description: x.description,
+    year: x.year,
+    last_updated: new Date(),
+    last_updated_by: this.loggedUser
+ }
+
+ try{
+
+  this.artistService.EditNewAwdInfo(arr, x.id).then(()=>{
+      this.alertService.showAlert('Successful', 'Award is updated', 'success');
+      
+      this.ngOnInit();
+      this.updateAwardBtn = true;
+  })
+
+ }catch(error:any){
+     this.alertService.showAlert('Internal Error', error.message, 'error');
+ }
+}
+
+addNewAward(){
+this.OpenAwaForm = true;
+}
+
+newAward:any = [];
+
+OpenAwaForm:boolean = false;
+
+submitAward(){
+  let arr = {
+    id_artist: this.artistID,
+    award: this.newAward.award,
+    description: this.newAward.description,
+    year: this.newAward.year,
+    created_by: this.loggedUser,
+    created_on: new Date(),
+    last_updated: new Date(),
+    last_updated_by: this.loggedUser
+  }
+try{
+      this.artistService.addNewAwd(arr).then(()=>{
+        this.ngOnInit();
+        this.alertService.showAlert('Successful', 'Education is added', 'success');
+      
+        this.OpenAwaForm = false;
+         this.updateDetailBtn = true;
+      
+      })
+    }catch(error:any){
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+
+}
+
+newMediaVideo:any = [];
+OpenMediaVideoForm:boolean = false;
+submitMediaVideo(arr:any){
+  let dataArr = {
+    id_media : 1,
+    id_artist: this.artistID,
+    title: arr.title,
+    image: arr.image,
+    description: arr.description,
+    url: arr.url,
+    created_by: this.loggedUser,
+    created_on: new Date(),
+    last_updated: new Date(),
+    last_updated_by: this.loggedUser
+  }
+
+  try{
+      this.artistService.addNewMediaVideo(dataArr).then(()=>{
+        this.ngOnInit();
+        this.alertService.showAlert('Successful', 'Education is added', 'success');
+      
+        this.OpenMediaVideoForm = false;
+         this.updateDetailBtn = true;
+      
+      })
+    }catch(error:any){
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+
+
+}
+ profilePreviewUrl: string | null = null;
+
+  async onMediaVidFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    // local preview
+    this.profilePreviewUrl = URL.createObjectURL(file);
+
+    try {
+      this.newMediaVideo.image = await this.artistService.uploadPublicProfilePhoto(file);
+      console.log(this.newMediaVideo);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload profile picture.');
+    } finally {
+  
+    }
+  }
+
+newMediaCD:any = [];
+OpenMediaCDForm:boolean = false;
+
+
+ async onMediaCDFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    // local preview
+    this.profilePreviewUrl = URL.createObjectURL(file);
+
+    try {
+      this.newMediaCD.image = await this.artistService.uploadPublicProfilePhoto(file);
+      console.log(this.newMediaCD);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload profile picture.');
+    } finally {
+  
+    }
+  }
+
+submitMediaCD(arr:any){
+let dataArr = {
+    id_media : 2,
+    id_artist: this.artistID,
+    title: arr.title,
+    image: arr.image,
+    description: arr.description,
+    url: arr.url,
+    created_by: this.loggedUser,
+    created_on: new Date(),
+    last_updated: new Date(),
+    last_updated_by: this.loggedUser
+  }
+
+  try{
+      this.artistService.addNewCDVideo(dataArr).then(()=>{
+        this.ngOnInit();
+        this.alertService.showAlert('Successful', 'Education is added', 'success');
+      
+        this.OpenMediaCDForm = false;
+         this.updateDetailBtn = true;
+      
+      })
+    }catch(error:any){
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+
+}
+
+sendPasswordReset(){
+  this.artistService.sendPasswordResetLink(this.artistProfile.email).then(()=>{
+            this.alertService.showAlert('Successful', 'Reset Email Sent', 'success');
+
+  })
+  
+}
 
 
 }

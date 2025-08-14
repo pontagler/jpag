@@ -33,6 +33,7 @@ authID:any;
 ngOnInit() {
     this.artistID = this.artistService.getArtistID()
     this.authID = this.artistService.getArtistProfileID();
+    console.log('rrrrr' , this.authID);
 
 }
 

@@ -11,8 +11,8 @@ import { ArtistService } from '../../services/artist.service';
 })
 export class LoginComponent {
   // Declare any properties needed for the component here
-  email: string = 'a@a.com';
-  password: string = 'qwerty';
+  email: string = 'bojaxo4546@gardsiir.com';
+  password: string = 'qwerty123';
 
   constructor(
     private artistService: ArtistService,
@@ -36,6 +36,7 @@ private router: Router // Inject the Router if you need to navigate after login
 
 
         this.artistService.setArtistProfileID(data.id_user);
+        
 
         console.log('Login successful', data);
         // Handle successful login, e.g., redirecting the user

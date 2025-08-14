@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PasswordResetComponent } from './password-reset/password-reset.component';
+import { ConfirmArtistComponent } from './confirm-artist/confirm-artist.component';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'visitor', pathMatch: 'full'},
@@ -7,5 +8,6 @@ export const routes: Routes = [
     {path: 'artistspace', loadChildren: () => import('./artistspace/artistspace.module').then(m => m.ArtistspaceModule)},
     {path: 'hosts', loadChildren: () => import('./hosts/hosts.module').then(m => m.HostsModule)},
     {path:'reset', component: PasswordResetComponent},
-    {path: 'visitor', loadChildren: () => import('./visitor/visitor.module').then(m => m.VisitorModule)}
+    {path:'confirm-artist', component: ConfirmArtistComponent},
+    {path: '', loadChildren: () => import('./visitor/visitor.module').then(m => m.VisitorModule)}
 ]

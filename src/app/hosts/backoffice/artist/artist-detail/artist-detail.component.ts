@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ArtistService } from '../../../../services/artist.service';
 import { FormsModule } from '@angular/forms';
 import { AlertService } from '../../../../services/alert.service';
+import { AuthService } from '../../../../services/auth.service';
 
 /**
  * Artist Detail Component
@@ -22,7 +23,8 @@ export class ArtistDetailComponent implements OnInit {
   constructor(
     private artistService: ArtistService,
     private route: ActivatedRoute,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private authService: AuthService
   ) {
     // Reactive effect to monitor logged user ID changes
     effect(() => {
@@ -33,7 +35,7 @@ export class ArtistDetailComponent implements OnInit {
 
   // Properties declaration with type annotations
   artistProfileID: any;                    // Current logged user ID
-  activeTab: string = 'portfolio';           // Currently active tab for navigation
+  activeTab: string = 'details';           // Currently active tab for navigation
   artistProfile: any = null;               // Main artist profile data
   artistID: string | null = null;          // Artist ID from route parameters
   loading: boolean = true;                 // Loading state indicator
@@ -649,6 +651,28 @@ sendPasswordReset(){
 
   })
   
+}
+
+activationemail(){
+  try{
+this.authService.resendConfirmation(this.artistProfile.email).then(()=>{
+  this.alertService.showAlert('Email Sent', 'Activation email has send', 'success');
+})
+  }catch(error:any){
+          this.alertService.showAlert('Internal Error', error.message, 'error');
+  }
+  
+
+}
+
+magicLink(){
+    try{
+this.authService.magicLink(this.artistProfile.email).then(()=>{
+  this.alertService.showAlert('Email Sent', 'Magic link has sent', 'success');
+})
+  }catch(error:any){
+          this.alertService.showAlert('Internal Error', error.message, 'error');
+  }
 }
 
 

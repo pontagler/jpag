@@ -22,5 +22,11 @@ async getArtistForVisitor(){
 }
 
 
+  async getArtistProfile(artistId: string): Promise<any> {
+    const { data, error } = await supabase.rpc('get_artist_profile_v1', { artist_id: artistId });
+
+    if (error) throw error;
+    return data;
+  }
 
 }

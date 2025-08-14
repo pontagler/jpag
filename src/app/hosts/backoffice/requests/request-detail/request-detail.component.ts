@@ -21,7 +21,6 @@ export class RequestDetailComponent implements OnInit {
   constructor(private artistService: ArtistService, private route: ActivatedRoute, private router: Router) {}
 
   
-
   async ngOnInit() {
     this.route.params.subscribe(params => {
       this.getRequestDetail(params['id']);

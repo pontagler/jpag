@@ -128,7 +128,7 @@
   </div>
 
   <!-- Footer Actions -->
-  <div class="flex flex-wrap items-center justify-end gap-3 border-t pt-4">
+  <div class="flex flex-wrap items-center justify-end gap-3 border-t pt-4" *ngIf="requestArr.status == 1">
     <button class="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="approve()">Approve</button>
     <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="approveAndCreateEvent()">Approve & Create Event</button>
     <button class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="reject()">Reject</button>

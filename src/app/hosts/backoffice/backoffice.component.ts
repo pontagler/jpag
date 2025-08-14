@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ArtistspaceRoutingModule } from '../../artistspace/artistspace-routing.module';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-backoffice',
@@ -8,7 +9,7 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class BackofficeComponent implements OnInit {
-  constructor(private router: Router) { }
+  constructor(private router: Router, private authService: AuthService) { }
 
   ngOnInit(): void { }
 
@@ -41,6 +42,11 @@ export class BackofficeComponent implements OnInit {
         
       case 7:
         this.router.navigate(['hosts/console/requests']);
+        break;
+
+      case 8:
+        this.authService.signOut();
+        this.router.navigate(['hosts']);
         break;
     }
   }

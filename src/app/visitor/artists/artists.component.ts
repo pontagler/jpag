@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SharedModule } from "../../shared/shared.module";
 import { VisitorService } from '../../services/visitor.service';
 import { AlertService } from '../../services/alert.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-artists',
@@ -15,7 +16,8 @@ export class ArtistsComponent implements OnInit{
 
   constructor(
     private visitorService: VisitorService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private router: Router
   ){
 
   }
@@ -31,6 +33,7 @@ export class ArtistsComponent implements OnInit{
   searchTerm: string = '';
   viewMode: 'grid' | 'list' = 'grid';
   showFilters: boolean = false;
+  isLoading: boolean = true;
 
   // Filters
   instrumentOptions: string[] = [];
@@ -40,6 +43,7 @@ export class ArtistsComponent implements OnInit{
   nameSort: 'asc' | 'desc' = 'asc';
 
   async getArtistForVisitor(): Promise<void> {
+    this.isLoading = true;
     try {
       const artists = await this.visitorService.getArtistForVisitor();
       this.allArtists = Array.isArray(artists) ? artists : [];
@@ -51,6 +55,8 @@ export class ArtistsComponent implements OnInit{
       this.filteredArtists = [];
       this.instrumentOptions = [];
       this.performanceOptions = [];
+    } finally {
+      this.isLoading = false;
     }
   }
 
@@ -150,6 +156,11 @@ export class ArtistsComponent implements OnInit{
     this.instrumentOptions = Array.from(instrumentSet).sort((a, b) => a.localeCompare(b));
     this.performanceOptions = Array.from(performanceSet).sort((a, b) => a.localeCompare(b));
   }
+
+   goToArtistDetail(id:any){
+    this.router.navigate(['artists', id])
+  }
+
 
 
 }

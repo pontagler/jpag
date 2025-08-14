@@ -92,9 +92,38 @@ async createNewUser(email:any, password:any = 'qwerty'){
   console.log(email);
   const {data, error} = await supabase.auth.signUp({
     email: email,
-    password: password
+    password: password,
+     options: {
+      emailRedirectTo: 'http://localhost:4200/confirm-artist'
+    }
   })
   if(error) throw error
+  return data;
+}
+
+
+
+async resendConfirmation(email:any){
+  console.log(email);
+  const {data, error} = await supabase.auth.resend({
+     type: 'signup',
+    email: email,
+     options: {
+      emailRedirectTo: 'http://localhost:4200/confirm-artist'
+    }
+  })
+  if(error) throw error
+  return data;
+}
+
+
+async magicLink(email:any){
+  console.log(email);
+  const { data, error } = await supabase.auth.signInWithOtp({
+  email: email,
+  options: { emailRedirectTo: 'http://localhost:4200/confirm-artist' }
+});
+if(error) throw error
   return data;
 }
 

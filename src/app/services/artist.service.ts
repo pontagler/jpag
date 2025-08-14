@@ -66,10 +66,22 @@ export class ArtistService {
   private artistProfile = signal<any>(null);
   private artistID = signal<string | null>(null);
   private loggedUserID = signal<string | null>(null);
+  private hostNewArtistID = signal<string | null>(null);
+
 
   setArtistProfileID(id: string) {
     this.artistProfileID.set(id);
   }
+
+
+setHostNewArtistID(id: string){
+  this.hostNewArtistID.set(id);
+}
+
+getHostNewArtistID(){
+  return  this.hostNewArtistID();
+}
+
 
   setLoggedUserID(id:string){
        console.log('...ddddd...........', id)
@@ -441,10 +453,11 @@ async createSingleArtist_step01(arrData: any) {
   }
 
   console.log('Profile stage cleared', resCode);
+  const id_artist = uuidv4();
 
   // Step 3: Create artist
   const artistData = {
-    id: uuidv4(),
+    id: id_artist,
     id_profile: profileData.id, // fixed to use profile ID only
     fname: arrData.personal.firstName,
     lname: arrData.personal.lastName,
@@ -460,6 +473,8 @@ async createSingleArtist_step01(arrData: any) {
     photo: arrData.personal.profilePic,
     created_by: arrData.id_auth
   };
+
+  this.setHostNewArtistID(id_artist);
 
   console.log('Artist stage initiated', artistData);
 
@@ -542,6 +557,14 @@ async addInstruments(arr:any){
   return data
 }
 
+
+//Add instruments
+async addPerformance1(arr:any){
+  const {data, error} = await supabase.from('artist_performance').insert(arr);
+  if(error) throw error
+  return data
+}
+
 //Delete instruments
 async delInstruments(id_artist:any, id_instrument:any){
   const {data, error} = await supabase.from('artist_instruments').delete().eq('id_artist', id_artist).eq('id_instrument', id_instrument)
@@ -549,6 +572,14 @@ async delInstruments(id_artist:any, id_instrument:any){
   console.log(data);
   return data;
 }
+
+async delPerformance1(id_artist:any, id_performance:any){
+  const {data, error} = await supabase.from('artist_performance').delete().eq('id_artist', id_artist).eq('id_performance', id_performance)
+  if(error) throw error
+  console.log(data);
+  return data;
+}
+
 
 //update artist system 
 async updateArtistStatus(arr:any, id_artist:any){
@@ -677,6 +708,14 @@ async deleteArtistMedia(id:any){
   }
 
 
+  async getAllPerfromance(){
+  const {data, error} = await supabase.from('sys_performance_type').select()
+  if(error) throw error
+  return data
+}
+
+
+
   async deleteArtistPerfromance(id:any){
     
   const {data, error} = await supabase.from('artist_performance').delete().eq('id', id)
@@ -712,8 +751,14 @@ async addNewEdu(arr:any){
   const {data, error} = await supabase.from('artist_education').insert(arr)
    if(error) throw error
   return data
-
 }
+
+async addNewEdu1(arr:any){
+  const {data, error} = await supabase.from('artist_education').insert(arr).select()
+   if(error) throw error
+  return data
+}
+
 
 async addNewAwd(arr:any){
   const {data, error} = await supabase.from('artist_awards').insert(arr)
@@ -721,6 +766,16 @@ async addNewAwd(arr:any){
   return data
 
 }
+
+
+async addNewAwd1(arr:any){
+  const {data, error} = await supabase.from('artist_awards').insert(arr).select()
+   if(error) throw error
+  return data
+
+}
+
+
 
   async delNewAwaInfo(id:any){
   const {data, error} = await supabase.from('artist_awards').delete().eq('id', id)
@@ -812,6 +867,100 @@ async getRequestDetail(id:any){
     if (error) throw error;
     return data;
   }
+
+
+
+
+  async HostUploadArtistMedia(
+  id_media:number,
+  id_artist: string,
+  title: string,
+  file: File | null,
+  desc: string,
+  url: string,
+  created_by: string  
+) {
+  try {
+    let publicImageUrl: string | null = null;
+
+    // 1. Upload only if file exists
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('artistrequest')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('artistrequest')
+        .getPublicUrl(filePath);
+
+      publicImageUrl = publicUrlData.publicUrl;
+    }
+
+    // 2. Insert into DB, with or without image
+    const { data, error: insertError } = await supabase
+      .from('artist_media')
+      .insert([{
+        id_media: id_media,
+        id_artist: id_artist,
+        title: title,
+        image: publicImageUrl, // will be null if no file
+        description: desc,
+        url:url,
+        created_by: created_by,
+        last_updated_by: created_by
+      }])
+      .select('id'); // get ID of inserted row
+
+    if (insertError) throw insertError;
+
+    return {
+      success: true,
+      imageUrl: publicImageUrl,
+      id: data?.[0]?.id || null
+    };
+
+  } catch (err) {
+    let message = 'Unknown error';
+    if (err instanceof Error) {
+      message = err.message;
+    } else if (typeof err === 'string') {
+      message = err;
+    } else {
+      try {
+        message = JSON.stringify(err);
+      } catch {
+        message = 'Unhandled error';
+      }
+    }
+
+    return { success: false, error: message };
+  }
+}
+
+
+
+
+async deleteHostsMedia(arr:any){
+  const { data, error } = await supabase
+  .storage
+  .from('artistrequest')
+  .remove([arr.url])
+
+  if(error){
+    throw error
+  }else{
+    const {data, error} = await supabase.from('artist_media').delete().eq('id', arr.id)
+    if(error) throw error
+    return data
+  }
+  return data
+}
 
 
 }

@@ -631,7 +631,7 @@
 
   <!-- Section 05: Profile -->
   <section *ngIf="isActive('account')" class="profile-info-section">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Password Reset</h2>
+   
 
     <div *ngIf="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
@@ -640,10 +640,28 @@
 
     <div *ngIf="artistProfile && !loading" class="bg-gray-50 p-6 rounded-lg shadow-sm">
       <div>
+         <h2 class="text-2xl font-bold text-gray-800 mb-6">Password Reset</h2>
         <button (click)="sendPasswordReset()" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
           Send Password Reset Link
         </button>
       </div>
+
+
+       <div class="mt-6">
+         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resend Activation</h2>
+        <button (click)="activationemail()" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
+          Send Activation Link
+        </button>
+      </div>
+
+      <div class="mt-6">
+         <h2 class="text-2xl font-bold text-gray-800 mb-6">Magic Link</h2>
+        <button (click)="magicLink()" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
+          Send Activation Link
+        </button>
+      </div>
+
+
     </div>
   </section>
 </div>

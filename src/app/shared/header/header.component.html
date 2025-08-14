@@ -1,7 +1,7 @@
 <div
-  class="backdrop-blur-md py-4 px-4 border-b border-gray-100 shadow-sm sticky top-0 z-50 bg-cream"
+  class="backdrop-blur-md py-4 px-4 border-b border-gray-100 shadow-sm sticky top-0 z-50 "
 >
-  <div class="max-w-7xl mx-auto">
+  <div class="w-5/6 mx-auto">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
         <img
@@ -18,110 +18,125 @@
           class="w-8 h-8"
         />
       </div>
-      <nav class="hidden md:flex items-center space-x-10">
+      <nav class="hidden md:flex items-center space-x-14">
         <a
-          href="/"
+          href="/#discover"
           [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
             getMenuItemClass(1)
           "
         >
           Discover
+          <span
+            [ngClass]="(urlID === 1) ? 'w-full' : 'w-0 group-hover:w-full'"
+            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+          ></span>
         </a>
         <a
           href="/concerts"
           [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
             getMenuItemClass(2)
           "
         >
           Events
+          <span
+            [ngClass]="(urlID === 2) ? 'w-full' : 'w-0 group-hover:w-full'"
+            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+          ></span>
         </a>
         <a
           href="/artists"
           [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            'text-pont-green font-medium text-xl relative group ' +
             getMenuItemClass(3)
           "
         >
           Artists
+          <span
+            [ngClass]="(urlID === 3) ? 'w-full' : 'w-0 group-hover:w-full'"
+            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+          ></span>
         </a>
 
         <a
-          href="/venues"
+          href="/#venues"
           [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
             getMenuItemClass(4)
           "
         >
           Locations
+          <span
+            [ngClass]="(urlID === 4) ? 'w-full' : 'w-0 group-hover:w-full'"
+            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+          ></span>
         </a>
         <a
-          href="/about"
+          href="/#about"
           [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-lg relative group ' +
+            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
             getMenuItemClass(5)
           "
         >
           About
+          <span
+            [ngClass]="(urlID === 5) ? 'w-full' : 'w-0 group-hover:w-full'"
+            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+          ></span>
         </a>
       </nav>
 
      <div class="hidden md:flex items-center space-x-4" >
         <Button *ngIf="urlID !== 21"
-          class="bg-gradient-to-r from-lime-600 to-lime-700 hover:from-pont-rust/90 hover:to-pont-rust text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          class="bg-gradient-to-r from-lime-600 to-lime-700 hover:from-pont-rust/90 hover:to-pont-rust rounded-lg text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         >
           Artist Login
         </Button>
-      </div>
-
-          <div class="hidden md:flex items-center space-x-4" >
-        <Button  *ngIf="urlID == 21"  (click)="logout()"
-          class="bg-pont-rust hover:from-pont-rust/90 hover:to-pont-rust text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+  <Button  *ngIf="urlID == 21"  (click)="logout()"
+          class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-2.5 font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
          Logout
         </Button>
-      </div> 
 
-      <button
+      </div>
+
+        <!-- <div class="hidden md:flex items-center space-x-4" >
+        <Button  *ngIf="urlID == 21"  (click)="logout()"
+          class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-2.5 font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+         Logout
+        </Button>
+      </div>  -->
+
+      <!-- <button
         class="md:hidden p-2 text-gray-700 hover:text-pont-green transition-colors rounded-lg hover:bg-pont-green/5"
-      ></button>
+      ></button> -->
     </div>
 
-    <div
-      class="absolute top-16 right-0 h-auto w-1/2 bg-pont-green shadow-lg md:hidden"
-      *ngIf="isMenuOpen"
-    >
-      <nav class="flex flex-col items-start space-y-4 p-4">
-        <a
-          href="/"
-          [ngClass]="'text-white text-lg font-medium relative group '"
-        >
+    <div *ngIf="isMenuOpen" class="md:hidden mt-6 py-6 border-t border-gray-100 bg-white/95 backdrop-blur-md rounded-2xl shadow-lg mx-4">
+      <nav class="flex flex-col space-y-6 px-6">
+        <a href="/#discover" class="text-gray-700 hover:text-pont-green transition-colors font-medium text-lg">
           Discover
         </a>
-        <a
-          href="/concerts"
-          [ngClass]="'text-white text-lg font-medium relative group '"
-        >
-          Events
-        </a>
-        <a
-          href="/artists"
-          [ngClass]="'text-white text-lg font-medium relative group '"
-        >
+        <a href="/artists" class="text-pont-green font-medium text-lg">
           Artists
         </a>
-        <a
-          href="/venues"
-          [ngClass]="'text-white text-lg font-medium relative group '"
-        >
-          Locations
+        <a href="/concerts" class="text-gray-700 hover:text-pont-green transition-colors font-medium text-lg">
+          Concerts
         </a>
-        <a
-          href="/about"
-          [ngClass]="'text-white text-lg font-medium relative group '"
-        >
+        <a href="/#venues" class="text-gray-700 hover:text-pont-green transition-colors font-medium text-lg">
+          Venues
+        </a>
+        <a href="/#about" class="text-gray-700 hover:text-pont-green transition-colors font-medium text-lg">
           About
         </a>
+        <div class="flex flex-col space-y-3 pt-6 border-t border-gray-100">
+          <button class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white w-fit bg-transparent px-4 py-2 rounded-md">
+            Sign In
+          </button>
+          <button class="bg-pont-rust hover:bg-pont-rust/90 text-white w-fit px-6 py-2 rounded-full font-semibold shadow-lg">
+            Join Now
+          </button>
+        </div>
       </nav>
     </div>
   </div>

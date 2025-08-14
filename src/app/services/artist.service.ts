@@ -401,6 +401,63 @@ async replaceArtistPhoto(
   }
 }
 
+
+async replaceArtistCover(
+  artistId: string,
+  authID:string,
+  oldPhotoUrl: string | null,
+  file: File
+): Promise<string> {
+  try {
+    // ✅ Delete old file only if it exists
+    if (oldPhotoUrl && oldPhotoUrl.includes('/storage/v1/object/')) {
+      const decodedUrl = decodeURIComponent(oldPhotoUrl);
+      const path = decodedUrl.split('/object/')[1].split('?')[0];
+
+      if (path) {
+        await supabase.storage.from('artistrequest').remove([path]);
+      }
+    }
+
+    // New file path
+    const fileName = `${artistId}-${Date.now()}-${file.name}`;
+    const filePath = `artists/${fileName}`;
+
+    // Upload new file (upsert in case path already exists)
+    const { error: uploadError } = await supabase.storage
+      .from('artistrequest')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    // Generate signed URL (1 year expiry)
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from('artistrequest')
+      .createSignedUrl(filePath, 60 * 60 * 24 * 365);
+
+    if (signedError) throw signedError;
+
+    // signedData.signedUrl;
+
+     const {data, error } = await supabase
+    .from('artists')
+    .update({
+      cover: signedData.signedUrl,
+      last_updated: new Date().toISOString(),
+      last_updated_by: authID
+    })
+    .eq('id', artistId);
+
+      if (error) throw error
+    
+    return signedData.signedUrl;
+
+  } catch (err) {
+    console.error('Replace photo error:', err);
+    throw err;
+  }
+}
+
 async createSingleArtist_temp(arrData: any) {
   console.log(arrData);
   return arrData
@@ -593,20 +650,14 @@ async updateArtistStatus(arr:any, id_artist:any){
 
 // Ipdate artist Detail
 
-async updateArtistDetail(arr:any, id_artist:any, id:any){
-  await supabase
-  .from('artists')
-  .update(arr)
-  .eq('id', id_artist).then(async()=>{
-    const {data, error } = await supabase1.rpc('fx_update_email_auth_user', {
-      p_email: arr.email,
-      p_id_artist: id_artist
-    })
+async updateArtistDetail(arr:any, id_artist:any){
+
+const {data, error} = await supabase.from('artists').update(arr)
+  .eq('id', id_artist)
     
     if(error) throw error
     return data;
-    
-  })
+  
   
 }
 
@@ -972,6 +1023,9 @@ async artistRequest(arr:any, id:any){
   if(error) throw error
   return data
 }
+
+
+
 
 
 

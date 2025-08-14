@@ -24,6 +24,9 @@ export class ArtistComponent implements OnInit {
   ngOnInit (){
     this.getAllArtists(); 
   }
+
+
+
   // Filters
   profileID:any;
   nameQuery: string = '';

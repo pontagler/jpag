@@ -51,6 +51,8 @@ export class ArtistDetailComponent implements OnInit {
   updateDetailBtn: boolean = true;         // Update detail button state
   allInstruments: any = [];                 // All instruments array
   updateAwardBtn:boolean = true;
+  // Profile image upload state
+  isUploadingProfile: boolean = false;
 
   /**
    * Sets the active tab for navigation
@@ -169,7 +171,6 @@ export class ArtistDetailComponent implements OnInit {
     let arr = {
       fname: this.artistProfile.fname,
       lname: this.artistProfile.lname,
-      email: this.artistProfile.email,
       phone: this.artistProfile.phone,
       tagline: this.artistProfile.tagline,
       website: this.artistProfile.website,
@@ -185,7 +186,7 @@ export class ArtistDetailComponent implements OnInit {
 
     try {
       // Call service to update artist details
-      this.artistService.updateArtistDetail(arr, this.artistID, this.artistProfile.id).then(() => {
+      this.artistService.updateArtistDetail(arr, this.artistID).then(() => {
         // Show success alert
         this.alertService.showAlert('Successful', 'Artist profile is updated', 'success');
         this.updateDetailBtn = true; // Exit edit mode
@@ -195,6 +196,58 @@ export class ArtistDetailComponent implements OnInit {
       this.alertService.showAlert('Internal Error', error.message, 'error');
     }
   }
+
+  // Change profile picture handler
+  async onProfileImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    if (!file || !this.artistID || !this.artistProfile) return;
+
+    this.isUploadingProfile = true;
+    try {
+      const newUrl = await this.artistService.replaceArtistPhoto(
+        this.artistID,
+        this.loggedUser,
+        this.artistProfile.photo || null,
+        file
+      );
+      this.artistProfile.photo = newUrl;
+      this.alertService.showAlert('Profile Updated', 'Profile picture changed successfully', 'success');
+      this.updateDetailBtn = true;
+    } catch (error: any) {
+      this.alertService.showAlert('Internal Error', error.message || 'Failed to update photo', 'error');
+    } finally {
+      this.isUploadingProfile = false;
+      input.value = '';
+    }
+  }
+
+  // Change profile picture handler
+  async onCoverImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    if (!file || !this.artistID || !this.artistProfile) return;
+
+    this.isUploadingProfile = true;
+    try {
+      const newUrl = await this.artistService.replaceArtistCover(
+        this.artistID,
+        this.loggedUser,
+        this.artistProfile.cover || null,
+        file
+      );
+      this.artistProfile.cover = newUrl;
+      this.alertService.showAlert('Cover Updated', 'Cover picture changed successfully', 'success');
+      this.updateDetailBtn = true;
+    } catch (error: any) {
+      this.alertService.showAlert('Internal Error', error.message || 'Failed to update photo', 'error');
+    } finally {
+      this.isUploadingProfile = false;
+      input.value = '';
+    }
+  }
+
+
 
   // Get instruments for artist update
   getInstruments() {

@@ -37,6 +37,13 @@ import { SignInAnonymouslyCredentials } from '@supabase/supabase-js';
 export class ArtistCreateComponent implements OnInit {
   // Current step in the multi-step form (0 = personal, 1 = portfolio, 2 = achievements)
   stepIndex: number = 0;
+  next1(){
+  this.stepIndex = 2;
+}
+
+next2(){
+  this.stepIndex = 3;
+}
 
   // Main reactive form controlling the entire artist creation process
   form: FormGroup;

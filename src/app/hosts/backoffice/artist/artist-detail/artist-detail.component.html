@@ -1,7 +1,7 @@
-<div class="artist-info-container p-6 bg-white rounded-xl shadow-lg ">
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
   <!-- Tabs Navigation -->
-  <ul class="flex flex-wrap border-b border-gray-200 mb-8 space-x-1">
-    <li class="mr-2 mb-2" *ngFor="
+  <ul class="flex flex-wrap border-b border-gray-200 mb-6 gap-2">
+    <li class="mb-2" *ngFor="
         let tab of [
           { id: 'details', label: 'Details' },
           { id: 'portfolio', label: 'Portfolio' },
@@ -10,11 +10,11 @@
           { id: 'account', label: 'Account' }
         ]
       ">
-      <button (click)="setActiveTab(tab.id)" class="py-3 px-5 font-medium rounded-t-lg transition-all duration-200 ease-in-out focus:outline-none"
+      <button (click)="setActiveTab(tab.id)" class="px-4 py-2 rounded-lg text-sm transition-all duration-200 ease-in-out focus:outline-none"
         [ngClass]="isActive(tab.id)
-          ? 'bg-blue-500 text-white shadow-md border-b-2 border-blue-600'
-          : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'"
-        >
+          ? 'bg-black text-white'
+          : 'border border-gray-200 text-gray-700 hover:bg-gray-50'"
+      >
         {{ tab.label }}
       </button>
     </li>
@@ -22,13 +22,21 @@
 
   <!-- Section 01: Details -->
   <section *ngIf="isActive('details')" class="details-section">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-      <h2 class="text-2xl font-bold text-gray-800">Artist Details</h2>
-      <div class="flex flex-wrap gap-3">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-user"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Artist Details</h2>
+          <p class="text-sm text-gray-500">Profile information</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
         <button 
           *ngIf="updateDetailBtn"
           (click)="updateDetailBtn = false"
-          class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-edit"></i>
           <span>Edit</span>
         </button>
@@ -36,7 +44,7 @@
         <button 
           *ngIf="!updateDetailBtn"
           (click)="updateDetail()"
-          class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           <i class="fas fa-save"></i>
           <span>Update</span>
         </button>
@@ -44,9 +52,9 @@
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-      <p class="text-gray-600 text-lg">Loading artist details...</p>
+    <div *ngIf="loading" class="text-center py-10">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-600 mb-3"></div>
+      <p class="text-gray-600 text-sm">Loading artist details...</p>
     </div>
 
     <!-- Error State -->
@@ -56,74 +64,74 @@
 
     <!-- Artist Details -->
     <div *ngIf="artistProfile && !loading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-gray-50 p-5 rounded-lg shadow-sm">
+      <div class="bg-gray-50 p-5 rounded-lg">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.fname || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">First Name</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.fname || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.fname"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.lname || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Last Name</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.lname || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.lname"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-          <div class="text-gray-900">{{ artistProfile.email || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Email</label>
+          <div class="mt-1 text-gray-900">{{ artistProfile.email || "N/A" }}</div>
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.phone || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Phone</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.phone || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.phone"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
       </div>
 
-      <div class="bg-gray-50 p-5 rounded-lg shadow-sm">
+      <div class="bg-gray-50 p-5 rounded-lg">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Tagline</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.tagline || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Tagline</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.tagline || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.tagline"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.website || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Website</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.website || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.website"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.city || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">City</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.city || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.city"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Province</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.proviance || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Province</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.proviance || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.proviance"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900 font-medium">{{ artistProfile.country || "N/A" }}</div>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Country</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.country || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.country"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" />
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
       </div>
 
       <div class="md:col-span-2">
-        <div class="bg-gray-50 p-5 rounded-lg shadow-sm">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Profile Picture</label>
           <div class="flex items-center gap-4">
             <img [src]="artistProfile.photo || 'assets/default-profile.jpg'" [alt]="
                 (artistProfile.fname || '') + ' ' + (artistProfile.lname || '')
@@ -133,21 +141,21 @@
       </div>
 
       <div class="md:col-span-2">
-        <div class="bg-gray-50 p-5 rounded-lg shadow-sm">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Short Bio</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900">{{ artistProfile.short_bio || "N/A" }}</div>
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Short Bio</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900">{{ artistProfile.short_bio || "N/A" }}</div>
           <textarea *ngIf="!updateDetailBtn" maxlength="100" rows="3" [(ngModel)]="artistProfile.short_bio"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
           </textarea>
         </div>
       </div>
 
       <div class="md:col-span-2">
-        <div class="bg-gray-50 p-5 rounded-lg shadow-sm">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Long Bio</label>
-          <div *ngIf="updateDetailBtn" class="text-gray-900">{{ artistProfile.long_bio || "N/A" }}</div>
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Long Bio</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900">{{ artistProfile.long_bio || "N/A" }}</div>
           <textarea *ngIf="!updateDetailBtn" maxlength="100" rows="3" [(ngModel)]="artistProfile.long_bio"
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
           </textarea>
         </div>
       </div>
@@ -156,13 +164,21 @@
 
   <!-- Section 02: Portfolio -->
   <section *ngIf="isActive('portfolio')" class="portfolio-section">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-      <h2 class="text-2xl font-bold text-gray-800">Portfolio</h2>
-      <div class="flex flex-wrap gap-3">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-briefcase"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Portfolio</h2>
+          <p class="text-sm text-gray-500">Instruments, media and performances</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
         <button 
           *ngIf="updateDetailBtn"
           (click)="updateDetailBtn = false"
-          class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-edit"></i>
           <span>Edit</span>
         </button>
@@ -170,7 +186,7 @@
         <button 
           *ngIf="!updateDetailBtn"
           (click)="updatePortfolio()"
-          class="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-times"></i>
           <span>Close</span>
         </button>
@@ -179,12 +195,12 @@
 
     <div class="mb-8">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Instruments</h3>
+        <h3 class="text-sm font-semibold text-gray-800">Instruments</h3>
       </div>
       
       <div *ngIf="updateDetailBtn" class="flex flex-wrap gap-2 mb-4">
         @for (x of instruments; track x) {
-        <span class="rounded-full px-4 py-2 text-sm font-medium shadow-sm" [ngClass]="[
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full shadow-sm" [ngClass]="[
             'bg-' + x.inst_color + '-100',
             'text-' + x.inst_color + '-800'
           ]">
@@ -193,15 +209,15 @@
         }
       </div>
 
-      <div *ngIf="!updateDetailBtn" class="bg-gray-50 p-5 rounded-lg shadow-sm">
-        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-          <select class="bg-white p-3 border border-gray-300 rounded-lg flex-1" [(ngModel)]="selectedInst" (change)="onInstChange($event)">
+      <div *ngIf="!updateDetailBtn" class="bg-gray-50 p-5 rounded-lg">
+        <div class="flex flex-col sm:flex-row gap-3 mb-3">
+          <select class="w-full sm:flex-1 pl-3 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none" [(ngModel)]="selectedInst" (change)="onInstChange($event)">
             <option value="0">Select Instruments</option>
             @for (item of allInstruments; track $index) {
             <option [value]="item.id"> {{item.name}}</option>
             }
           </select>
-          <button (click)="addIntrumentData()"  class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          <button (click)="addIntrumentData()"  class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 inline-flex items-center justify-center gap-2">
             <i class="fas fa-plus"></i>
             <span>Add</span>
           </button>
@@ -209,7 +225,7 @@
 
         <div class="flex flex-wrap gap-2">
           @for (x of selectedInstArray; track x) {
-          <span class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-sm" [ngClass]="[
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full shadow-sm" [ngClass]="[
               'bg-' + x.inst_color + '-100',
               'text-' + x.inst_color + '-800'
             ]">
@@ -223,33 +239,33 @@
 
     <div class="mb-8">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Video Media</h3>
+        <h3 class="text-sm font-semibold text-gray-800">Video Media</h3>
         <button 
           (click)="OpenMediaVideoForm = true" 
           *ngIf="!updateDetailBtn" 
-          class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
+          class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 inline-flex items-center gap-2">
           <i class="fas fa-plus"></i>
           <span>Add New Video</span>
         </button>
       </div>
       
-      <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+      <div class="bg-gray-50 p-6 rounded-lg">
         @if (artistProfile.media_video && artistProfile.media_video.length > 0) {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             @for (item of artistProfile.media_video; track $index) {
             <div class="relative group">
-              <div class="overflow-hidden rounded-lg shadow-md">
+              <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
                 <img [src]="item.image" [alt]="item.title" class="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105" />
               </div>
               <div class="mt-3">
-                <h4 class="font-medium text-gray-900 truncate">{{ item.title | titlecase }}</h4>
+                <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.title | titlecase }}</h4>
                 @if (!updateDetailBtn) {
-                  <button class="mt-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
+                  <button class="mt-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
                     (click)="deleteMediaVideo(item.id)">
                     Remove
                   </button>
                 } @else {
-                  <button class="mt-2 text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
+                  <button class="mt-2 text-xs bg-black hover:bg-gray-800 text-white px-3 py-1 rounded-lg"
                     (click)="goTo(item.url)">
                     Visit
                   </button>
@@ -264,7 +280,7 @@
             <p class="text-lg">No video media added yet.</p>
             <button 
               (click)="addVideoMedia()" 
-              class="mt-4 text-sm bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+              class="mt-4 text-sm px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
               Add First Video
             </button>
           </div>
@@ -274,34 +290,34 @@
 
     <div class="mb-8">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">CD Media</h3>
+        <h3 class="text-sm font-semibold text-gray-800">CD Media</h3>
         <button 
           (click)="OpenMediaCDForm = true" 
           *ngIf="!updateDetailBtn" 
-          class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
+          class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 inline-flex items-center gap-2">
           <i class="fas fa-plus"></i>
           <span>Add New CD</span>
         </button>
       </div>
       
-      <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+      <div class="bg-gray-50 p-6 rounded-lg">
         @if (artistProfile.media_cd && artistProfile.media_cd.length > 0) {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             @for (item of artistProfile.media_cd; track $index) {
             <div class="relative group">
-              <div class="overflow-hidden rounded-lg shadow-md">
+              <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
                 <img [src]="item.image" [alt]="item.title" class="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105" />
               </div>
               <div class="mt-3">
-                <h4 class="font-medium text-gray-900 truncate">{{ item.title | titlecase }}</h4>
-                <p class="text-sm text-gray-600 truncate">{{ item.description | titlecase }}</p>
+                <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.title | titlecase }}</h4>
+                <p class="text-xs text-gray-600 truncate">{{ item.description | titlecase }}</p>
                 @if (!updateDetailBtn) {
-                  <button class="mt-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
+                  <button class="mt-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
                     (click)="deleteMediacd(item.id)">
                     Remove
                   </button>
                 } @else {
-                  <button class="mt-2 text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
+                  <button class="mt-2 text-xs bg-black hover:bg-gray-800 text-white px-3 py-1 rounded-lg"
                     (click)="goTo(item.url)">
                     Visit
                   </button>
@@ -321,26 +337,26 @@
 
     <div>
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Performance Types</h3>
+        <h3 class="text-sm font-semibold text-gray-800">Performance Types</h3>
       </div>
       
       <div *ngIf="updateDetailBtn" class="flex flex-wrap gap-2 mb-4">
         @for (x of artistProfile.performance_type; track x) {
-        <span class="rounded-full px-4 py-2 text-sm font-medium shadow-sm bg-blue-100 text-blue-800">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
           {{ x.performance_type }}
         </span>
         }
       </div>
 
-      <div *ngIf="!updateDetailBtn" class="bg-gray-50 p-5 rounded-lg shadow-sm">
-        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-          <select class="bg-white p-3 border border-gray-300 rounded-lg flex-1" [(ngModel)]="selectedPerf" (change)="onPerfChange($event)">
+      <div *ngIf="!updateDetailBtn" class="bg-gray-50 p-5 rounded-lg">
+        <div class="flex flex-col sm:flex-row gap-3 mb-3">
+          <select class="w-full sm:flex-1 pl-3 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none" [(ngModel)]="selectedPerf" (change)="onPerfChange($event)">
             <option value="0">Select Performance Type</option>
             @for (item of uniquePerforamnceArr; track $index) {
             <option [value]="item.id"> {{item.name}}</option>
             }
           </select>
-          <button (click)="addPerformance()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          <button (click)="addPerformance()" class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 inline-flex items-center justify-center gap-2">
             <i class="fas fa-plus"></i>
             <span>Add</span>
           </button>
@@ -348,7 +364,7 @@
 
         <div class="flex flex-wrap gap-2">
           @for (x of artistProfile.performance_type; track x) {
-          <span class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-sm bg-blue-100 text-blue-800">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
             <span>{{ x.performance_type }}</span>
             <span (click)="deletePerforamcne(x.id_ap)" class="cursor-pointer">×</span>
           </span>
@@ -361,15 +377,23 @@
   <!-- Section 03: Education & Awards -->
   <section *ngIf="isActive('education')" class="education-awards-section">
     <!-- Education Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-      <h2 class="text-2xl font-bold text-gray-800">Education</h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Education</h2>
+          <p class="text-sm text-gray-500">Manage education history</p>
+        </div>
+      </div>
       
       <!-- Edit/Add Buttons -->
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap gap-2">
         <button 
           *ngIf="updateDetailBtn"
           (click)="updateDetailBtn = false"
-          class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-edit"></i>
           <span>Edit</span>
         </button>
@@ -377,7 +401,7 @@
         <button 
           *ngIf="updateDetailBtn"
           (click)="addNewEdu()"
-          class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           <i class="fas fa-plus"></i>
           <span>Add New</span>
         </button>
@@ -385,7 +409,7 @@
         <button 
           *ngIf="!updateDetailBtn"
           (click)="updateDetailBtn = true"
-          class="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-arrow-left"></i>
           <span>Back</span>
         </button>
@@ -393,19 +417,19 @@
     </div>
 
     <!-- Education List -->
-    <div class="space-y-6 mb-12">
+    <div class="space-y-6 mb-10">
       @for(x of artistProfile.education; track x){
-      <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div class="bg-white rounded-xl p-6 ring-1 ring-gray-100">
         <div class="grid grid-cols-1 gap-4">
           <!-- School Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">School</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">School</label>
             @if(updateDetailBtn) {
-              <p class="text-gray-900 font-medium">{{ x.school | titlecase }}</p>
+              <p class="mt-1 text-gray-900 font-medium">{{ x.school | titlecase }}</p>
             } @else {
               <input 
                 type="text" 
-                class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 [(ngModel)]="x.school"
                 placeholder="Enter school name">
             }
@@ -413,13 +437,13 @@
 
           <!-- Course Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Course</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Course</label>
             @if(updateDetailBtn) {
-              <p class="text-gray-900 font-medium">{{ x.course | titlecase }}</p>
+              <p class="mt-1 text-gray-900 font-medium">{{ x.course | titlecase }}</p>
             } @else {
               <input 
                 type="text" 
-                class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 [(ngModel)]="x.course"
                 placeholder="Enter course name">
             }
@@ -427,13 +451,13 @@
 
           <!-- Year Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Year</label>
             @if(updateDetailBtn) {
-              <p class="text-gray-900 font-medium">{{ x.year | titlecase }}</p>
+              <p class="mt-1 text-gray-900 font-medium">{{ x.year | titlecase }}</p>
             } @else {
               <input 
                 type="text" 
-                class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 [(ngModel)]="x.year"
                 placeholder="Enter year">
             }
@@ -441,15 +465,15 @@
 
           <!-- Action Buttons -->
           @if(!updateDetailBtn) {
-            <div class="flex flex-wrap gap-3 pt-2">
+            <div class="flex flex-wrap gap-2 pt-2">
               <button 
-                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90"
                 (click)="EditNewEduInfo(x)">
                 <i class="fas fa-sync-alt"></i>
                 <span>Update</span>
               </button>
               <button 
-                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
                 (click)="delNewEduInfo(x.id)">
                 <i class="fas fa-trash"></i>
                 <span>Remove</span>
@@ -464,15 +488,23 @@
     <hr class="my-10 border-gray-200" />
 
     <!-- Awards Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-      <h2 class="text-2xl font-bold text-gray-800">Awards</h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-trophy"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Awards</h2>
+          <p class="text-sm text-gray-500">Achievements and recognition</p>
+        </div>
+      </div>
       
       <!-- Edit/Add Buttons -->
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap gap-2">
         <button 
           *ngIf="updateAwardBtn"
           (click)="updateAwardBtn = false"
-          class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-edit"></i>
           <span>Edit</span>
         </button>
@@ -480,7 +512,7 @@
         <button 
           *ngIf="updateAwardBtn"
           (click)="addNewAward()"
-          class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           <i class="fas fa-plus"></i>
           <span>Add New</span>
         </button>
@@ -488,7 +520,7 @@
         <button 
           *ngIf="!updateAwardBtn"
           (click)="updateAwardBtn = true"
-          class="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-arrow-left"></i>
           <span>Back</span>
         </button>
@@ -498,17 +530,17 @@
     <!-- Awards List -->
     <div class="space-y-6">
       @for(x of artistProfile.awards; track x){
-      <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div class="bg-white rounded-xl p-6 ring-1 ring-gray-100">
         <div class="grid grid-cols-1 gap-4">
           <!-- Award Name Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Award Name</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Award Name</label>
             @if(updateAwardBtn) {
-              <p class="text-gray-900 font-medium">{{ x.award | titlecase }}</p>
+              <p class="mt-1 text-gray-900 font-medium">{{ x.award | titlecase }}</p>
             } @else {
               <input 
                 type="text" 
-                class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 [(ngModel)]="x.award"
                 placeholder="Enter award name">
             }
@@ -516,13 +548,13 @@
 
           <!-- Year Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Year</label>
             @if(updateAwardBtn) {
-              <p class="text-gray-900 font-medium">{{ x.year | titlecase }}</p>
+              <p class="mt-1 text-gray-900 font-medium">{{ x.year | titlecase }}</p>
             } @else {
               <input 
                 type="text" 
-                class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 [(ngModel)]="x.year"
                 placeholder="Enter year">
             }
@@ -530,12 +562,12 @@
 
           <!-- Description Field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description</label>
             @if(updateAwardBtn) {
-              <p class="text-gray-700">{{ x.description | titlecase }}</p>
+              <p class="mt-1 text-gray-700">{{ x.description | titlecase }}</p>
             } @else {
               <textarea 
-                class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 [(ngModel)]="x.description"
                 placeholder="Enter award description"
                 rows="2"></textarea>
@@ -544,15 +576,15 @@
 
           <!-- Action Buttons -->
           @if(!updateAwardBtn) {
-            <div class="flex flex-wrap gap-3 pt-2">
+            <div class="flex flex-wrap gap-2 pt-2">
               <button 
-                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90"
                 (click)="editNewAwardInfo(x)">
                 <i class="fas fa-sync-alt"></i>
                 <span>Update</span>
               </button>
               <button 
-                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white"
                 (click)="delNewAwardInfo(x.id)">
                 <i class="fas fa-trash"></i>
                 <span>Remove</span>
@@ -567,13 +599,21 @@
 
   <!-- Section 04: System -->
   <section *ngIf="isActive('system')" class="system-settings-section">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-      <h2 class="text-2xl font-bold text-gray-800">System Settings</h2>
-      <div class="flex flex-wrap gap-3">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-gear"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">System Settings</h2>
+          <p class="text-sm text-gray-500">Profile status and featured</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
         <button 
           *ngIf="changeSystem"
           (click)="changesystemFunction()"
-          class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
           <i class="fas fa-edit"></i>
           <span>Edit</span>
         </button>
@@ -581,21 +621,21 @@
         <button 
           *ngIf="!changeSystem"
           (click)="updateSystemFunction()"
-          class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50">
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           <i class="fas fa-save"></i>
           <span>Update</span>
         </button>
       </div>
     </div>
 
-    <div *ngIf="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-      <p class="text-gray-600 text-lg">Loading system settings...</p>
+    <div *ngIf="loading" class="text-center py-10">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-600 mb-3"></div>
+      <p class="text-gray-600 text-sm">Loading system settings...</p>
     </div>
 
-    <div *ngIf="artistProfile && !loading" class="bg-gray-50 p-6 rounded-lg shadow-sm">
+    <div *ngIf="artistProfile && !loading" class="bg-gray-50 p-6 rounded-lg">
       <div class="flex items-center mb-6">
-        <label class="mr-4 font-medium text-gray-700 min-w-max">Profile Active:</label>
+        <label class="mr-4 text-xs font-medium text-gray-600 uppercase tracking-wide min-w-max">Profile Active</label>
         <div class="flex items-center">
           <input type="checkbox" [(ngModel)]="activeArtist" [checked]="artistProfile.status == 1"
             [disabled]="changeSystem" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500" />
@@ -606,7 +646,7 @@
       </div>
       
       <div class="flex items-center mb-6">
-        <label class="mr-4 font-medium text-gray-700 min-w-max">Featured:</label>
+        <label class="mr-4 text-xs font-medium text-gray-600 uppercase tracking-wide min-w-max">Featured</label>
         <div class="flex items-center">
           <input type="checkbox" [(ngModel)]="featureArtist" [checked]="artistProfile.is_featured || false"
             [disabled]="changeSystem" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500" />
@@ -619,10 +659,10 @@
       <div class="mt-8 text-sm text-gray-600">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p><strong>Created:</strong> {{ artistProfile.created_on | date : "medium" }}</p>
+            <p><span class="text-gray-500">Created:</span> {{ artistProfile.created_on | date : "medium" }}</p>
           </div>
           <div>
-            <p><strong>Last Updated:</strong> {{ artistProfile.last_updated | date : "medium" }}</p>
+            <p><span class="text-gray-500">Last Updated:</span> {{ artistProfile.last_updated | date : "medium" }}</p>
           </div>
         </div>
       </div>
@@ -633,30 +673,30 @@
   <section *ngIf="isActive('account')" class="profile-info-section">
    
 
-    <div *ngIf="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-      <p class="text-gray-600 text-lg">Loading profile info...</p>
+    <div *ngIf="loading" class="text-center py-10">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-600 mb-3"></div>
+      <p class="text-gray-600 text-sm">Loading profile info...</p>
     </div>
 
-    <div *ngIf="artistProfile && !loading" class="bg-gray-50 p-6 rounded-lg shadow-sm">
-      <div>
-         <h2 class="text-2xl font-bold text-gray-800 mb-6">Password Reset</h2>
-        <button (click)="sendPasswordReset()" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
+    <div *ngIf="artistProfile && !loading" class="bg-gray-50 p-6 rounded-lg">
+      <div class="mb-6">
+         <h2 class="text-lg font-semibold text-gray-900 mb-3">Password Reset</h2>
+        <button (click)="sendPasswordReset()" class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           Send Password Reset Link
         </button>
       </div>
 
 
-       <div class="mt-6">
-         <h2 class="text-2xl font-bold text-gray-800 mb-6">Resend Activation</h2>
-        <button (click)="activationemail()" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
+       <div class="mt-6 mb-6">
+         <h2 class="text-lg font-semibold text-gray-900 mb-3">Resend Activation</h2>
+        <button (click)="activationemail()" class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           Send Activation Link
         </button>
       </div>
 
       <div class="mt-6">
-         <h2 class="text-2xl font-bold text-gray-800 mb-6">Magic Link</h2>
-        <button (click)="magicLink()" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 shadow-sm hover:shadow-md">
+         <h2 class="text-lg font-semibold text-gray-900 mb-3">Magic Link</h2>
+        <button (click)="magicLink()" class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           Send Activation Link
         </button>
       </div>
@@ -668,12 +708,12 @@
 
 <!-- Modals -->
 <div *ngIf="OpenEduForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
     <div class="flex justify-between items-center p-6 border-b">
-      <h2 class="text-2xl font-bold text-gray-800">Add Education</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Add Education</h2>
       <button 
         (click)="closeForm()"
-        class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+        class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -683,37 +723,37 @@
     <form (ngSubmit)="submitEducation()" #educationForm="ngForm" class="p-6 space-y-6">
       <!-- School Name Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">School Name *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">School Name *</label>
         <input
           type="text"
           name="school"
           [(ngModel)]="newEducation.school"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter school name">
       </div>
   
       <!-- Course Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Course *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Course *</label>
         <input
           type="text"
           name="course"
           [(ngModel)]="newEducation.course"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter course name">
       </div>
   
       <!-- Year Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Year *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Year *</label>
         <input
           type="text"
           name="year"
           [(ngModel)]="newEducation.year"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter year">
       </div>
   
@@ -722,14 +762,14 @@
         <button
           type="submit"
           [disabled]="!educationForm.valid"
-          class="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 disabled:bg-gray-400 inline-flex items-center justify-center gap-2">
           <i class="fas fa-save"></i>
           <span>Submit</span>
         </button>
         <button
           type="button"
           (click)="clearForm()"
-          class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
           <i class="fas fa-eraser"></i>
           <span>Clear</span>
         </button>
@@ -739,12 +779,12 @@
 </div>
 
 <div *ngIf="OpenAwaForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
     <div class="flex justify-between items-center p-6 border-b">
-      <h2 class="text-2xl font-bold text-gray-800">Add Awards</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Add Awards</h2>
       <button 
         (click)="closeForm()"
-        class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+        class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -754,37 +794,37 @@
     <form (ngSubmit)="submitAward()" #awardForm="ngForm" class="p-6 space-y-6">
       <!-- Award Name Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Award Name *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Award Name *</label>
         <input
           type="text"
           name="award"
           [(ngModel)]="newAward.award"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter award name">
       </div>
   
       <!-- Description Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
         <input
           type="text"
           name="description"
           [(ngModel)]="newAward.description"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter description">
       </div>
   
       <!-- Year Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Year *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Year *</label>
         <input
           type="text"
           name="year"
           [(ngModel)]="newAward.year"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter year">
       </div>
   
@@ -793,14 +833,14 @@
         <button
           type="submit"
           [disabled]="!awardForm.valid"
-          class="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 disabled:bg-gray-400 inline-flex items-center justify-center gap-2">
           <i class="fas fa-save"></i>
           <span>Submit</span>
         </button>
         <button
           type="button"
           (click)="clearForm()"
-          class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
           <i class="fas fa-eraser"></i>
           <span>Clear</span>
         </button>
@@ -810,12 +850,12 @@
 </div>
 
 <div *ngIf="OpenMediaVideoForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
     <div class="flex justify-between items-center p-6 border-b">
-      <h2 class="text-2xl font-bold text-gray-800">Add Media Videos</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Add Media Videos</h2>
       <button 
         (click)="closeForm()"
-        class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+        class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -825,7 +865,7 @@
     <form (ngSubmit)="submitMediaVideo(newMediaVideo)" #mediaVideoForm="ngForm" class="p-6 space-y-6">
       <!-- Image Photo Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Image Photo</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Image Photo</label>
         <div class="flex flex-col gap-3">
           <input
             type="file"
@@ -833,7 +873,7 @@
             accept="image/*"
             (change)="onMediaVidFileSelected($event)"
             required
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none"
             placeholder="Enter year">
           
           <img *ngIf="newMediaVideo.image" class="rounded-lg w-full max-h-40 object-contain" [src]="newMediaVideo.image" />
@@ -842,37 +882,37 @@
 
       <!-- Video Name Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Video Name *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Video Name *</label>
         <input
           type="text"
           name="title"
           [(ngModel)]="newMediaVideo.title"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter video name">
       </div>
 
       <!-- Description Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
         <input
           type="text"
           name="description"
           [(ngModel)]="newMediaVideo.description"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter description">
       </div>
 
       <!-- URL Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">URL *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">URL *</label>
         <input
           type="text"
           name="url"
           [(ngModel)]="newMediaVideo.url"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter URL">
       </div>
 
@@ -881,14 +921,14 @@
         <button
           type="submit"
           [disabled]="!mediaVideoForm.valid"
-          class="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 disabled:bg-gray-400 inline-flex items-center justify-center gap-2">
           <i class="fas fa-save"></i>
           <span>Submit</span>
         </button>
         <button
           type="button"
           (click)="clearForm()"
-          class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
           <i class="fas fa-eraser"></i>
           <span>Clear</span>
         </button>
@@ -898,12 +938,12 @@
 </div>
 
 <div *ngIf="OpenMediaCDForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
     <div class="flex justify-between items-center p-6 border-b">
-      <h2 class="text-2xl font-bold text-gray-800">Add Media CD</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Add Media CD</h2>
       <button 
         (click)="closeForm()"
-        class="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+        class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -913,7 +953,7 @@
     <form (ngSubmit)="submitMediaCD(newMediaCD)" #mediaCDForm="ngForm" class="p-6 space-y-6">
       <!-- CD Cover Photo Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">CD Cover Photo</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">CD Cover Photo</label>
         <div class="flex flex-col gap-3">
           <input
             type="file"
@@ -921,7 +961,7 @@
             accept="image/*"
             (change)="onMediaCDFileSelected($event)"
             required
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none"
             placeholder="Enter year">
           
           <img *ngIf="newMediaCD.image" class="rounded-lg w-full max-h-40 object-contain" [src]="newMediaCD.image" />
@@ -930,37 +970,37 @@
 
       <!-- CD Name Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">CD/Album Name *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">CD/Album Name *</label>
         <input
           type="text"
           name="title"
           [(ngModel)]="newMediaCD.title"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter CD/album name">
       </div>
 
       <!-- Description Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
         <input
           type="text"
           name="description"
           [(ngModel)]="newMediaCD.description"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter description">
       </div>
 
       <!-- URL Field -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">URL *</label>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">URL *</label>
         <input
           type="text"
           name="url"
           [(ngModel)]="newMediaCD.url"
           required
-          class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
+          class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           placeholder="Enter URL">
       </div>
 
@@ -969,14 +1009,14 @@
         <button
           type="submit"
           [disabled]="!mediaCDForm.valid"
-          class="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 disabled:bg-gray-400 inline-flex items-center justify-center gap-2">
           <i class="fas fa-save"></i>
           <span>Submit</span>
         </button>
         <button
           type="button"
           (click)="clearForm()"
-          class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+          class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
           <i class="fas fa-eraser"></i>
           <span>Clear</span>
         </button>

@@ -3,6 +3,7 @@ import { CommonModule, DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ArtistService } from '../../../../services/artist.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AlertService } from '../../../../services/alert.service';
 
 @Component({
   selector: 'app-request-detail',
@@ -18,13 +19,23 @@ export class RequestDetailComponent implements OnInit {
   commentText: string = '';
   isSubmitting: boolean = false;
 
-  constructor(private artistService: ArtistService, private route: ActivatedRoute, private router: Router) {}
-
+  constructor(
+    private artistService: ArtistService, 
+    private route: ActivatedRoute, 
+    private router: Router,
+    private alertService: AlertService
   
+  ) {
+
+  }
+
+  loggedUser:any;
   async ngOnInit() {
     this.route.params.subscribe(params => {
       this.getRequestDetail(params['id']);
     });
+        this.loggedUser = this.artistService.getLoggedUserID();
+
   }
 
   getRequestDetail(p0: any){
@@ -97,5 +108,39 @@ export class RequestDetailComponent implements OnInit {
       default: return String(status ?? '');
     }
   }
+  
+
+  statusRequest(id:any){
+   let arr = {
+    status :parseInt(id),
+    last_status_change: new Date(),
+    last_status_by: this.loggedUser,
+    comment: this.commentText
+   } 
+
+   console.log(arr);
+   console.log(this.requestArr.id);
+
+   try{
+this.artistService.artistRequest(arr, this.requestArr.id).then(()=>{
+    if(id == 2){
+      this.alertService.showAlert('Approved', 'The requested is approved', 'success');
+      this.router.navigate(['hosts/console/requests']);
+    }else{
+      this.alertService.showAlert('Rejected', 'The requested is rejected', 'warning');
+       this.router.navigate(['hosts/console/requests']);
+    }
+})
+   }catch(error:any){
+    this.alertService.showAlert('Internal Error', error.message, 'error');
+   }
+   
+
+
+  }
+
+rejectRequest(){
+
+}
 
 }

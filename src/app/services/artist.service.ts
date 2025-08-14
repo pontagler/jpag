@@ -963,4 +963,17 @@ async deleteHostsMedia(arr:any){
 }
 
 
+async artistRequest(arr:any, id:any){
+
+  console.log('----back side', arr);
+  console.log('----back id', id);
+  
+  const {data, error} = await supabase.from('artist_request').update(arr).eq('id', id)
+  if(error) throw error
+  return data
+}
+
+
+
+
 }

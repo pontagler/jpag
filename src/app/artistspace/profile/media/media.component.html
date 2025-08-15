@@ -3,35 +3,41 @@
     <div class="bg-white rounded-xl p-4 shadow-md mb-4">
         <div class="flex flex-row justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">Media</h1>
-            <div
-                class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
-                <i class="fas fa-pen-to-square text-md"></i>
-                <p class="text-sm">Edit Profile</p>
-            </div>
+            <button (click)="openAddVideoModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
+                <i class="fas fa-plus"></i>
+                <span>Add Video</span>
+            </button>
         </div>
 
         <div class="space-y-4">
             <p class="text-xl font-medium">Videos</p>
 
- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-  @for (x of artistProfile.media_video; track x) {
-    <div class="bg-gray-100 rounded-xl p-4 shadow-sm">
-      <div class="flex flex-row">
-        <img [src]="x.image" [alt]="x.title" class="w-24 h-24 rounded-xl mr-4" />
-        <div>
-          <h2 class="text-lg font-semibold">{{ x.title | titlecase }}</h2>
-          <p class="text-sm text-gray-600">{{ x.description | titlecase }}</p>
-          <button
-            (click)="watchVideo(x.url)"
-            class="mt-2 bg-pont-green text-white px-4 py-2 rounded-lg text-sm"
-          >
-            Watch Video
-          </button>
-        </div>
-      </div>
-    </div>
-  }
-</div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                @if (artistProfile?.media_video && artistProfile.media_video.length > 0) {
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @for (item of artistProfile.media_video; track $index) {
+                    <div class="relative group">
+                        <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
+                            <img [src]="item.image" [alt]="item.title" class="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                        <div class="mt-3">
+                            <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.title | titlecase }}</h4>
+                            <p class="text-xs text-gray-600 truncate">{{ item.description | titlecase }}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button class="text-xs bg-black hover:bg-gray-800 text-white px-3 py-1 rounded-lg" (click)="watchVideo(item.url)">Watch</button>
+                                <button class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg" (click)="deleteMediaVideo(item.id)">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-video text-4xl mb-4"></i>
+                    <p class="text-lg">No video media added yet.</p>
+                </div>
+                }
+            </div>
 
         </div>
 
@@ -41,38 +47,143 @@
         <div class="bg-white rounded-xl p-4 shadow-md mb-4">
         <div class="flex flex-row justify-between items-center mb-4">
                  <p class="text-xl font-medium">Music CD</p>
-            <div
-                class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
-                <i class="fas fa-pen-to-square text-md"></i>
-                <p class="text-sm">Edit Profile</p>
-            </div>
+            <button (click)="openAddCDModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
+                <i class="fas fa-plus"></i>
+                <span>Add CD</span>
+            </button>
         </div>
 
         <div class="space-y-4">
            
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                 @for (x of artistProfile.media_cd; track x) {
-                <div class="bg-gray-100 rounded-xl p-4 shadow-sm">
-                    <div class="flex flex-row">
-                        <img [src]="x.image"
-                            [alt]="x.title" class="w-24 h-24 rounded-full mr-4">
-                        <div>
-                            <h2 class="text-lg font-semibold">{{x.title | titlecase}}</h2>
-                            <p class="text-sm text-gray-600">{{x.description | titlecase}}</p>
-                            <button     (click)="watchVideo(x.url)"
-                            class="mt-2 bg-pont-green text-white px-4 py-2 rounded-lg text-sm">Visit Link</button>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                @if (artistProfile?.media_cd && artistProfile.media_cd.length > 0) {
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @for (item of artistProfile.media_cd; track $index) {
+                    <div class="relative group">
+                        <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
+                            <img [src]="item.image" [alt]="item.title" class="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                        <div class="mt-3">
+                            <h4 class="text-sm font-medium text-gray-900 truncate">{{ item.title | titlecase }}</h4>
+                            <p class="text-xs text-gray-600 truncate">{{ item.description | titlecase }}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button class="text-xs bg-black hover:bg-gray-800 text-white px-3 py-1 rounded-lg" (click)="watchVideo(item.url)">Visit</button>
+                                <button class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg" (click)="deleteMediaCD(item.id)">Remove</button>
+                            </div>
                         </div>
                     </div>
+                    }
                 </div>
-            }
-                
-
-
-
+                } @else {
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-compact-disc text-4xl mb-4"></i>
+                    <p class="text-lg">No CD media added yet.</p>
+                </div>
+                }
             </div>
         </div>
 
+    </div>
+
+    <!-- Add CD Modal -->
+    <div *ngIf="OpenMediaCDForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-lg font-semibold text-gray-900">Add Media CD</h2>
+                <button (click)="closeForm()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form (ngSubmit)="submitMediaCD(newMediaCD)" #mediaCDForm="ngForm" class="p-6 space-y-6">
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">CD Cover Photo</label>
+                    <div class="flex flex-col gap-3">
+                        <input type="file" name="file" accept="image/*" (change)="onMediaCDFileSelected($event)" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none">
+                        <img *ngIf="newMediaCD.image" class="rounded-lg w-full max-h-40 object-contain" [src]="newMediaCD.image" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">CD/Album Name *</label>
+                    <input type="text" name="title" [(ngModel)]="newMediaCD.title" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter CD/album name">
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
+                    <input type="text" name="description" [(ngModel)]="newMediaCD.description" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter description">
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">URL *</label>
+                    <input type="text" name="url" [(ngModel)]="newMediaCD.url" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter URL">
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" [disabled]="!mediaCDForm.valid" class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 disabled:bg-gray-400 inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i>
+                        <span>Submit</span>
+                    </button>
+                    <button type="button" (click)="closeForm()" class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Video Modal -->
+    <div *ngIf="OpenMediaVideoForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-lg font-semibold text-gray-900">Add Media Video</h2>
+                <button (click)="closeForm()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form (ngSubmit)="submitMediaVideo(newMediaVideo)" #mediaVideoForm="ngForm" class="p-6 space-y-6">
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Image Photo</label>
+                    <div class="flex flex-col gap-3">
+                        <input type="file" name="file" accept="image/*" (change)="onMediaVidFileSelected($event)" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none">
+                        <img *ngIf="newMediaVideo.image" class="rounded-lg w-full max-h-40 object-contain" [src]="newMediaVideo.image" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Video Name *</label>
+                    <input type="text" name="title" [(ngModel)]="newMediaVideo.title" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter video name">
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
+                    <input type="text" name="description" [(ngModel)]="newMediaVideo.description" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter description">
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">URL *</label>
+                    <input type="text" name="url" [(ngModel)]="newMediaVideo.url" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter URL">
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" [disabled]="!mediaVideoForm.valid" class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 disabled:bg-gray-400 inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i>
+                        <span>Submit</span>
+                    </button>
+                    <button type="button" (click)="closeForm()" class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     </div>

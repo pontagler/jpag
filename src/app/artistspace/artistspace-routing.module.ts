@@ -5,7 +5,7 @@ import { AuthGuard } from '../guard/auth.guard';
 
 const routes: Routes = [
   
-  {path:'login', component: LoginComponent, data: { urlID: 11 }},
+  {path:'', component: LoginComponent, data: { urlID: 11 }},
   {path:'profile', loadChildren: () => import('./profile/profile.module').then(m => m.ProfileModule), data: { urlID: 21 } },
 ];
 

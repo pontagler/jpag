@@ -1,10 +1,98 @@
 <div class="w-full max-w-full overflow-hidden">
+
+
+
+  <!-- Profile Photo & Cover Section -->
+  <div class="bg-white rounded-xl shadow-md mb-4 overflow-hidden">
+    <div class="relative group">
+      <!-- Cover image banner -->
+      <img
+        [src]="artistProfile.cover || tempCover"
+        alt="Cover image"
+        class="w-full h-40 md:h-56 lg:h-64 object-cover" />
+
+      <!-- Full-cover hover overlay to change cover -->
+      <label class="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center text-white">
+        <input type="file" accept="image/*" (change)="onSelectCover($event)" hidden />
+        <span class="inline-flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full text-xs">
+          <i class="fa-solid fa-camera"></i>
+          <span>Change cover</span>
+        </span>
+      </label>
+
+      <!-- Cover uploading overlay -->
+      <div *ngIf="coverUploading" class="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-sm">
+        <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+          <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25" />
+          <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" />
+        </svg>
+        <span class="ml-2">Uploading...</span>
+      </div>
+
+      <!-- Floating profile avatar -->
+      <div class="absolute -bottom-12 left-6">
+        <div class="relative group">
+          <img
+            [src]="artistProfile.photo || '/assets/images/icons/user-b.png'"
+            alt="Profile photo"
+            class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover ring-4 ring-white shadow-lg" />
+
+          <!-- Avatar change overlay -->
+          <label class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center text-white text-xs rounded-full">
+            <input type="file" accept="image/*" (change)="onSelectPhoto($event)" hidden />
+            <i class="fa-solid fa-camera mr-2"></i>
+            <span>Change</span>
+          </label>
+
+          <!-- Avatar uploading overlay -->
+          <div *ngIf="photoUploading" class="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs rounded-full">
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+              <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25" />
+              <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" />
+            </svg>
+            <span class="ml-2">Uploading...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spacer beneath floating avatar and caption -->
+    <div class="pt-16 px-4 pb-4">
+      <div class="flex items-start justify-between">
+        <div class="flex-1 min-w-0">
+          <div *ngIf="!nameEdit">
+            <h1 class="text-2xl font-semibold text-gray-900">{{ artistProfile.fname | titlecase }} {{ artistProfile.lname | titlecase }}</h1>
+            <p class="text-lg text-pont-rust">{{ artistProfile.tagline | titlecase }}</p>
+          </div>
+          <div *ngIf="nameEdit" class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+            <input type="text" [(ngModel)]="artistProfile.fname" placeholder="First name" class="px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="text" [(ngModel)]="artistProfile.lname" placeholder="Last name" class="px-3 py-2 border border-gray-300 rounded-lg" />
+            <input type="text" [(ngModel)]="artistProfile.tagline" placeholder="Tagline" class="px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+        </div>
+        <div class="ml-4 shrink-0">
+          <button *ngIf="!nameEdit" (click)="nameEdit = true" class="flex flex-row items-center gap-2 text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-200">
+            <i class="fas fa-pen-to-square text-sm"></i>
+            <span class="text-sm">Edit</span>
+          </button>
+          <button *ngIf="nameEdit" (click)="updateNameTagline()" class="flex flex-row items-center gap-2 text-white bg-pont-green px-3 py-1.5 rounded-lg hover:bg-pont-green/90">
+            <span *ngIf="!nameClick" class="text-sm">Update</span>
+            <span *ngIf="nameClick" class="animate-spin text-white">
+              <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25" />
+                <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- About Section -->
   <div class="bg-white rounded-xl p-4 shadow-md mb-4">
     <div class="flex flex-row justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">
-        About {{ artistProfile.fname | titlecase }}
-      </h1>
+      <h2 class="text-xl font-medium">Short Biography</h2>
       <div *ngIf="!shortBio" (click)="shortBio = true"
         class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
         <i class="fas fa-pen-to-square text-md"></i>
@@ -41,7 +129,7 @@
 
     <div class="space-y-4">
       <div>
-        <p class="text-lg text-black font-medium mb-2">Biography</p>
+        
         <p *ngIf="!shortBio" class="text-sm text-gray-700 leading-relaxed">
           {{ artistProfile.short_bio | titlecase }}
         </p>
@@ -110,61 +198,207 @@
         <h2 class="text-xl font-medium">Performance Type</h2>
       </div>
 
-      <div class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+      <div *ngIf="!perfEdit" (click)="onTogglePerfEdit()" class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
         <i class="fas fa-pen-to-square text-md"></i>
-        <p class="text-sm">Edit Profile</p>
+        <p class="text-sm">Edit</p>
+      </div>
+      <div *ngIf="perfEdit" (click)="onTogglePerfEdit()" class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <p class="text-sm">Close</p>
       </div>
     </div>
 
     <div class="space-y-4">
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-2" *ngIf="!perfEdit">
         @for (x of artistProfile.performance_type; track x) {
         <span class="bg-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm">{{ x.performance_type |
           titlecase }}</span>
         }
       </div>
+
+      <div *ngIf="perfEdit" class="flex flex-col space-y-4">
+        <div class="flex gap-2 mb-3">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-bolt absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <select
+              class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none"
+              [(ngModel)]="selectedPerformanceID"
+              [ngModelOptions]="{standalone: true}"
+              name="selectedPerformanceID"
+              (change)="onChangePerf($event)"
+            >
+              <option value="0">Select Performance</option>
+              @for (x of availablePerformance; track x) {
+                <option [value]="x.id">{{ x.name | titlecase}}</option>
+              }
+            </select>
+            <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+          </div>
+
+          <button class="px-3 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50" (click)="addPerformanceData()">Add</button>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let perf of artistProfile.performance_type" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+            {{ perf.performance_type || perf.performance }}
+            <button class="ml-1 text-gray-500 hover:text-red-600" (click)="removePerformance(perf)"><i class="fa-solid fa-xmark"></i></button>
+          </span>
+        </div>
+      </div>
     </div>
 
     <hr class="mt-4 mb-4" />
-    <div class="flex flex-row space-x-2">
-      <i class="fas fa-book text-xl text-pont-green mt-1"></i>
-      <h2 class="text-xl font-bold">Education & Experience</h2>
+
+    <!-- Education & Experience as table -->
+    <div class="flex flex-row justify-between items-center mb-4">
+      <div class="flex flex-row space-x-2">
+        <i class="fas fa-book text-xl text-pont-green mt-1"></i>
+        <h2 class="text-xl font-bold">Education & Experience</h2>
+      </div>
+      <button (click)="openEduForm()" class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-pont-green/90 cursor-pointer">
+        <i class="fas fa-plus text-md"></i>
+        <p class="text-sm">Add</p>
+      </button>
     </div>
-    <div class="space-y-4 mt-4">
-      <div class="flex flex-col gap-2">
-        @for (y of artistProfile.education; track y) {
-        <div class="flex flex-row space-x-2 mb-0">
-          <i class="fas fa-graduation-cap text-md text-gray-300 mt-1"></i>
-          <p class="text-lg text-gray-700 font-medium mb-0">
-            {{ y.school | titlecase }}
-          </p>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let ed of artistProfile.education">
+            <td class="px-4 py-2">{{ ed.school }}</td>
+            <td class="px-4 py-2">{{ ed.course }}</td>
+            <td class="px-4 py-2">{{ ed.year }}</td>
+            <td class="px-4 py-2 text-right">
+              <button (click)="removeEducation(ed)" class="px-3 py-1 text-xs rounded-md border border-gray-200">Remove</button>
+            </td>
+          </tr>
+          <tr *ngIf="!artistProfile.education || artistProfile.education.length === 0">
+            <td colspan="4" class="px-4 py-6 text-center text-gray-500">No education added yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Education Add Modal -->
+    <div *ngIf="OpenEduForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-lg font-semibold text-gray-900">Add Education</h2>
+          <button (click)="closeEduForm()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <p class="text-md text-gray-500 ml-8 mb-0">
-          {{ y.course | titlecase }}
-        </p>
-        <p class="text-md text-gray-500 ml-8 mb-4">Graduated {{ y.year }}</p>
-        }
+        <form (ngSubmit)="addEducation()" class="p-6 space-y-4">
+          <div>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">School *</label>
+            <input [(ngModel)]="newEducation.school" name="school" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter school name" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Course *</label>
+            <input [(ngModel)]="newEducation.course" name="course" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter course" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Year *</label>
+            <input [(ngModel)]="newEducation.year" name="year" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter year" />
+          </div>
+          <div class="flex gap-4 pt-2">
+            <button type="submit" class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 inline-flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i>
+              <span>Submit</span>
+            </button>
+            <button type="button" (click)="clearEduForm()" class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
+              <i class="fas fa-eraser"></i>
+              <span>Clear</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
     <hr class="mt-8 mb-8" />
-    <div class="flex flex-row space-x-2">
-      <i class="fas fa-award text-xl text-pont-green mt-1"></i>
-      <h2 class="text-xl font-bold">Awards & Recognition</h2>
+
+    <!-- Awards as table -->
+    <div class="flex flex-row justify-between items-center mb-4">
+      <div class="flex flex-row space-x-2">
+        <i class="fas fa-award text-xl text-pont-green mt-1"></i>
+        <h2 class="text-xl font-bold">Awards & Recognition</h2>
+      </div>
+      <button (click)="openAwaForm()" class="flex flex-row space-x-2 text-white bg-pont-green p-2 rounded-lg hover:bg-pont-green/90 cursor-pointer">
+        <i class="fas fa-plus text-md"></i>
+        <p class="text-sm">Add</p>
+      </button>
     </div>
-    <div class="space-y-4 mt-4">
-      <div class="flex flex-col">
-        @for (y of artistProfile.awards; track y) {
-        <div class="flex flex-row space-x-2 mb-0">
-          <i class="fas fa-star text-md text-gray-300 mt-1"></i>
-          <p class="text-lg text-gray-700 font-medium mb-0">
-            {{ y.award | titlecase }}
-          </p>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Award</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let aw of artistProfile.awards">
+            <td class="px-4 py-2">{{ aw.award }}</td>
+            <td class="px-4 py-2">{{ aw.description }}</td>
+            <td class="px-4 py-2">{{ aw.year }}</td>
+            <td class="px-4 py-2 text-right">
+              <button (click)="removeAward(aw)" class="px-3 py-1 text-xs rounded-md border border-gray-200">Remove</button>
+            </td>
+          </tr>
+          <tr *ngIf="!artistProfile.awards || artistProfile.awards.length === 0">
+            <td colspan="4" class="px-4 py-6 text-center text-gray-500">No awards added yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Awards Add Modal -->
+    <div *ngIf="OpenAwaForm" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto ring-1 ring-gray-100">
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-lg font-semibold text-gray-900">Add Award</h2>
+          <button (click)="closeAwaForm()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <p class="text-md text-gray-500 ml-8 mb-6">
-          {{ y.description | titlecase }} - Year{{ y.year }}
-        </p>
-        }
+        <form (ngSubmit)="addAward()" class="p-6 space-y-4">
+          <div>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Award *</label>
+            <input [(ngModel)]="newAward.award" name="award" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter award name" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
+            <textarea [(ngModel)]="newAward.description" name="description" required rows="2" class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter description"></textarea>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Year *</label>
+            <input [(ngModel)]="newAward.year" name="year" required class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter year" />
+          </div>
+          <div class="flex gap-4 pt-2">
+            <button type="submit" class="flex-1 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90 inline-flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i>
+              <span>Submit</span>
+            </button>
+            <button type="button" (click)="clearAwaForm()" class="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center gap-2">
+              <i class="fas fa-eraser"></i>
+              <span>Clear</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

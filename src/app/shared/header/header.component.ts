@@ -39,7 +39,7 @@ getMenuItemClass(urlID: any) {
 logout(){
   this.auth.signOut();
   this.alertService.showAlert('Logged Out', 'You have been logged out successfully.', 'success');
-  this.router.navigate(['/artistspace/login']);
+  this.router.navigate(['/artistspace']);
 }
 
 

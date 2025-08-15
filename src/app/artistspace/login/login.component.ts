@@ -11,7 +11,7 @@ import { ArtistService } from '../../services/artist.service';
 })
 export class LoginComponent {
   // Declare any properties needed for the component here
-  email: string = 'bojaxo4546@gardsiir.com';
+  email: string = '1wcsocx81f@jxpomup.com';
   password: string = 'qwerty123';
 
   constructor(

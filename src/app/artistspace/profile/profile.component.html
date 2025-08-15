@@ -3,15 +3,15 @@
 <main class="bg-cream">
   <div class="flex flex-col lg:flex-row gap-4 px-4 lg:px-36 pt-16 pb-8">
     <div class="w-full lg:w-1/5 flex-shrink-0">
-      <div class="flex flex-col bg-white rounded-xl p-4 items-center justify-center shadow-md">
+      <!-- <div class="flex flex-col bg-white rounded-xl p-4 items-center justify-center shadow-md">
         <img
           [src]="artistProfile.photo"
           alt="profile" class="w-32 h-32 lg:w-56 lg:h-56 rounded-full object-cover" />
         <h1 class="text-xl lg:text-2xl font-bold mb-0 mt-4 text-center">{{artistProfile.fname | titlecase}} {{artistProfile.lname | titlecase}}</h1>
         <p class="text-md lg:text-lg font-medium text-pont-rust text-center">{{artistProfile.tagline | titlecase}}</p>
-      </div>
+      </div> -->
 
-      <div class="flex flex-col space-y-1 bg-white rounded-xl p-4 shadow-md mt-6">
+      <div class="flex flex-col space-y-1 bg-white rounded-xl p-4 shadow-md">
         
         <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(1)"
         [ngClass]="{'bg-black text-white': activeTab === 1, 'bg-white text-black hover:bg-gray-50': activeTab !== 1}">

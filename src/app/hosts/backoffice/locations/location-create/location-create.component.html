@@ -5,8 +5,8 @@
         <i class="fa-solid fa-location-dot"></i>
       </span>
       <div>
-        <h2 class="text-lg font-semibold text-gray-900">Create Location</h2>
-        <p class="text-sm text-gray-500">Add a new location</p>
+        <h2 class="text-lg font-semibold text-gray-900">{{ mode === 'edit' ? 'Edit Location' : 'Create Location' }}</h2>
+        <p class="text-sm text-gray-500">{{ mode === 'edit' ? 'Update location details, facility and images' : 'Add a new location' }}</p>
       </div>
     </div>
     <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50" (click)="cancel()">
@@ -96,7 +96,7 @@
 
     <div class="flex items-center justify-between pt-2">
       <div></div>
-      <button (click)="detailSubmit()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">Next</button>
+      <button (click)="detailSubmit()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">{{ mode === 'edit' ? 'Save & Continue' : 'Next' }}</button>
     </div>
   </div>
 

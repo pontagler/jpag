@@ -1,0 +1,264 @@
+<div class="bg-cream">
+
+  <section
+    class="relative bg-orange-50"
+    style="background-image: url('/assets/images/bg-venue.png'); background-size: cover; background-position: center;"
+  >
+    <div class="absolute inset-0 z-0"></div>
+    <div class="relative z-10 text-center px-9 py-16">
+      <h1 class="text-4xl lg:text-5xl font-bold text-gray-700 mb-4">
+        Unique <span class="text-pont-rust">Locations</span>
+      </h1>
+      <p class="text-lg text-black max-w-2xl mx-auto">
+        Discover extraordinary spaces perfect for intimate classical music performances
+      </p>
+    </div>
+  </section>
+
+  <section class="py-12 px-4 bg-white">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col lg:flex-row gap-4 items-center justify-between mb-8">
+        <div class="flex-1 max-w-md w-full">
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input
+              placeholder="Search venue by name..."
+              class="pl-10 h-12 w-full border border-gray-300 rounded-md focus:border-pont-green focus:outline-none"
+              type="text"
+              [ngModel]="searchTerm"
+              (ngModelChange)="onSearchChange($event)"
+            />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button (click)="showFilters = !showFilters" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-4 py-2 rounded-md transition">
+            <i class="fa-solid fa-sliders mr-2"></i>
+            Filters
+          </button>
+
+          <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+            <button (click)="viewMode = 'grid'" class="px-3 py-2" [ngClass]="viewMode==='grid' ? 'bg-pont-green text-white' : 'text-gray-600'">
+              <i class="fa-solid fa-table-cells"></i>
+            </button>
+            <button (click)="viewMode = 'list'" class="px-3 py-2" [ngClass]="viewMode==='list' ? 'bg-pont-green text-white' : 'text-gray-600'">
+              <i class="fa-solid fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if(showFilters){
+        <div class="mb-8 border border-pont-green/20 rounded-lg p-4">
+          <div class="grid md:grid-cols-5 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+                      [ngModel]="selectedCity"
+                      (ngModelChange)="onCityChange($event)">
+                <option value="">All Cities</option>
+                @for(opt of cityOptions; track opt){
+                  <option [value]="opt">{{opt | titlecase}}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+              <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+                      [ngModel]="selectedCapacity"
+                      (ngModelChange)="onCapacityChange($event)">
+                <option value="all">All Capacities</option>
+                <option value="under100">Under 100</option>
+                <option value="100-300">100-300</option>
+                <option value="over300">Over 300</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+                      [ngModel]="selectedType"
+                      (ngModelChange)="onTypeChange($event)">
+                <option value="">All Types</option>
+                @for(opt of typeOptions; track opt){
+                  <option [value]="opt">{{opt | titlecase}}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Specifications</label>
+              <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+                      [ngModel]="selectedSpec"
+                      (ngModelChange)="onSpecChange($event)">
+                <option value="">All Specs</option>
+                @for(opt of specOptions; track opt){
+                  <option [value]="opt">{{opt | titlecase}}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Amenity</label>
+              <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+                      [ngModel]="selectedAmenity"
+                      (ngModelChange)="onAmenityChange($event)">
+                <option value="">All Amenities</option>
+                @for(opt of amenityOptions; track opt){
+                  <option [value]="opt">{{opt | titlecase}}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button (click)="clearFilters()" class="h-10 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Clear All</button>
+          </div>
+        </div>
+      }
+
+      <div class="mb-6">
+        <p class="text-gray-600">Showing {{filteredLocations.length || 0}} of {{allLocations.length || 0}} locations</p>
+      </div>
+
+      @if(isLoading){
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          @for(_ of [0,1,2,3,4,5,6,7]; track _){
+            <div class="border-0 shadow-lg bg-white rounded p-0">
+              <div class="p-0">
+                <div class="w-full h-64 bg-gray-200 animate-pulse"></div>
+                <div class="p-6 space-y-3">
+                  <div class="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                  <div class="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                  <div class="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div>
+                  <div class="h-9 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if(viewMode === 'grid'){
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          @for(v of filteredLocations; track v.id_location){
+            <div class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded">
+              <div class="p-0">
+                <div class="relative overflow-hidden">
+                  <img [src]="(v?.images?.[0]?.url) || '/assets/images/venues/v1.png'" [alt]="v?.location || 'Venue'" class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute top-4 left-4">
+                    <span class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(v?.types?.[0]?.type || v?.type || 'Venue') | titlecase}}</span>
+                  </div>
+                </div>
+                <div class="p-6">
+                  <h3 class="font-bold text-xl text-gray-900 mb-1">{{v?.location}}</h3>
+                  <p class="text-sm text-gray-500 mb-3">
+                    <i class="fa-solid fa-location-dot mr-1"></i>
+                    {{v?.city || v?.proviance}}
+                  </p>
+                  <p class="text-sm text-gray-600 mb-4">{{(v?.description || '') | slice:0:120}}{{(v?.description?.length || 0) > 120 ? '…' : ''}}</p>
+                  <!-- <div class="text-xs text-gray-500 mb-3">
+                    <span class="font-semibold text-gray-800">Host:</span> {{v?.host}}
+                    <span class="mx-2">•</span>
+                    Hosting since {{v?.created_on | date:'mediumDate'}}
+                  </div> -->
+                  <div class="flex flex-wrap gap-2 mb-4">
+                    @for(a of (v?.specs || []); track a?.id){
+                      <span class="bg-pont-light-green/30 text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{(a?.specs || a?.specs) | titlecase}}</span>
+                    }
+                  </div>
+
+                  <hr>
+            <div class="pt-4 mb-4">
+            <p class="text-sm font-semibold text-gray-800">Host: {{v?.host}}</p>
+            <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
+              <p>Hosting since {{v?.created_on | date:'dd-MMM-yyyy'}}</p>
+            </div>
+          </div>
+
+
+
+                  <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded">View Details</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="space-y-6">
+          @for(v of filteredLocations; track v.id_location){
+            <div class="grid md:grid-cols-6 gap-0 border border-gray-200 rounded-xl bg-white overflow-hidden hover:shadow-xl transition">
+              <div class="md:col-span-2 relative">
+                <img [src]="(v?.images?.[0]?.url) || '/assets/images/venues/v1.png'" [alt]="v?.location || 'Venue'" class="w-full h-56 md:h-64 lg:h-72 object-cover" />
+                <div class="absolute top-3 left-3">
+                  <span class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(v?.types?.[0]?.type || v?.type || 'Venue') | titlecase}}</span>
+                </div>
+              </div>
+              <div class="md:col-span-4 p-5 md:p-6 flex flex-col justify-between">
+                <div>
+                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900">{{v?.location}}</h3>
+                      <p class="text-sm text-gray-500">
+                        <i class="fa-solid fa-location-dot mr-1"></i>
+                        {{v?.city || v?.proviance}}
+                      </p>
+                    </div>
+                    <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded">View Details</p>
+                  </div>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(v?.description || '') | slice:0:180}}{{(v?.description?.length || 0) > 180 ? '…' : ''}}</p>
+                
+                  <div class="flex flex-wrap gap-2 mt-4">
+                    @for(tag of (v?.types || []); track tag?.id){
+                      <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{tag?.type | titlecase}}</span>
+                    }
+                    @for(s of (v?.specs || []); track s?.id){
+                      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">{{(s?.name || s?.spec || s?.specs) | titlecase}}</span>
+                    }
+                    @for(a of (v?.amenity || []); track a?.id){
+                      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">{{(a?.name || a?.amenity) | titlecase}}</span>
+                    }
+                  </div>
+         <hr class="mt-4">
+            <div class="pt-4">
+            <p class="text-sm font-semibold text-gray-800">Host: {{v?.host}}</p>
+            <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
+              <p>Hosting since {{v?.created_on | date:'dd-MMM-yyyy'}}</p>
+            </div>
+          </div>
+                   <!-- <hr>
+                    <div class="text-xs text-gray-500 mt-2">
+                    <span class="font-semibold text-gray-800">Host:</span> {{v?.host}}
+                    <span class="mx-2">•</span>
+                    Hosting since {{v?.created_on | date:'mediumDate'}}
+                  </div> -->
+                 
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-pont-light-green">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-pont-green mb-4">Stay Connected</h2>
+      <p class="text-lg text-gray-700 mb-8">
+        Subscribe to our newsletter and never miss an upcoming concert or artist announcement
+      </p>
+
+      <form class="space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Your Name" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+          <input type="text" placeholder="Code Postal" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+        </div>
+        <input type="email" placeholder="Your Email Address" class="h-12 w-full border border-pont-green focus:outline-none px-3 rounded" />
+        <button type="submit" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">Subscribe to Newsletter</button>
+      </form>
+    </div>
+  </section>
+
+</div>

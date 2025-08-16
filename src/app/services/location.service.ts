@@ -39,6 +39,33 @@ async getSysSpecs(){
   }
 
 
+  // List all mappings: location -> amenity
+  async listAllLocationAmenities(){
+    const { data, error } = await supabase
+      .from('location_amenity')
+      .select('id_location, id_amenity');
+    if (error) throw error;
+    return data;
+  }
+
+  // List all mappings: location -> specification
+  async listAllLocationSpecs(){
+    const { data, error } = await supabase
+      .from('location_specs')
+      .select('id_location, id_specs');
+    if (error) throw error;
+    return data;
+  }
+
+  // List all mappings: location -> type
+  async listAllLocationTypes(){
+    const { data, error } = await supabase
+      .from('location_types')
+      .select('id_location, id_type');
+    if (error) throw error;
+    return data;
+  }
+
     //Get all the types Requests
 async getSysTypes(){
     const {data, error} = await supabase.from('sys_location_types').select()
@@ -51,6 +78,18 @@ async getSysTypes(){
 async addLocationDetails(arr:any){
   const {data, error} = await supabase.from ('locations').insert(arr).select()
   if(error) throw error
+  return data;
+}
+
+// Update location details
+async updateLocationDetails(id: number, arr: any){
+  const { data, error } = await supabase
+    .from('locations')
+    .update(arr)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
   return data;
 }
 

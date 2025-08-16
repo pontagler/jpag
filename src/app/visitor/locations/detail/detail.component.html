@@ -1,0 +1,158 @@
+<div class="bg-cream min-h-screen">
+  <div *ngIf="loading" class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">Loading venue...</h1>
+    </div>
+  </div>
+
+  <div *ngIf="(error || !location) && !loading" class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ error || 'Venue Not Found' }}</h1>
+      <button class="bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded" (click)="backToList()">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Back to Locations
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="location && !loading" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-800">{{ location.name }}</h1>
+        <div class="flex items-center gap-4 mt-2 text-gray-600">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-location-dot w-5 h-5"></i>
+            <span class="font-semibold">{{ location.address }} {{ location.zip }}</span>
+          </div>
+        </div>
+      </div>
+      <button class="border bg-white/80 backdrop-blur-sm px-4 py-2 rounded" (click)="backToList()">
+        <i class="fas fa-arrow-left mr-2 w-4 h-4"></i>
+        Back to all locations
+      </button>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+      <!-- Left Column (Carousel) -->
+      <div class="md:col-span-2">
+        <div class="rounded-2xl shadow-2xl overflow-hidden relative">
+          <ng-container *ngIf="galleryImages.length > 0; else carouselPlaceholder">
+            <div class="aspect-video relative">
+              <img [src]="galleryImages[currentImageIndex].url" [alt]="location.name" class="w-full h-full object-cover" />
+            </div>
+            <button class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full w-10 h-10 flex items-center justify-center shadow" (click)="showPrev()">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full w-10 h-10 flex items-center justify-center shadow" (click)="showNext()">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </ng-container>
+          <ng-template #carouselPlaceholder>
+            <div class="aspect-video relative">
+              <img src="/assets/images/logo/logo.jpg" alt="Venue placeholder" class="w-full h-full object-cover" />
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Right Column (Host Info + Map) -->
+      <div class="space-y-6">
+
+        <div class="shadow-lg rounded-2xl border-2 border-pont-green/20 bg-white">
+          <div class="p-5 border-b">
+            <h2 class="text-2xl font-bold text-pont-green flex items-center">
+     <i class="fa-solid fa-star-of-life mr-3"></i>
+              Host Information
+            </h2>
+          </div>
+          <div class="p-5 space-y-4">
+            <div class="flex items-center space-x-4">
+              <img src="../../../../assets/images/profile/user-b.png" alt="Host" class="w-16 h-16 rounded-full border-2 border-pont-light-green" />
+              <div>
+                <p class="font-bold text-lg text-gray-800">Pontangler</p>
+                <p class="text-sm text-gray-500">
+                  Hosting since {{ (location.created_on | date:'yyyy') || currentYear }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="shadow-lg rounded-2xl border-2 border-pont-green/20 bg-white">
+          <div class="p-5 border-b">
+            <h2 class="text-2xl font-bold text-pont-green flex items-center">
+              <i class="fa-solid fa-address-book mr-3"></i>
+              Contact
+            </h2>
+          </div>
+          <div class="p-5 space-y-3">
+            <div *ngIf="location.phone" class="flex items-center space-x-3 text-gray-700">
+              <i class="fa-solid fa-phone text-pont-green"></i>
+              <a class="hover:underline" [href]="'tel:' + location.phone">{{ location.phone }}</a>
+            </div>
+            <div *ngIf="location.email" class="flex items-center space-x-3 text-gray-700">
+              <i class="fa-solid fa-envelope text-pont-green"></i>
+              <a class="hover:underline" [href]="'mailto:' + location.email">{{ location.email }}</a>
+            </div>
+            <div *ngIf="location.website" class="flex items-center space-x-3 text-gray-700">
+              <i class="fa-solid fa-globe text-pont-green"></i>
+              <a class="hover:underline break-all" [href]="location.website?.startsWith('http') ? location.website : 'http://' + location.website" target="_blank" rel="noopener">
+                {{ location.website }}
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+    
+
+     
+      </div>
+    </div>
+
+    <div class="my-12 h-px bg-gray-200"></div>
+
+    <!-- Main Content Area -->
+    <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+      <div class="md:col-span-2 space-y-8">
+        <div class="flex items-center gap-4">
+          <span *ngIf="location.type || location.residence_type" class="bg-gradient-to-r from-pont-green to-green-500 text-white border-none text-md py-2 px-4 rounded-full">{{ location.type || location.residence_type }}</span>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-pont-green text-white border font-normal rounded-full px-3 py-1" *ngFor="let t of (location.types || [])">{{ t.name | titlecase }}</span>
+
+            <span class="bg-pont-light-green/40 text-pont-green border border-pont-green/20 font-normal rounded-full px-3 py-1" *ngFor="let t of (location.specs || [])">{{ t.name | titlecase }}</span>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">About this space</h2>
+          <p class="text-lg text-gray-600 leading-relaxed">{{ location.description }}</p>
+        </div>
+
+        <div *ngIf="(location.amenities || []).length > 0">
+          <h2 class="text-3xl font-bold text-gray-800 mb-6">What this place offers</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex items-center space-x-3" *ngFor="let a of location.amenities">
+              <i class="far fa-check-circle text-pont-green"></i>
+              <span class="text-gray-700">{{ a.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+           <div class="shadow-lg rounded-2xl border-2 border-pont-green/20 bg-white">
+          <div class="p-5 border-b"></div>
+          <div class="p-5 space-y-2">
+            <!-- Map placeholder -->
+            <div class="w-full h-60 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500">Map coming soon</div>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Sticky details card placeholder removed as in TSX it's commented out -->
+    </div>
+  </div>
+</div>

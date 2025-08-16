@@ -29,4 +29,16 @@ async getArtistForVisitor(){
     return data;
   }
 
+async getLocationList(){
+  const { data, error } = await supabase.rpc('get_location_visitor_list');
+
+    if (error) throw error;
+    return data;
+
+}
+
+
+
+  
+
 }

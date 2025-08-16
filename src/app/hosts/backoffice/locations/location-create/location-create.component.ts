@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertService } from '../../../../services/alert.service';
 import { LocationService } from '../../../../services/location.service';
 import { ArtistService } from '../../../../services/artist.service';
@@ -15,19 +15,32 @@ import { ArtistService } from '../../../../services/artist.service';
 export class LocationCreateComponent implements OnInit {
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private alertService: AlertService,
     private locationService: LocationService,
     private aritstService: ArtistService
   ) { }
 
   loggedUsers: any;
-  ngOnInit(): void {
-    this.getSysAmenity();
+  async ngOnInit(): Promise<void> {
     this.loggedUsers = this.aritstService.getLoggedUserID();
-    console.log('This is a logged users', this.loggedUsers);
+    const qId = this.route.snapshot.queryParamMap.get('id');
+    const navStateId = history.state && history.state.id ? history.state.id : null;
+    const effectiveId = qId || navStateId;
+    if (effectiveId) {
+      this.mode = 'edit';
+      this.catchID = Number(effectiveId);
+      await this.getSysAmenity();
+      await this.loadExistingLocation(this.catchID);
+      this.stepIndex = 0;
+    } else {
+      await this.getSysAmenity();
+      this.stepIndex = 0;
+    }
   }
   // Stepper state
-  stepIndex: number = 2; // 0 = Details, 1 = Facility, 2 = Images
+  stepIndex: number = 0; // 0 = Details, 1 = Facility, 2 = Images
+  mode: 'create' | 'edit' = 'create';
   // Step 1: Details form model
   details = {
     name: '',
@@ -192,17 +205,84 @@ export class LocationCreateComponent implements OnInit {
     };
 
     try {
-      await this.locationService.addLocationDetails(arr).then((res) => {
-        this.alertService.showAlert(
-          'Succesful',
-          'The details are added',
-          'success'
-        );
-        this.catchID = res[0].id;
+      if (this.mode === 'edit') {
+        const updateArr = {
+          name: arr.name,
+          address: arr.address,
+          lat: arr.lat,
+          long: arr.long,
+          description: arr.description,
+          capacity: arr.capacity,
+          city: arr.city,
+          proviance: arr.proviance,
+          country: arr.country,
+          zip: arr.zip,
+          phone: arr.phone,
+          email: arr.email,
+          website: arr.website,
+          updated_by: this.loggedUsers,
+          last_updated_on: new Date(),
+        };
+        await this.locationService.updateLocationDetails(this.catchID, updateArr);
+        this.alertService.showAlert('Successful', 'Details updated', 'success');
         this.stepIndex = 1;
-      });
+      } else {
+        await this.locationService.addLocationDetails(arr).then((res) => {
+          this.alertService.showAlert(
+            'Succesful',
+            'The details are added',
+            'success'
+          );
+          this.catchID = res[0].id;
+          this.stepIndex = 1;
+        });
+      }
     } catch (error: any) {
       this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+  }
+
+  private async loadExistingLocation(id: number){
+    try{
+      const rows = await this.locationService.getLocationInfo(id);
+      const loc = Array.isArray(rows) && rows.length ? rows[0] : null;
+      if (!loc) return;
+      this.details = {
+        name: loc.name || '',
+        description: loc.description || '',
+        capacity: loc.capacity || '',
+        address: loc.address || '',
+        city: loc.city || '',
+        proviance: loc.proviance || '',
+        country: loc.country || '',
+        lat: loc.lat || '',
+        long: loc.long || '',
+        zip: loc.zip || '',
+        phone: loc.phone || '',
+        email: loc.email || '',
+        website: loc.website || '',
+      };
+
+      // Prefill facility selections and options
+      this.selectedAmenities = (loc.amenities || []).map((a:any)=> ({ id: a.id_amenity || a.id, name: a.name }));
+      this.selectedSpecifications = (loc.specs || []).map((s:any)=> ({ id: s.id_specs || s.id, name: s.name }));
+      this.selectedTypes = (loc.types || []).map((t:any)=> ({ id: t.id_type || t.id, name: t.name }));
+
+      // Remove already selected from available pools
+      const amenityIds = new Set(this.selectedAmenities.map((x:any)=> Number(x.id)));
+      this.amenities = (this.amenities || []).filter((a:any)=> !amenityIds.has(Number(a.id)));
+
+      const specIds = new Set(this.selectedSpecifications.map((x:any)=> Number(x.id)));
+      this.specifications = (this.specifications || []).filter((s:any)=> !specIds.has(Number(s.id)));
+
+      const typeIds = new Set(this.selectedTypes.map((x:any)=> Number(x.id)));
+      this.locationTypes = (this.locationTypes || []).filter((t:any)=> !typeIds.has(Number(t.id)));
+
+      // Prefill images section
+      this.existingImages = (loc.images || []).map((img:any)=> ({ id: img.id, url: img.url }));
+      this.stepIndex = 0;
+    }catch(err){
+      console.error(err);
     }
   }
 

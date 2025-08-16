@@ -45,7 +45,7 @@ export class LocationDetailComponent implements OnInit {
   }
 
   editDetails(): void {
-    this.router.navigate(['hosts/console/locations/create'], { queryParams: { id: this.location?.id } });
+    this.router.navigate(['hosts/console/locations/create'], { queryParams: { id: this.location?.id }, state: { id: this.location?.id } });
   }
 
   async toggleStatus(): Promise<void> {

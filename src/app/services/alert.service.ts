@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import Swal from 'sweetalert2'
+import Swal, { SweetAlertResult } from 'sweetalert2'
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,20 @@ export class AlertService {
     });
   }
 
+dialogAlert(
+    title: string,
+    confirmText: string,
+    denyText: string,
+    cancelButton: boolean = true
+  ): Promise<SweetAlertResult<any>> {
+    return Swal.fire({
+      title: title,
+      showDenyButton: true,
+      showCancelButton: cancelButton,
+      confirmButtonText: confirmText,
+      denyButtonText: denyText,
+    });
+  }
 
 
 }

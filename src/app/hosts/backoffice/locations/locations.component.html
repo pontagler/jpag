@@ -1,1 +1,67 @@
-<p>locations works!</p>
+<div class="w-full max-w-full overflow-hidden">
+
+
+  
+
+      
+  <div class="bg-white rounded-xl p-4 shadow-md">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+            <i class="fa-solid fa-users"></i>
+          </span>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Locations</h2>
+            <p class="text-sm text-gray-500">Browse and manage hosts locations</p>
+          </div>
+        </div>
+        <button (click)="createNew()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800">
+          <i class="fa-solid fa-plus"></i>
+          <span>Create New</span>
+        </button>
+      </div>
+
+    <div *ngIf="loading" class="py-6 text-center text-gray-500">Loading...</div>
+    <div *ngIf="!loading && errorMessage" class="py-6 text-center text-red-600">{{ errorMessage }}</div>
+
+    <div *ngIf="!loading && !errorMessage" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created On</th>
+            
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let loc of locations" (click)="navigateTo(loc.id)" class="cursor-pointer hover:bg-gray-50">
+            <td class="px-4 py-2">{{ loc.id }}</td>
+            <td class="px-4 py-2">{{ loc.name }}</td>
+            <td class="px-4 py-2">{{ loc.address }}</td>
+            <td class="px-4 py-2">{{ loc.city }}</td>
+            <td class="px-4 py-2">{{ loc.country }}</td>
+            <td class="px-4 py-2">
+              <span class="inline-flex items-center px-2 py-1 text-xs rounded-full"
+                    [ngClass]="{ 'bg-green-100 text-green-700': +loc.status === 1, 'bg-gray-100 text-gray-700': +loc.status !== 1 }">
+                {{ getStatusLabel(loc.status) }}
+              </span>
+            </td>
+            <td class="px-4 py-2">{{ loc.capacity }}</td>
+            <td class="px-4 py-2">{{ loc.created_on | date: 'medium' }}</td>
+           
+          </tr>
+          <tr *ngIf="locations.length === 0">
+            <td colspan="8" class="px-4 py-6 text-center text-gray-500">No locations found.</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

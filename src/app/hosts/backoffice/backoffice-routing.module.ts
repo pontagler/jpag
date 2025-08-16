@@ -6,7 +6,9 @@ import { ArtistCreateComponent } from './artist-create/artist-create.component';
 import { HomeComponent } from './home/home.component';
 import { EventsComponent } from './events/events.component';
 import { LocationsComponent } from './locations/locations.component';
+import { LocationDetailComponent } from './locations/location-detail/location-detail.component';
 import { HostsComponent } from './hosts/hosts.component';
+import { LocationCreateComponent } from './locations/location-create/location-create.component';
 import { AccountComponent } from './account/account.component';
 import { ArtistDetailComponent } from './artist/artist-detail/artist-detail.component';
 import { RequestsComponent } from './requests/requests.component';
@@ -21,6 +23,8 @@ const routes: Routes = [
     {path:'artists/create', component: ArtistCreateComponent, data:{urlID:431}},
     {path:'artists/:id', component: ArtistDetailComponent, data:{urlID:432}},
     {path:'locations', component: LocationsComponent, data:{urlID:44}},
+    {path:'locations/:id', component: LocationDetailComponent, data:{urlID:442}},
+    {path:'locations/create', component: LocationCreateComponent, data:{urlID:441}},
     {path:'hosts', component: HostsComponent, data:{urlID:45}},
     {path:'account', component: AccountComponent, data:{urlID:46}},
     {path:'requests', component: RequestsComponent, data:{urlID:47}},

@@ -1,0 +1,137 @@
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
+  <div *ngIf="loading" class="text-center py-10">
+    <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-600 mb-3"></div>
+    <p class="text-gray-600 text-sm">Loading location...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="text-center py-12 text-red-600 bg-red-50 rounded-lg">
+    <p class="text-lg font-medium">{{ error }}</p>
+  </div>
+
+  <div *ngIf="location && !loading" class="space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-location-dot"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">{{ location.name }}</h2>
+          <p class="text-sm text-gray-500">{{ location.address }}, {{ location.city }}, {{ location.country }}</p>
+        </div>
+      </div>
+      <div class="flex space-x-4">
+         <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-400 text-black hover:bg-gray-800" (click)="toggleStatus()">
+        <i class="fas" [ngClass]="+location.status === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+        <span>{{ +location.status === 1 ? 'Set Inactive' : 'Set Active' }}</span>
+      </button>
+
+        <span class="inline-flex items-center px-2 py-1 text-xs rounded-full"
+              [ngClass]="{ 'bg-green-100 text-green-700': +location.status === 1, 'bg-gray-100 text-gray-700': +location.status !== 1 }">
+          {{ +location.status === 1 ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 space-y-6">
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-800 mb-3">Details</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <div class="text-gray-500">Capacity</div>
+              <div class="text-gray-900 font-medium">{{ location.capacity || 'N/A' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500">Phone</div>
+              <div class="text-gray-900 font-medium">{{ location.phone || 'N/A' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500">Email</div>
+              <div class="text-gray-900 font-medium break-all">{{ location.email || 'N/A' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500">Website</div>
+              <div class="text-gray-900 font-medium break-all">{{ location.website || 'N/A' }}</div>
+            </div>
+
+            <div>
+              <div class="text-gray-500">Latitude</div>
+              <div class="text-gray-900 font-medium break-all">{{ location.lat || 'N/A' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500">Longitude</div>
+              <div class="text-gray-900 font-medium break-all">{{ location.long || 'N/A' }}</div>
+            </div>
+
+          </div>
+          <div class="mt-4">
+            <div class="text-gray-500 text-sm mb-1">Description</div>
+            <div class="text-gray-900">{{ location.description || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-5 rounded-lg" *ngIf="location.images && location.images.length">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-gray-800">Images</h3>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div class="relative group" *ngFor="let img of location.images">
+              <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
+                <img [src]="img.url" class="w-full h-36 object-cover" />
+              </div>
+              <div class="mt-1 text-[11px] text-gray-500">{{ img.created_on | date:'medium' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-800 mb-3">Types</h3>
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700" *ngFor="let t of location.types">{{ t.name }}</span>
+            <span *ngIf="!location.types || location.types.length === 0" class="text-xs text-gray-500">No types</span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-800 mb-3">Amenities</h3>
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700" *ngFor="let a of location.amenities">{{ a.name }}</span>
+            <span *ngIf="!location.amenities || location.amenities.length === 0" class="text-xs text-gray-500">No amenities</span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-5 rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-800 mb-3">Specs</h3>
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700" *ngFor="let s of location.specs">{{ s.name }}</span>
+            <span *ngIf="!location.specs || location.specs.length === 0" class="text-xs text-gray-500">No specs</span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-5 rounded-lg text-sm text-gray-600">
+          <div class="grid grid-cols-1 gap-2">
+            <div><span class="text-gray-500">Hosted By:</span> {{ location.host | titlecase }}</div>
+            <div><span class="text-gray-500">Created:</span> {{ location.created_on | date : 'medium' }}</div>
+            <div><span class="text-gray-500">Last Updated:</span> {{ location.last_updated_on | date : 'medium' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 justify-between">
+      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50" (click)="editDetails()">
+        <i class="fas fa-edit"></i>
+        <span>Edit Details</span>
+      </button>
+     
+      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600" (click)="deleteLocation()">
+        <i class="fas fa-trash"></i>
+        <span>Delete Location</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+

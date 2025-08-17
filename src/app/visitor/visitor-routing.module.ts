@@ -5,6 +5,8 @@ import { VisitorComponent } from './visitor.component';
 import { DetailComponent as ArtistDetailComponent } from './artists/detail/detail.component';
 import { LocationDetailComponent } from './locations/detail/detail.component';
 import { LocationsComponent } from './locations/locations.component';
+import { EventsComponent } from './events/events.component';
+import { DetailComponent } from './events/detail/detail.component';
 
 const routes: Routes = [
     {path: '',component: VisitorComponent,
@@ -13,6 +15,8 @@ const routes: Routes = [
         {path: 'artists/:id', component:ArtistDetailComponent, data: { urlID: 312}},
         {path: 'locations', component:LocationsComponent, data: { urlID: 313}},
         {path: 'locations/:id', component:LocationDetailComponent, data: { urlID: 314}},
+        {path: 'events', component:EventsComponent, data: { urlID: 315}},
+        {path: 'events/:id', component:DetailComponent, data: { urlID: 316}},
       ]
   },
 ];

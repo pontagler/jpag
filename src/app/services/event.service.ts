@@ -25,6 +25,12 @@ async getEventsList(){
 }
 
 
+  //Get Event details
+  async getEventDetail(id:any){
+    const {data, error} = await supabase.rpc('get_event_info', {id_event: id})
+    if(error) throw error
+    return data;
+  }
 
 
 }

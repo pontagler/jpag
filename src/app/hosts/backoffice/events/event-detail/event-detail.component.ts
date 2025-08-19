@@ -1,22 +1,25 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { EventService } from '../../../../services/event.service';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { EventService } from '../../../services/event.service';
-import { SafeUrlPipe } from '../../../shared/safe-url.pipe';
 
 @Component({
-  selector: 'app-detail',
+  selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SafeUrlPipe],
-  templateUrl: './detail.component.html'
+  imports: [CommonModule, RouterModule],
+  templateUrl: './event-detail.component.html'
 })
-export class DetailComponent implements OnInit {
+export class EventDetailComponent implements OnInit {
   isLoading: boolean = true;
   errorMessage: string = '';
   event: any = null;
   currentYear: number = new Date().getFullYear();
-  activeTab: 'details' | 'location' | 'artists' | 'media' = 'details';
+  // Mirror create-event steps: 1 Detail, 2 Dates, 3 Shows, 4 Image, 5 Media, 6 Artists
+  step: 1 | 2 | 3 | 4 | 5 | 6 = 1;
+
   showAllDates: boolean = false;
+  media: Array<{ id: number; id_media: number; title: string; image: string | null; description: string | null; url: string | null }> = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -31,27 +34,7 @@ export class DetailComponent implements OnInit {
       this.isLoading = false;
       return;
     }
-    await this.loadEvent(id);
-  }
-
-  private async loadEvent(id: number): Promise<void> {
-    this.isLoading = true;
-    this.errorMessage = '';
-    try {
-      const data = await this.eventService.getEventDetail(id as any);
-      const raw = Array.isArray(data) ? (data[0] || null) : (data || null);
-      if (!raw) {
-        this.errorMessage = 'Event not found.';
-        this.event = null;
-        return;
-      }
-      this.event = this.normalizeEvent(raw);
-    } catch (err) {
-      this.errorMessage = 'Failed to load event.';
-      this.event = null;
-    } finally {
-      this.isLoading = false;
-    }
+    await Promise.all([this.loadEvent(id), this.loadMedia(id)]);
   }
 
   get displayedDates(): any[] {
@@ -68,25 +51,53 @@ export class DetailComponent implements OnInit {
     this.showAllDates = !this.showAllDates;
   }
 
+  private async loadEvent(id: number): Promise<void> {
+    this.isLoading = true;
+    this.errorMessage = '';
+    try {
+      const data = await this.eventService.getEventDetail(id as any);
+      console.log('data--->', data);
+      const raw = Array.isArray(data) ? (data[0] || null) : (data || null);
+      if (!raw) {
+        this.errorMessage = 'Event not found.';
+        this.event = null;
+        return;
+      }
+      this.event = this.normalizeEvent(raw);
+    } catch (err) {
+      this.errorMessage = 'Failed to load event.';
+      this.event = null;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private async loadMedia(id: number): Promise<void> {
+    try {
+      const data = await this.eventService.getEventMedia(id);
+      this.media = (data || []).map((m: any) => ({
+        id: m.id,
+        id_media: m.id_media,
+        title: m.title,
+        image: m.image,
+        description: m.description,
+        url: m.url
+      }));
+    } catch (err) {
+      // ignore media errors; keep page loading
+      this.media = [];
+    }
+  }
+
   private normalizeEvent(raw: any): any {
     const eventDates = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
     const shows = Array.isArray(raw?.event_shows) ? raw.event_shows : [];
     const artists = Array.isArray(raw?.event_artists) ? raw.event_artists : [];
-    const media = Array.isArray(raw?.event_media) ? raw.event_media : [];
     const instruments = Array.isArray(raw?.instruments) ? raw.instruments : [];
-
-    const artistDisplay = artists
-      .map((a: any) => `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim())
-      .filter((s: string) => !!s)
-      .join(', ');
 
     const editionDisplay = [raw?.edition_name, raw?.edition_year]
       .filter((v: any) => !!v)
       .join(' ');
-
-    const statusNormalized: 'upcoming' | 'past' | '' = typeof raw?.status === 'number'
-      ? (raw.status === 1 ? 'upcoming' : raw.status === 0 ? 'past' : '')
-      : ((raw?.status || '') as string).toString().toLowerCase() as any;
 
     return {
       id: raw?.id ?? raw?.id_event ?? null,
@@ -94,24 +105,15 @@ export class DetailComponent implements OnInit {
       eventKind: raw?.event || '',
       imageUrl: raw?.photo || '',
       title: raw?.title || '',
-      status: statusNormalized,
+      status: raw?.status,
       teaser: raw?.teaser || '',
       programme: raw?.programme || '',
       eventType: raw?.event_type || '',
       description: raw?.description || '',
       bookingUrl: raw?.booking_url || '',
       editionDisplay,
-      dates: eventDates.map((d: any) => ({
-        id: d?.id,
-        date: d?.date,
-        time: d?.time
-      })),
-      shows: shows.map((s: any) => ({
-        id: s?.id,
-        composer: s?.title,
-        piece: s?.description,
-        duration: s?.time_manage
-      })),
+      dates: eventDates.map((d: any) => ({ id: d?.id, date: d?.date, time: d?.time })),
+      shows: shows.map((s: any) => ({ id: s?.id, composer: s?.title, piece: s?.description, duration: s?.time_manage })),
       instruments: instruments.map((i: any) => i?.instrument).filter((v: any) => !!v),
       location: {
         name: raw?.location?.name || '',
@@ -130,18 +132,7 @@ export class DetailComponent implements OnInit {
         photo: a?.photo || '',
         tagline: a?.tagline || '',
         shortBio: a?.short_bio || ''
-      })),
-
-    media: media.map((a: any) => ({
-        id:a.id,
-        url:a.url || '',
-        image:a.image || '',
-        title:a.title || '',
-        description:a.description || '',
-      })),
-
-
-
+      }))
     };
   }
 
@@ -154,7 +145,6 @@ export class DetailComponent implements OnInit {
 
   formatTime(timeString: string | null | undefined): string {
     if (!timeString) return '';
-    // Ensure we can format time-only strings by anchoring to a date
     const d = new Date(`1970-01-01T${timeString}`);
     if (isNaN(d.getTime())) return '';
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });

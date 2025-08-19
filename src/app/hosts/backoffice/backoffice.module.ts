@@ -7,13 +7,15 @@ import { BackofficeComponent } from './backoffice.component';
 import { ArtistComponent, TruncatePipe } from './artist/artist.component';
 import { SharedModule } from '../../shared/shared.module';
 import { ArtistCreateComponent } from './artist-create/artist-create.component';
+import { EventsComponent } from './events/events.component';
 
 
 @NgModule({
   declarations: [
     BackofficeComponent,
     ArtistComponent,
-    ArtistCreateComponent
+    ArtistCreateComponent,
+    EventsComponent
   ],
   imports: [
     CommonModule,

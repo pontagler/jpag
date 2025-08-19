@@ -1,1 +1,304 @@
-<p>hosts works!</p>
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+        <i class="fa-solid fa-house"></i>
+      </span>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Host Profile</h2>
+        <p class="text-sm text-gray-500">Details and contact information</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button *ngIf="!editMode" (click)="enableEdit()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800">
+        <i class="fa-regular fa-pen-to-square"></i>
+        <span>Edit</span>
+      </button>
+      <ng-container *ngIf="editMode">
+        <button (click)="save()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500">
+          <i class="fa-solid fa-check"></i>
+          <span>Save</span>
+        </button>
+        <button (click)="cancelEdit()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Cancel</span>
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  <ng-container *ngIf="hostsArray && hostsArray.length; else noHost">
+    <!-- View Mode -->
+    <ng-container *ngIf="!editMode">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: Identity -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+          <img class="h-28 w-28 md:h-32 md:w-32 rounded-xl object-cover ring-1 ring-gray-200"
+               [src]="hostsArray[0].photo || 'assets/images/logo/logo.jpg'"
+               [alt]="hostsArray[0].public_name || hostsArray[0].name || 'Host'" />
+          <div class="flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-2xl font-semibold text-gray-900">{{ (hostsArray[0].public_name || hostsArray[0].name) | titlecase }}</h3>
+              <span *ngIf="hostsArray[0].public_name && hostsArray[0].public_name !== hostsArray[0].name" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700 ring-1 ring-gray-200">
+                <i class="fa-regular fa-id-badge"></i>
+                Public Name
+              </span>
+            </div>
+            <div class="mt-2 text-gray-600 space-y-1">
+              <div class="flex items-start gap-2">
+                <i class="fa-solid fa-location-dot text-gray-400 mt-0.5"></i>
+                <div>
+                  <div class="text-sm">{{ hostsArray[0].address }}</div>
+                  <div class="text-sm">
+                    {{ hostsArray[0].zip }} {{ hostsArray[0].city | titlecase }}<span *ngIf="hostsArray[0].proviance">, {{ hostsArray[0].proviance | titlecase }}</span>
+                  </div>
+                  <div class="text-sm">{{ hostsArray[0].country | titlecase }}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+               
+                <i class="fa-solid fa-globe text-gray-400"></i>
+                <a class="text-indigo-600 hover:text-indigo-700 hover:underline"
+                   [attr.href]="(hostsArray[0].web_url && (hostsArray[0].web_url.startsWith('http') ? hostsArray[0].web_url : 'https://' + hostsArray[0].web_url)) || null"
+                   target="_blank" rel="noopener">
+                  {{ hostsArray[0].web_url || 'Website not provided' }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="rounded-xl ring-1 ring-gray-200 p-4 bg-gray-50">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
+              <i class="fa-regular fa-address-card"></i>
+            </span>
+            <h4 class="font-medium text-gray-900">Primary Contact</h4>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="flex items-center gap-2 text-gray-700">
+              <i class="fa-regular fa-user text-gray-400"></i>
+              <span>{{ hostsArray[0].contact_fname | titlecase }} {{ hostsArray[0].contact_lname | titlecase }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fa-regular fa-envelope text-gray-400"></i>
+              <a class="text-indigo-600 hover:underline" [attr.href]="hostsArray[0].contact_email ? 'mailto:' + hostsArray[0].contact_email : null">{{ hostsArray[0].contact_email || '—' }}</a>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-phone text-gray-400"></i>
+              <a class="text-indigo-600 hover:underline" [attr.href]="hostsArray[0].contact_phone1 ? 'tel:' + hostsArray[0].contact_phone1 : null">{{ hostsArray[0].contact_phone1 || '—' }}</a>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-phone text-gray-400"></i>
+              <a class="text-indigo-600 hover:underline" [attr.href]="hostsArray[0].contact_phone2 ? 'tel:' + hostsArray[0].contact_phone2 : null">{{ hostsArray[0].contact_phone2 || '—' }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Meta -->
+      <div class="space-y-6">
+        <div class="rounded-xl ring-1 ring-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+              <i class="fa-regular fa-address-book"></i>
+              
+            </span>
+            <h4 class="font-medium text-gray-900">At a glance</h4>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+              <span class="text-gray-600">Capacity</span>
+              <span class="font-medium text-gray-900">{{ hostsArray[0].capacity || '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+              <span class="text-gray-600">Hosts / Year</span>
+              <span class="font-medium text-gray-900">{{ hostsArray[0].host_per_year || '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+              <span class="text-gray-600">Type</span>
+             <span class="font-medium text-gray-900" [ngSwitch]="hostsArray[0].id_type">
+  <ng-container *ngSwitchCase="1">Association</ng-container>
+  <ng-container *ngSwitchCase="2">Particular</ng-container>
+  <ng-container *ngSwitchCase="3">Enterprise</ng-container>
+  <ng-container *ngSwitchDefault>—</ng-container>
+</span>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-xl ring-1 ring-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-amber-50 text-amber-700">
+              <i class="fa-regular fa-clock"></i>
+            </span>
+            <h4 class="font-medium text-gray-900">Timestamps</h4>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Created</span>
+              <span class="text-gray-900">{{ hostsArray[0].created_on | date:'yyyy-MM-dd HH:mm' }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Last Updated</span>
+              <span class="text-gray-900">{{ hostsArray[0].last_update_on | date:'yyyy-MM-dd HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <a class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800"
+             [attr.href]="buildMapsLink(hostsArray[0])"
+             target="_blank" rel="noopener">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>Open in Maps</span>
+          </a>
+          <a *ngIf="hostsArray[0].web_url" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+             [attr.href]="hostsArray[0].web_url.startsWith('http') ? hostsArray[0].web_url : 'https://' + hostsArray[0].web_url" target="_blank" rel="noopener">
+            <i class="fa-solid fa-globe"></i>
+            <span>Visit Website</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    </ng-container>
+
+    <!-- Edit Mode -->
+    <form *ngIf="editMode" [formGroup]="form" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: Identity edit -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+          <img class="h-28 w-28 md:h-32 md:w-32 rounded-xl object-cover ring-1 ring-gray-200"
+               [src]="form.value.photo || hostsArray[0].photo || 'assets/images/logo/logo.jpg'"
+               alt="Host photo" />
+          <div class="flex-1 w-full space-y-3">
+            <div>
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Upload Logo</label>
+              <input type="file" accept="image/*" (change)="onLogoSelected($event)" class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Name</label>
+                <input formControlName="name" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Public Name</label>
+                <input formControlName="public_name" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Address</label>
+                <input formControlName="address" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">City</label>
+                <input formControlName="city" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Province</label>
+                <input formControlName="proviance" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">ZIP</label>
+                <input formControlName="zip" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Country</label>
+                <input formControlName="country" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Website</label>
+                <input formControlName="web_url" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Photo URL</label>
+                <input formControlName="photo" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact edit -->
+        <div class="rounded-xl ring-1 ring-gray-200 p-4 bg-gray-50">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
+              <i class="fa-regular fa-address-card"></i>
+            </span>
+            <h4 class="font-medium text-gray-900">Primary Contact</h4>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">First Name</label>
+              <input formControlName="contact_fname" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Last Name</label>
+              <input formControlName="contact_lname" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Email</label>
+              <input formControlName="contact_email" type="email" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Phone 1</label>
+              <input formControlName="contact_phone1" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Phone 2</label>
+              <input formControlName="contact_phone2" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Meta edit -->
+      <div class="space-y-6">
+        <div class="rounded-xl ring-1 ring-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+              <i class="fa-regular fa-address-book"></i>
+            </span>
+            <h4 class="font-medium text-gray-900">At a glance</h4>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Capacity</label>
+              <input formControlName="capacity" type="number" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Hosts / Year</label>
+              <input formControlName="host_per_year" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Type</label>
+              <select formControlName="id_type" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option [ngValue]="null">—</option>
+                <option [ngValue]="1">Association</option>
+                <option [ngValue]="2">Particular</option>
+                <option [ngValue]="3">Enterprise</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-template #noHost>
+    <div class="flex flex-col items-center gap-2 text-gray-500 py-12">
+      <i class="fa-regular fa-folder-open text-3xl"></i>
+      <p class="text-sm">No host data found</p>
+    </div>
+  </ng-template>
+</div>
+

@@ -1,10 +1,11 @@
 <div class="min-h-screen bg-white" *ngIf="!isLoading && !errorMessage && event">
-
-
   <div class="bg-white border-b">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div></div>
-      <a routerLink="/events" class="inline-flex items-center text-pont-rust hover:opacity-80">
+      <a [routerLink]="['/hosts/console/events', event.id, 'edit']" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+        <i class="fa-regular fa-pen-to-square"></i>
+        Edit
+      </a>
+      <a routerLink="/hosts/console/events" class="inline-flex items-center text-pont-rust hover:opacity-80">
         <i class="fa-solid fa-arrow-left"></i>
         Back to Events
       </a>
@@ -17,7 +18,7 @@
         <div class="relative">
           <img [src]="event.imageUrl || '/assets/images/profile/c1.png'" [alt]="event.title" class="w-full h-96 object-cover rounded-lg shadow" />
           <div class="absolute top-4 left-4 flex gap-2">
-            <span class="px-2 py-1 rounded text-white text-sm bg-green-700">{{ event.eventType || event.eventKind  | titlecase}}</span>
+            <span class="px-2 py-1 rounded text-white text-sm bg-green-700">{{ event.eventType || event.eventKind | titlecase}}</span>
           </div>
         </div>
 
@@ -26,28 +27,14 @@
             <h3 class="text-lg text-black/80 font-medium">{{ event.editionDisplay }}</h3>
             <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ event.title | titlecase}}</h1>
             <div class="flex flex-wrap gap-2">
-                @for(x of event.artists; track x; let last = $last; let i = $index) {
-                    <h2 class="text-xl lg:text-2xl font-medium text-pont-rust mb-2">
-                      {{ x.name | titlecase }}
-                      <span class="text-pont-rust" *ngIf="!last && i < event.artists.length - 2">, </span>
-                      <span class="text-pont-rust" *ngIf="i === event.artists.length - 2"> & </span>
-                    </h2>
-                  }
-                  
-                  
-        </div>
-
-
-            <!-- <p class="text-base text-rose-700 font-medium mb-0" *ngIf="event.host">Hosted by {{ event.host }}</p> -->
-            <div class="flex gap-2 mb-3 flex-wrap">
               <span *ngFor="let inst of event.instruments" class="px-2 py-1 rounded-full border text-black font-medium text-sm bg-slate-50 border-slate-200">{{ inst | titlecase }}</span>
             </div>
-            <p class="text-gray-700 leading-relaxed">{{ event.teaser }}</p>
+            <p class="text-gray-700 leading-relaxed mt-2">{{ event.teaser }}</p>
           </div>
 
           <div class="space-y-2 text-sm text-gray-700">
             <div *ngFor="let d of displayedDates" class="flex items-center">
-                <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+              <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
               <span class="font-medium">{{ formatDate(d.date) }}</span>
               <span class="mx-2">-</span>
               <span class="font-medium">{{ formatTime(d.time) }}</span>
@@ -57,19 +44,16 @@
             </button>
           </div>
 
-
           <div class="flex space-x-1 text-lg">
             <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
-            <p class="text-gray-500">{{event.location.name | titlecase}}, </p>
+            <p class="text-gray-500">{{event.location.name | titlecase}},</p>
             <p class="text-gray-500">{{event.location.city | titlecase}}</p>
             <p class="text-gray-500">{{event.location.zip | uppercase}}</p>
-
           </div>
 
           <div class="flex space-x-3">
-          
-            <a *ngIf="event.bookingUrl" [href]="event.bookingUrl" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-full  px-5 py-3 bg-pont-rust hover:opacity-90 text-white rounded">
-                <i class="fa-solid fa-ticket text-white mr-2 "></i> Book Tickets
+            <a *ngIf="event.bookingUrl" [href]="event.bookingUrl" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-full px-5 py-3 bg-pont-rust hover:opacity-90 text-white rounded">
+              <i class="fa-solid fa-ticket text-white mr-2 "></i> Book Tickets
             </a>
           </div>
         </div>
@@ -80,48 +64,21 @@
   <section class="bg-white py-6">
     <div class="max-w-7xl mx-auto px-4">
       <div class="mb-6">
-        <div class="grid grid-cols-4 w-full bg-gray-100 rounded-md p-1">
-          <button (click)="activeTab='details'"
-                  class="px-4 py-2 rounded text-sm font-medium transition"
-                  [ngClass]="{
-                    'bg-white text-gray-900 shadow': activeTab==='details',
-                    'text-gray-600 hover:text-gray-900': activeTab!=='details'
-                  }">
-            Details
-          </button>
-          <button (click)="activeTab='location'"
-                  class="px-4 py-2 rounded text-sm font-medium transition"
-                  [ngClass]="{
-                    'bg-white text-gray-900 shadow': activeTab==='location',
-                    'text-gray-600 hover:text-gray-900': activeTab!=='location'
-                  }">
-            Location
-          </button>
-          <button (click)="activeTab='media'"
-          class="px-4 py-2 rounded text-sm font-medium transition"
-          [ngClass]="{
-            'bg-white text-gray-900 shadow': activeTab==='media',
-            'text-gray-600 hover:text-gray-900': activeTab!=='media'
-          }">
-    Media
-  </button>
-          <button (click)="activeTab='artists'"
-                  class="px-4 py-2 rounded text-sm font-medium transition"
-                  [ngClass]="{
-                    'bg-white text-gray-900 shadow': activeTab==='artists',
-                    'text-gray-600 hover:text-gray-900': activeTab!=='artists'
-                  }">
-            Artists
-          </button>
+        <div class="grid grid-cols-6 w-full bg-gray-100 rounded-md p-1">
+          <button (click)="step=1" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===1, 'text-gray-600': step!==1 }">Detail</button>
+          <button (click)="step=2" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===2, 'text-gray-600': step!==2 }">Dates</button>
+          <button (click)="step=3" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===3, 'text-gray-600': step!==3 }">Shows</button>
+          <button (click)="step=4" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===4, 'text-gray-600': step!==4 }">Image</button>
+          <button (click)="step=5" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===5, 'text-gray-600': step!==5 }">Media</button>
+          <button (click)="step=6" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===6, 'text-gray-600': step!==6 }">Artists</button>
         </div>
       </div>
 
-      <div [ngSwitch]="activeTab">
-        <div *ngSwitchCase="'details'">
+      <div [ngSwitch]="step">
+        <div *ngSwitchCase="1">
           <div class="grid lg:grid-cols-2 gap-8">
             <div class="border rounded-lg">
-              <div class="p-4  font-semibold flex items-center text-2xl">
-              
+              <div class="p-4 font-semibold flex items-center text-2xl">
                 <i class="fa-solid fa-music text-pont-green mr-2"></i>
                 About This Concert
               </div>
@@ -131,7 +88,7 @@
             </div>
 
             <div class="border rounded-lg">
-              <div class="p-4  font-semibold text-2xl">Shows</div>
+              <div class="p-4 font-semibold text-2xl">Shows</div>
               <div class="p-4 space-y-4">
                 <div *ngFor="let piece of event.shows" class="border-l-4 border-green-700 pl-4">
                   <h4 class="font-semibold text-gray-900">{{ piece.composer }}</h4>
@@ -143,67 +100,81 @@
           </div>
         </div>
 
-        <div *ngSwitchCase="'location'">
+        <div *ngSwitchCase="2">
           <div class="border rounded-lg">
             <div class="p-4 font-semibold flex items-center text-2xl">
-             
-              <i class="fa-regular fa-compass text-pont-green mr-2"></i>
-              {{ event.location?.name || 'Location' }}
+              <i class="fa-regular fa-calendar-days text-pont-green mr-2"></i>
+              Dates
             </div>
-            <div class="p-4 grid lg:grid-cols-2 gap-8">
-              <div class="space-y-3">
-                <p class="text-gray-700">{{ event.location?.description }}</p>
-                <div class="space-y-2 text-gray-700">
-                  <div class="flex items-center">
-                    <i class="fa-solid fa-location-dot text-pont-green mr-2"></i>
-                    {{ event.location?.address }}</div>
-                  <div class="flex items-center">
-                    <i class="fa-solid fa-location-dot text-pont-green mr-2"></i>
-                    {{ event.location?.city }} {{ event.location?.zip }}</div>
-                  <div class="flex items-center" *ngIf="event.location?.phone">
-                  
-                    <i class="fa-solid fa-phone text-pont-green mr-2"></i>
-                    {{ event.location?.phone }}</div>
-                  <div class="flex items-center" *ngIf="event.location?.email">
-                   
-                    <i class="fa-solid fa-at text-pont-green mr-2"></i>
-                    {{ event.location?.email }}</div>
-                  <div class="flex items-center" *ngIf="event.location?.website">
-                    <i class="fa-solid fa-globe text-pont-green mr-2"></i>
-                    
-                    {{ event.location?.website }}</div>
-               
-                </div>
-              </div>
-              <div class="w-full">
-                <iframe title="Venue Location" width="100%" height="250" style="border:0;border-radius:8px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                  [src]="('https://www.google.com/maps?q=' + (event.location?.address || '') + '&output=embed') | safeUrl">
-                </iframe>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div *ngSwitchCase="'media'">
-          <div class="grid lg:grid-cols-2 gap-8" *ngIf="event.media?.length; else noMedia">
-            <div *ngFor="let a of event.media" class="border rounded-lg">
-              <div class="p-6 flex items-start gap-4">
-                <img [src]="a.image || '/assets/images/profile/user-b.png'" [alt]="a.name" width="80" height="80" class="rounded-full object-cover" />
+            <div class="p-4 space-y-2 text-sm text-gray-700">
+              <div *ngFor="let d of event.dates" class="flex items-center justify-between p-2 rounded bg-gray-50">
                 <div>
-                  <h3 class="text-xl font-bold text-gray-900">{{ a.title }}</h3>
-                  <p class="text-rose-700 font-medium" *ngIf="a.description">{{ a.description }}</p>
-                  <button (click)="a.url" class="bg-pont-green text-white px-4 py-1 rounded-lg">Visit</button>
+                  <span class="font-medium">{{ formatDate(d.date) }}</span>
+                  <span class="mx-1">•</span>
+                  <span>{{ formatTime(d.time) }}</span>
                 </div>
+                <i class="fa-regular fa-clock text-gray-400"></i>
               </div>
-             
             </div>
           </div>
-          <ng-template #noMedia>
-            <p class="text-gray-600">No Media listed.</p>
-          </ng-template>
         </div>
 
-        <div *ngSwitchCase="'artists'">
+        <div *ngSwitchCase="3">
+          <div class="border rounded-lg">
+            <div class="p-4 font-semibold flex items-center text-2xl">
+              <i class="fa-solid fa-music text-pont-green mr-2"></i>
+              Programme (Shows)
+            </div>
+            <div class="p-4 space-y-3">
+              <div *ngFor="let s of event.shows" class="border-l-4 border-green-700 pl-3">
+                <div class="font-semibold text-gray-900 text-sm">{{ s.composer }}</div>
+                <div class="text-gray-700 text-sm">{{ s.piece }}</div>
+                <div class="text-gray-500 text-xs" *ngIf="s.duration">{{ s.duration }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="4">
+          <div class="border rounded-lg p-4 space-y-3">
+            <div class="font-semibold flex items-center gap-2">
+              <i class="fa-regular fa-image text-pont-green"></i>
+              Main Image
+            </div>
+            <div class="mt-2">
+              <img [src]="event.imageUrl || '/assets/images/profile/c1.png'" class="w-full h-56 object-cover rounded" />
+            </div>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="5">
+          <div class="">
+            <div class="border rounded-lg p-4 space-y-3 lg:col-span-2">
+              <div class="font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-record-vinyl text-pont-green"></i>
+                Media (Videos / CDs)
+              </div>
+              <div class=" space-y-3 grid grid-cols-1 lg:grid-cols-3 gap-4" *ngIf="media.length; else noMedia">
+                <div *ngFor="let m of media" class="p-2 rounded bg-gray-50">
+                  <div class="flex flex-row space-x-4">
+                    <img [src]="m.image || '/assets/images/profile/c1.png'" class="w-16 h-16 object-cover rounded" />
+                    <div>
+                    <div class="text-xs text-gray-500">{{ m.id_media===1 ? 'Video' : 'CD' }}</div>
+                    <div class="font-semibold text-gray-900">{{ m.title }}</div>
+                    <div class="text-gray-700 text-sm" *ngIf="m.description">{{ m.description }}</div>
+                    <a *ngIf="m.url" [href]="m.url" target="_blank" rel="noopener" class="text-pont-green text-sm underline">Open Link</a>
+                    </div>
+                  </div>
+ </div>
+              </div>
+              <ng-template #noMedia>
+                <p class="text-sm text-gray-500">No media added yet.</p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="6">
           <div class="grid lg:grid-cols-2 gap-8" *ngIf="event.artists?.length; else noArtists">
             <div *ngFor="let a of event.artists" class="border rounded-lg">
               <div class="p-6 flex items-start gap-4">
@@ -220,8 +191,6 @@
             <p class="text-gray-600">No artists listed.</p>
           </ng-template>
         </div>
-
-       
       </div>
     </div>
   </section>
@@ -233,7 +202,7 @@
   <div class="bg-white border-b">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
       <div></div>
-      <a routerLink="/events" class="inline-flex items-center text-pont-rust hover:opacity-80">
+      <a routerLink="/hosts/console/events" class="inline-flex items-center text-pont-rust hover:opacity-80">
         <i class="fa-solid fa-arrow-left"></i>
         Back to Events
       </a>

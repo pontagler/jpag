@@ -1,0 +1,208 @@
+<div class="min-h-screen">
+  <!-- Hero Section -->
+  <section class="py-16 px-4" style="background-image: url('https://pekaexfrnhysdntbyqbl.supabase.co/storage/v1/object/public/hosts/fern1.png'); background-size: cover; background-position: center;">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left Content -->
+        <div class="space-y-8">
+          <div class="relative">
+            <h1 class="text-3xl md:text-5xl font-bold leading-none">
+              Notre raison d’être,<br />
+              <span class="text-pont-rust font-extrabold leading-none block mt-2">le soutien aux jeunes talents.</span>
+            </h1>
+            <div class="mt-6 text-gray-700 text-md md:text-md space-y-4">
+              <p>
+                La France dispose d'un vivier de jeunes talents, issus des excellentes écoles d’arts et des Conservatoires de France et d’Europe. <span class="font-bold">Une fois diplômés, ils ont besoin de se produire</span> pour parfaire leur formation et développer tout leur talent.
+              </p>
+              <p>
+                Notre ambition en donnant ces concerts et en créant ce festival a toujours été de les aider dans cette phase cruciale du début de leur carrière.
+              </p>
+              <p class="font-bold">
+                Car comment devenir des professionnels accomplis sans occasion de jouer ou de se produire ?
+              </p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button (click)="goToEvents()" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">
+              Donation
+            </button>
+            <button (click)="goToArtists()" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-8 py-3 text-lg rounded bg-transparent">
+              Become member
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Image -->
+        <div class="relative">
+          <div class="relative rounded-md overflow-hidden shadow-2xl">
+            <img src="https://pekaexfrnhysdntbyqbl.supabase.co/storage/v1/object/public/hosts/bg.png" alt="Musicians performing" class="w-full h-[400px] object-cover" />
+          </div>
+
+          <div class="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm rounded-full px-4 py-3 flex items-center space-x-3 shadow-lg transition-colors duration-300 hover:bg-pont-green hover:text-white cursor-pointer group">
+                  <div class="bg-pont-rust rounded-full p-2 w-10 h-10 transition-colors duration-300 group-hover:bg-white">
+                   
+                    <span class="w-6 h-6 fill-current text-white transition-colors duration-300 group-hover:text-pont-green">
+                    <i class="fa-solid fa-play ml-0.5"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-sm">Live Performance</div>
+                    <div class="text-xs text-gray-600 transition-colors duration-300 group-hover:text-white">
+                      Now Playing
+                    </div>
+                  </div>
+                </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upcoming Events Section -->
+  <section class="py-16 px-4 bg-slate-50 -mt-2" aria-labelledby="upcoming-events-heading">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 id="upcoming-events-heading" class="text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Don't miss these exceptional performances celebrating Brittany's rich musical heritage
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-8 mb-12">
+        <article class="group border-0 shadow-lg bg-white overflow-hidden rounded" *ngFor="let event of eventArray; let i = index" [attr.aria-label]="event.title">
+          <div class="grid md:grid-cols-5 gap-0 h-full">
+            <div class="md:col-span-2 relative h-full">
+              <img [src]="event.photo" [alt]="event.title" class="w-full h-full object-cover" loading="lazy" decoding="async" />
+              <div class="absolute top-4 left-4">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-pont-rust text-white">{{ event.event_type | titlecase }}</span>
+              </div>
+              <div class="absolute bottom-4 left-4">
+                <div class="flex flex-wrap space-x-2">
+
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold bg-pont-green text-white shadow" *ngFor="let x of event.instruments">{{ x.instrument | titlecase }}</span>
+                 </div>
+              </div>
+            </div>
+            <div class="md:col-span-3 p-6 flex flex-col justify-between h-full">
+              <div>
+                <h5 class="text-sm text-black w-fit">{{ event.edition_name | titlecase }} {{ event.edition_year | titlecase }}</h5>
+                <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
+  <div class="flex flex-wrap gap-1 leading-tight">
+                <ng-container *ngFor="let x of event.event_artists; let last = last; let i = index">
+                    <h2 class="text-sm lg:text-md font-medium text-pont-rust leading-tight mb-0">
+                      {{ x.fname | titlecase }} {{ x.lname | titlecase }}
+                      <span class="text-pont-rust" *ngIf="!last && i < event.event_artists.length - 2">, </span>
+                      <span class="text-pont-rust" *ngIf="i === event.event_artists.length - 2"> & </span>
+                    </h2>
+                  </ng-container>
+                  
+                  
+        </div>
+                <!-- <p class="text-pont-green font-semibold mb-3">{{ concert.artist }}</p> -->
+                
+                
+                <p class="text-gray-600 mb-4 leading-tight mt-2">{{ (event.teaser?.length > 30) ? ((event.teaser | slice:0:100) + '…') : event.teaser }}</p>
+                <div class="space-y-2 mb-2">
+                  <!-- <div class="flex items-center text-gray-700" *ngFor="let show of concert.shows | slice:0:2">
+                    <span class="font-medium text-sm">{{ show.date }}</span>
+                    <span class="mx-2">•</span>
+                    <span class="text-sm">{{ show.time }}</span>
+                  </div> -->
+
+                      <div class="space-y-2 text-sm text-gray-700">
+            <div *ngFor="let d of getVisibleDates(event, i)" class="flex items-center">
+                <i class="fa-regular fa-calendar text-pont-green mr-3" aria-hidden="true"></i>
+              <span class="font-medium">{{ formatDate(d.date) }}</span>
+              <span class="mx-2">-</span>
+              <span class="font-medium">{{ formatTime(d.time) }}</span>
+            </div>
+            <button *ngIf="event.event_dates?.length > 2" (click)="toggleDates(i)" class="text-green-700 underline text-xs mt-1">
+              {{ expandedEvents[i] ? 'hide' : 'show more' }}
+            </button>
+          </div>
+
+                  <div class="flex items-center text-gray-700">
+                    <i class="fa-solid fa-location-dot text-pont-green mr-3" aria-hidden="true"></i>
+                    <span>{{ event.location || 'Location' }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <a routerLink="/events" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-6 py-2 rounded" [attr.aria-label]="'Book ' + event.title">Book Now</a>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <ng-container *ngIf="!(eventArray?.length)">
+        <p class="text-center text-gray-600">No upcoming events at the moment. Please check back soon.</p>
+      </ng-container>
+
+      <div class="text-center">
+        <a routerLink="/events" class="border border-pont-rust text-pont-rust hover:bg-pont-rust hover:text-white px-8 py-3 rounded bg-transparent inline-block">
+          View All Events
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Artists Section -->
+  <section class="py-16 px-4 bg-cream">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Featured Artists</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Discover the talented musicians who bring our cultural heritage to life through their exceptional performances
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded overflow-hidden" *ngFor="let artist of artistArray">
+          <div class="relative overflow-hidden">
+            <img [src]="artist.photo" [alt]="artist.fname" class="w-full h-80 object-cover" />
+          </div>
+          <div class="p-6">
+            <h3 class="font-bold text-xl text-gray-900 mb-2">{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</h3>
+            <p class="text-pont-rust font-medium mb-2"> {{ artist.tagline  | titlecase}} </p>
+            <p class="text-sm text-gray-600 mb-3">{{ artist.short_bio }}</p>
+            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <div class="flex flex-wrap space-x-2">
+                @for(x of artist.instruments ; track x){
+              <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{ x.instrument | titlecase }}</span>
+                }
+              </div>  
+            </div>
+            <a routerLink="/artists" class="w-full bg-pont-green hover:bg-pont-green/90 text-white text-center block py-2 rounded">View Profile</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <a routerLink="/artists" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-8 py-3 rounded bg-transparent inline-block">
+          View All Artists
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="py-16 px-4 bg-pont-rust">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">Stay Connected</h2>
+      <p class="text-lg text-white mb-8">
+        Subscribe to our newsletter and never miss an upcoming event or artist announcement
+      </p>
+      <form class="space-y-4" (submit)="$event.preventDefault()">
+        <div class="grid md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Your Name" class="h-12 px-3 rounded border outline-none" />
+          <input type="text" placeholder="Code Postal" class="h-12 px-3 rounded border outline-none" />
+        </div>
+        <input type="email" placeholder="Your Email Address" class="h-12 px-3 rounded border w-full outline-none" />
+        <button type="submit" class="bg-white text-pont-rust px-8 py-3 text-lg rounded">Subscribe to Newsletter</button>
+      </form>
+    </div>
+  </section>
+</div>

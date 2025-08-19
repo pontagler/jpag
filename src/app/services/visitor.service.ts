@@ -38,7 +38,19 @@ async getLocationList(){
 }
 
 
+async getUpcomingEvents(){
+  const { data, error } = await supabase.rpc('get_event_list_home');
+    if (error) throw error;
+    return data;
 
+}
+
+async getFeaturedArtist(){
+  const { data, error } = await supabase.rpc('get_artists_for_home');
+    if (error) throw error;
+    return data;
+
+}
   
 
 }

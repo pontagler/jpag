@@ -1,0 +1,78 @@
+<div class="bg-cream min-h-screen">
+  <main>
+    <!-- Hero Section -->
+    <section class="relative h-[50vh] flex items-center justify-center text-white">
+      <img src="assets/images/profile/c1.png" alt="Breton landscape" class="absolute inset-0 w-full h-full object-cover z-0" />
+      <div class="absolute inset-0 bg-black/50 z-10"></div>
+      <div class="relative z-20 text-center">
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight">About Pont Ar Gler</h1>
+        <p class="mt-4 max-w-2xl mx-auto text-xl md:text-2xl">
+          Connecting Cultures Through the Power of Breton Music
+        </p>
+      </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-4xl font-bold text-gray-800 mb-6">Our Story</h2>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          Founded in the heart of Brittany, Pont Ar Gler was born from a deep love for the region's rich musical heritage. Our mission is to build a bridge ("pont" in Breton) between talented local artists ("gler") and a global audience that appreciates authentic, traditional, and contemporary Breton music. We believe in the power of music to transcend boundaries and foster a sense of community.
+        </p>
+      </div>
+    </section>
+
+    <!-- Meet the Team Section -->
+    <section class="py-20 px-4">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-4xl font-bold text-center text-gray-800 mb-12">Meet the Team</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div class="text-center" *ngFor="let member of teamMembers">
+            <img [src]="member.image" [alt]="member.name" width="150" height="150" class="rounded-full mx-auto mb-4 shadow-lg" />
+            <h3 class="text-2xl font-bold text-pont-green">{{ member.name }}</h3>
+            <p class="text-md font-semibold text-pont-rust mb-2">{{ member.role }}</p>
+            <p class="text-gray-600">{{ member.bio }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
+        <div>
+          <h2 class="text-4xl font-bold text-gray-800 mb-4">Get In Touch</h2>
+          <p class="text-lg text-gray-600 mb-8">
+            We'd love to hear from you! Whether you're an artist, a venue owner, or a music lover, feel free to reach out.
+          </p>
+          <div class="space-y-4">
+            <div class="flex items-center space-x-4">
+              <span class="w-6 h-6 text-pont-green">📧</span>
+              <a href="mailto:contact at pontargler.com" class="text-gray-700 hover:text-pont-rust">contact{{`&#64`}}pontargler.com</a>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="w-6 h-6 text-pont-green">📞</span>
+              <span class="text-gray-700">+33 1 23 45 67 89</span>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="w-6 h-6 text-pont-green">📍</span>
+              <span class="text-gray-700">123 Rue de la Musique, 35000 Rennes, Brittany</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-8 shadow-xl rounded-2xl bg-white">
+          <form (submit)="onSubmit($event)">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <input placeholder="First Name" class="h-12 border rounded px-3" />
+              <input placeholder="Last Name" class="h-12 border rounded px-3" />
+            </div>
+            <input placeholder="Email Address" type="email" class="mb-6 h-12 w-full border rounded px-3" />
+            <textarea placeholder="Your Message" rows="5" class="mb-6 w-full border rounded p-3"></textarea>
+            <button type="submit" class="w-full h-12 text-lg bg-pont-green hover:bg-pont-green/90 text-white rounded-xl">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

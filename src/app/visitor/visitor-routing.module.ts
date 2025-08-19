@@ -8,6 +8,7 @@ import { LocationsComponent } from './locations/locations.component';
 import { EventsComponent } from './events/events.component';
 import { DetailComponent } from './events/detail/detail.component';
 import { HomeComponent } from './home/home.component';
+import { AboutComponent } from './about/about.component';
 
 const routes: Routes = [
     {path: '',component: VisitorComponent,
@@ -19,6 +20,7 @@ const routes: Routes = [
         {path: 'locations/:id', component:LocationDetailComponent, data: { urlID: 314}},
         {path: 'events', component:EventsComponent, data: { urlID: 315}},
         {path: 'events/:id', component:DetailComponent, data: { urlID: 316}},
+        {path: 'about', component:AboutComponent, data: { urlID: 318}},
       ]
   },
 ];

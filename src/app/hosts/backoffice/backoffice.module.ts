@@ -8,6 +8,8 @@ import { ArtistComponent, TruncatePipe } from './artist/artist.component';
 import { SharedModule } from '../../shared/shared.module';
 import { ArtistCreateComponent } from './artist-create/artist-create.component';
 import { EventsComponent } from './events/events.component';
+import { AccountComponent } from './account/account.component';
+import { AccountDetailComponent } from './account/detail/detail.component';
 
 
 @NgModule({
@@ -15,7 +17,9 @@ import { EventsComponent } from './events/events.component';
     BackofficeComponent,
     ArtistComponent,
     ArtistCreateComponent,
-    EventsComponent
+    EventsComponent,
+    AccountComponent,
+    AccountDetailComponent
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,97 @@
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6" *ngIf="!loading; else loadingTpl">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900">Account Detail</h2>
+      <p class="text-sm text-gray-500">ID: {{ user?.id }} / {{ user?.id_user }}</p>
+    </div>
+  </div>
+
+  <div class="border-b border-gray-200 mb-4">
+    <nav class="flex gap-4" aria-label="Tabs">
+      <button (click)="setTab('details')" [class]="activeTab==='details' ? 'px-3 py-2 text-sm font-medium border-b-2 border-black' : 'px-3 py-2 text-sm text-gray-500'">Details</button>
+      <button (click)="setTab('system')" [class]="activeTab==='system' ? 'px-3 py-2 text-sm font-medium border-b-2 border-black' : 'px-3 py-2 text-sm text-gray-500'">System</button>
+    </nav>
+  </div>
+
+  <div *ngIf="activeTab==='details'">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <div class="text-xs text-gray-500">id</div>
+        <div class="text-sm text-gray-900">{{ user?.id }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">id_user</div>
+        <div class="text-sm text-gray-900">{{ user?.id_user }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">id_role</div>
+        <div class="text-sm text-gray-900">{{ user?.id_role }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">first_name</div>
+        <div class="text-sm text-gray-900">{{ user?.first_name }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">last_name</div>
+        <div class="text-sm text-gray-900">{{ user?.last_name }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">email</div>
+        <div class="text-sm text-gray-900">{{ user?.email }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">phone</div>
+        <div class="text-sm text-gray-900">{{ user?.phone }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">city</div>
+        <div class="text-sm text-gray-900">{{ user?.city }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">proviance</div>
+        <div class="text-sm text-gray-900">{{ user?.proviance }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">country</div>
+        <div class="text-sm text-gray-900">{{ user?.country }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">created_at</div>
+        <div class="text-sm text-gray-900">{{ user?.created_at || user?.created_on | date:'yyyy-MM-dd HH:mm' }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">created_by</div>
+        <div class="text-sm text-gray-900">{{ user?.created_by }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">last_updated</div>
+        <div class="text-sm text-gray-900">{{ user?.last_updated || user?.updated_at | date:'yyyy-MM-dd HH:mm' }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">last_updated_by</div>
+        <div class="text-sm text-gray-900">{{ user?.last_updated_by }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500">rolename</div>
+        <div class="text-sm text-gray-900">{{ user?.rolename }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab==='system'" class="space-y-4">
+    <div class="rounded-lg border border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium text-gray-900">Reset Password</div>
+          <div class="text-xs text-gray-500">Set a new password for this user</div>
+        </div>
+        <button class="px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800" (click)="resetPassword()">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="p-6 text-sm text-gray-500">Loading...</div>
+  
+</ng-template>

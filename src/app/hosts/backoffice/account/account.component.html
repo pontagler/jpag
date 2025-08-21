@@ -1,1 +1,161 @@
-<p>account works!</p>
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+        <i class="fa-solid fa-user"></i>
+      </span>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Accounts</h2>
+        <p class="text-sm text-gray-500">Browse and manage user accounts</p>
+      </div>
+    </div>
+    <button (click)="createNew()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800">
+      <i class="fa-solid fa-plus"></i>
+      <span>Create New Account</span>
+    </button>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="flex flex-col">
+      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Search by name, email, phone</label>
+      <div class="relative mt-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input [(ngModel)]="searchQuery" type="text" placeholder="Type to search..." class="w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
+    </div>
+
+    <div class="flex flex-col">
+      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Filter by Status</label>
+      <div class="relative mt-1">
+        <i class="fa-regular fa-flag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <select [(ngModel)]="statusFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+          <option value="All">All</option>
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+        </select>
+        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+      </div>
+    </div>
+
+    <div class="flex flex-col">
+      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Filter by Country</label>
+      <div class="relative mt-1">
+        <i class="fa-solid fa-globe absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <select [(ngModel)]="countryFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+          <option value="All">All</option>
+          <option *ngFor="let c of uniqueCountries" [value]="c">{{ c }}</option>
+        </select>
+        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto rounded-lg ring-1 ring-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50/80 backdrop-blur sticky top-0 z-10 text-left">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('id_user')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-hashtag text-gray-400"></i>
+              <span>User ID</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='id_user' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='id_user' && sortDirection==='desc',
+                'fa-sort': sortKey!=='id_user'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('name')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-id-card text-gray-400"></i>
+              <span>Name</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='name' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='name' && sortDirection==='desc',
+                'fa-sort': sortKey!=='name'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('email')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-envelope text-gray-400"></i>
+              <span>Email</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='email' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='email' && sortDirection==='desc',
+                'fa-sort': sortKey!=='email'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('phone')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-phone text-gray-400"></i>
+              <span>Phone</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='phone' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='phone' && sortDirection==='desc',
+                'fa-sort': sortKey!=='phone'
+              }"></i>
+            </span>
+          </th>
+         
+         
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('createdAt')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-clock text-gray-400"></i>
+              <span>Created At</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='createdAt' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='createdAt' && sortDirection==='desc',
+                'fa-sort': sortKey!=='createdAt'
+              }"></i>
+            </span>
+          </th>
+         
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('status')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-circle text-gray-400"></i>
+              <span>Status</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='status' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='status' && sortDirection==='desc',
+                'fa-sort': sortKey!=='status'
+              }"></i>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr *ngFor="let a of displayedAccounts" class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="viewDetail(a)">
+          <td class="px-4 py-3  font-mono text-sm text-gray-800">{{ a.id_user | truncate:8 }}</td>
+          <td class="px-4 py-3 text-gray-900 text-sm">{{ a.name }}</td>
+          <td class="px-4 py-3 text-gray-700 text-sm">{{ a.email }}</td>
+          <td class="px-4 py-3 text-gray-700 text-sm">{{ a.phone }}</td>
+    
+          <td class="px-4 py-3 whitespace-nowrap text-gray-700 text-sm">{{ a.createdAt | date:'yyyy-MM-dd' }}</td>
+          
+          <td class="px-4 py-3 text-sm">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="a.status === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+              <i class="fa-solid" [ngClass]="a.status === 1 ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+              {{ a.status === 1 ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="displayedAccounts.length === 0">
+          <td colspan="9" class="px-6 py-12 text-center text-sm">
+            <div class="flex flex-col items-center gap-2 text-gray-500">
+              <i class="fa-regular fa-folder-open text-3xl"></i>
+              <p class="text-sm">No accounts found</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center justify-between text-sm text-gray-500">
+    <div>Showing {{ displayedAccounts.length }} result<span *ngIf="displayedAccounts.length !== 1">s</span></div>
+  </div>
+</div>

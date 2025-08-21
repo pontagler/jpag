@@ -15,6 +15,8 @@ import { ArtistDetailComponent } from './artist/artist-detail/artist-detail.comp
 import { RequestsComponent } from './requests/requests.component';
 import { RequestDetailComponent } from './requests/request-detail/request-detail.component';
 import { CreateEventComponent } from './events/create-event/create-event.component';
+import { AccountDetailComponent } from './account/detail/detail.component';
+import { CreateAccountComponent } from './account/create-account/create-account.component';
 
 const routes: Routes = [
   {path:'', component: BackofficeComponent, children:[
@@ -32,6 +34,8 @@ const routes: Routes = [
     {path:'locations/:id', component: LocationDetailComponent, data:{urlID:442}},
     {path:'hosts', component: HostsComponent, data:{urlID:45}},
     {path:'account', component: AccountComponent, data:{urlID:46}},
+    {path:'account/create', component: CreateAccountComponent, data:{urlID:460}},
+    {path:'account/:id', component: AccountDetailComponent, data:{urlID:461}},
     {path:'requests', component: RequestsComponent, data:{urlID:47}},
     {path:'requests/:id', component: RequestDetailComponent, data:{urlID:48}},
   ]}

@@ -1,0 +1,51 @@
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6">
+  <div class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-900">Create New Account</h2>
+    <p class="text-sm text-gray-500">Add an admin account</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">First name</label>
+        <input formControlName="fname" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="John" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Last name</label>
+        <input formControlName="lname" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Doe" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Email</label>
+        <input formControlName="email" type="email" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="john@example.com" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Phone</label>
+        <input formControlName="phone" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="+1 555 123 4567" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">City</label>
+        <input formControlName="city" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Toronto" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Province</label>
+        <input formControlName="province" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ontario" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Country</label>
+        <input formControlName="country" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Canada" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Password</label>
+        <input formControlName="password" type="password" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••" />
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" [disabled]="submitting" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800 disabled:opacity-50">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span>{{ submitting ? 'Creating...' : 'Create Account' }}</span>
+      </button>
+      <button type="button" class="px-4 py-2 rounded-lg border" (click)="cancel()">Cancel</button>
+    </div>
+  </form>
+</div>

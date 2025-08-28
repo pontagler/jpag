@@ -33,6 +33,12 @@
           <p class="text-md font-medium">Requirements</p>
         </div>
 
+             <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(8)"
+        [ngClass]="{'bg-black text-white': activeTab === 8, 'bg-white text-black hover:bg-gray-50': activeTab !== 8}">
+         <i class="fa-regular fa-rectangle-list text-md mt-1"></i>
+          <p class="text-md font-medium">Timeoff</p>
+        </div>
+
 
           <div class="flex flex-row space-x-4 w-full rounded-xl p-3 cursor-pointer transition-colors" (click)="isActiveTab(3)"
         [ngClass]="{'bg-black text-white': activeTab === 3, 'bg-white text-black hover:bg-gray-50': activeTab !== 3}">

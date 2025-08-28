@@ -9,6 +9,7 @@ import { InstrumentsComponent } from './instruments/instruments.component';
 import { MediaComponent } from './media/media.component';
 import { AccountComponent } from './account/account.component';
 import { RequirementComponent } from '../../artistspace/profile/requirement/requirement.component';
+import { TimeoffComponent } from './timeoff/timeoff.component';
 
 const routes: Routes = [
   {path: '', component: ProfileComponent,
@@ -22,6 +23,7 @@ const routes: Routes = [
     {path: 'events', component: EventsComponent, },
     {path: 'account', component: AccountComponent },
     {path: 'requirement', component: RequirementComponent },
+    {path: 'timeoff', component: TimeoffComponent },
   ]
     
 

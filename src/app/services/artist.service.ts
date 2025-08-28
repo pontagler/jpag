@@ -1043,6 +1043,31 @@ async editArtistRequirement(arr:any, id:any){
   return data
 }
 
+async addArtistTimeOff(arr:any){
+  const {data, error} = await supabase.from('artist_timeoff').insert(arr)
+  if(error) throw error
+  return data
+}
+
+async getArtistTimeOff(id:any){
+  const {data, error} = await supabase.from('artist_timeoff').select().eq('id_artist', id)
+  if(error) throw error
+  return data
+}
+
+async deleteArtistTimeOff(id:any){
+  const {data, error} = await supabase.from('artist_timeoff').delete().eq('id', id)
+  if(error) throw error
+  return data
+}
+
+async editArtistTimeOff(arr:any, id:any){
+  const {data, error} = await supabase.from('artist_timeoff').update(arr).eq('id', id)
+  if(error) throw error
+  return data
+}
+
+
 
 
 

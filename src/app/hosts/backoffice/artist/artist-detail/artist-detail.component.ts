@@ -61,6 +61,19 @@ export class ArtistDetailComponent implements OnInit {
     foodRestriction: '',
     requirements: ''
   };
+  // Time-off section state
+  timeoffShowEdit: boolean = true;
+  startDate: string = '';
+  endDate: string = '';
+  note: string = '';
+  editingIndex: number | null = null;
+  timeoffEntries: Array<{
+    id?: number;
+    startDate: string;
+    endDate: string;
+    days: number;
+    note?: string;
+  }> = [];
   // Form properties
   instruments: any = [];                   // Instruments array
   changeSystem: boolean = true;            // System settings edit state
@@ -118,6 +131,8 @@ export class ArtistDetailComponent implements OnInit {
         this.loading = false;
         // Load requirement section data
         await this.loadArtistRequirement();
+        // Load time-off section data
+        await this.loadArtistTimeOff();
       } else {
         this.error = 'Artist ID not found in route parameters';
         this.loading = false;
@@ -148,6 +163,22 @@ export class ArtistDetailComponent implements OnInit {
       }
     } catch (e) {
       console.error('Failed to load artist requirement', e);
+    }
+  }
+
+  async loadArtistTimeOff(): Promise<void> {
+    if (!this.artistID) return;
+    try {
+      const data = await this.artistService.getArtistTimeOff(this.artistID);
+      this.timeoffEntries = (data || []).map((row: any) => ({
+        id: row.id,
+        startDate: row.start_date,
+        endDate: row.end_data,
+        days: this.calculateInclusiveDays(row.start_date, row.end_data),
+        note: row.notes || ''
+      }));
+    } catch (e) {
+      console.error('Failed to load timeoff', e);
     }
   }
 
@@ -193,6 +224,118 @@ export class ArtistDetailComponent implements OnInit {
     if (str.length <= 4) return str;
     const last4 = str.slice(-4);
     return 'x'.repeat(str.length - 4) + last4;
+  }
+
+  get computedDays(): number {
+    if (!this.startDate || !this.endDate) return 0;
+    const start = new Date(this.startDate);
+    const end = new Date(this.endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
+    const diffMs = end.setHours(0,0,0,0) - start.setHours(0,0,0,0);
+    if (diffMs < 0) return 0;
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  private calculateInclusiveDays(start: string, end: string): number {
+    const s = new Date(start);
+    const e = new Date(end);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 0;
+    const diffMs = e.setHours(0,0,0,0) - s.setHours(0,0,0,0);
+    if (diffMs < 0) return 0;
+    return Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  resetTimeoffForm(): void {
+    this.startDate = '';
+    this.endDate = '';
+    this.note = '';
+    this.editingIndex = null;
+  }
+
+  addOrUpdateTimeoff(): void {
+    if (!this.startDate || !this.endDate) return;
+    const days = this.computedDays;
+    if (days <= 0) return;
+    if (this.editingIndex !== null) {
+      this.updateTimeoffEntry(this.editingIndex);
+    } else {
+      this.addTimeoffEntry();
+    }
+  }
+
+  private async addTimeoffEntry(): Promise<void> {
+    if (!this.artistID) return;
+    const payload: any = {
+      id_artist: this.artistID,
+      start_date: this.startDate,
+      end_data: this.endDate,
+      notes: this.note?.trim() || null,
+      created_by: this.loggedUser
+    };
+    try {
+      await this.artistService.addArtistTimeOff(payload);
+      await this.loadArtistTimeOff();
+      this.resetTimeoffForm();
+      this.timeoffShowEdit = false;
+      this.alertService.showAlert('Successful', 'Time off added', 'success');
+    } catch (e: any) {
+      console.error('Failed to add timeoff', e);
+      this.alertService.showAlert('Internal Error', e?.message || 'Failed to add', 'error');
+    }
+  }
+
+  private async updateTimeoffEntry(index: number): Promise<void> {
+    if (!this.artistID) return;
+    const target = this.timeoffEntries[index];
+    if (!target || target.id == null) return;
+    const payload: any = {
+      id_artist: this.artistID,
+      start_date: this.startDate,
+      end_data: this.endDate,
+      notes: this.note?.trim() || null,
+      updated_by: this.loggedUser,
+      last_updated_on: new Date().toISOString()
+    };
+    try {
+      await this.artistService.editArtistTimeOff(payload, target.id);
+      await this.loadArtistTimeOff();
+      this.resetTimeoffForm();
+      this.timeoffShowEdit = false;
+      this.alertService.showAlert('Successful', 'Time off updated', 'success');
+    } catch (e: any) {
+      console.error('Failed to update timeoff', e);
+      this.alertService.showAlert('Internal Error', e?.message || 'Failed to update', 'error');
+    }
+  }
+
+  editTimeoff(index: number): void {
+    const item = this.timeoffEntries[index];
+    if (!item) return;
+    this.startDate = item.startDate;
+    this.endDate = item.endDate;
+    this.note = item.note || '';
+    this.editingIndex = index;
+    this.timeoffShowEdit = true;
+  }
+
+  async deleteTimeoff(index: number): Promise<void> {
+    const item = this.timeoffEntries[index];
+    if (!item) return;
+    if (item.id == null) {
+      this.timeoffEntries.splice(index, 1);
+      return;
+    }
+    try {
+      await this.artistService.deleteArtistTimeOff(item.id);
+      await this.loadArtistTimeOff();
+      if (this.editingIndex === index) {
+        this.resetTimeoffForm();
+      }
+      this.alertService.showAlert('Successful', 'Time off deleted', 'success');
+    } catch (e: any) {
+      console.error('Failed to delete timeoff', e);
+      this.alertService.showAlert('Internal Error', e?.message || 'Failed to delete', 'error');
+    }
   }
 
   /**

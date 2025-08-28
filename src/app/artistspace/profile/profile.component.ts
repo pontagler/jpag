@@ -80,6 +80,11 @@ case 7:
     this.router.navigate(['/artistspace/profile/requirement']);
 break;
 
+case 8:
+
+    this.router.navigate(['/artistspace/profile/timeoff']);
+break;
+
 default:
     this.router.navigate(['/artistspace/profile/artist']);
 }

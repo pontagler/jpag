@@ -2,7 +2,7 @@
 
 	<section
 		class="relative bg-orange-50"
-		style="background-image: url('/assets/images/bg-venue.png'); background-size: cover; background-position: center;"
+		style="background-image: url('/assets/images/background/bg1.webp'); background-size: cover; background-position: center;"
 	>
 		<div class="absolute inset-0 z-0"></div>
 		<div class="relative z-10 text-center px-9 py-16">
@@ -215,6 +215,7 @@
 										<div>
                                             <p class="text-lg">{{e.edition_name | titlecase}} {{e.edition_year}} </p>
 											<h3 class="text-xl font-bold text-gray-900">{{e?.title || e?.name}}</h3>
+											<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
 											<p class="text-sm text-gray-500">
 												<i class="fa-solid fa-location-dot mr-1"></i>
 												{{e?.venue || e?.location || e?.city}}
@@ -222,6 +223,7 @@
 										</div>
 										<p (click)="goToEventDetail(e.id)" class="cursor-pointer inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">View Details</p>
 									</div>
+									
 									<p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(e?.description || '') | slice:0:180}}{{(e?.description?.length || 0) > 180 ? '…' : ''}}</p>
 									<div class="space-y-1 text-sm text-gray-600 mt-3 min-h-[2.75rem]">
 										@for(d of (e?.shows || []); track d; let i = $index){

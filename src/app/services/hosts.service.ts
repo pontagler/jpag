@@ -49,6 +49,14 @@ import { ArtistService } from './artist.service';
       }
 
 
+
+      async getDashbaordCount(){
+        const {data, error} = await supabase.from('vw_dashboard_stats').select('*');
+        if(error) throw error
+        return data;
+      }
+
+
       
     
 

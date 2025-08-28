@@ -44,7 +44,7 @@ export class LoginComponent {
               }
 
               this.artistService.setArtistProfileID(res.id);
-              this.router.navigate(['hosts/console/artists']);
+              this.router.navigate(['hosts/console/home']);
               
 
 

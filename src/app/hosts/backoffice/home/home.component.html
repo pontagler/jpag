@@ -1,1 +1,74 @@
-<p>home works!</p>
+<div class="px-4 md:px-6 lg:px-8 py-6">
+  <h2 class="text-2xl md:text-3xl font-semibold text-zinc-800 mb-6">Analytics</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
+    <!-- Upcoming Events -->
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-zinc-500">Upcoming Events</div>
+          <div class="text-3xl font-bold text-zinc-900 mt-1">{{ upcomingEventsCount }}</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-lime-100 flex items-center justify-center">
+        
+          <i class="fa-regular fa-calendar-check text-lime-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events This Month -->
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-zinc-500">Events This Month</div>
+          <div class="text-3xl font-bold text-zinc-900 mt-1">{{ eventsThisMonthCount }}</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+        
+          <i class="fa-regular fa-calendar text-orange-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Artists -->
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-zinc-500">Artists</div>
+          <div class="text-3xl font-bold text-zinc-900 mt-1">{{ artistsCount }}</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center">
+          
+          <i class="fa-regular fa-circle-play text-sky-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Locations -->
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-zinc-500">Locations</div>
+          <div class="text-3xl font-bold text-zinc-900 mt-1">{{ locationsCount }}</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+       
+          <i class="fa-regular fa-map text-emerald-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Artist Requests Pending -->
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 p-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-zinc-500">Pending Requests</div>
+          <div class="text-3xl font-bold text-zinc-900 mt-1">{{ artistRequestsPendingCount }}</div>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-fuchsia-100 flex items-center justify-center">
+          <i class="fa-regular fa-hourglass-half text-fuchsia-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -25,7 +25,9 @@ export class ArtistsComponent implements OnInit{
   ngOnInit(): void {
     if (!this.allArtists || this.allArtists.length === 0) {
       this.getArtistForVisitor();
+     
     }
+     this.visitorService.setRouteID(3);
   }
 
   allArtists: any[] = [];

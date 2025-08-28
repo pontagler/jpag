@@ -1024,8 +1024,24 @@ async artistRequest(arr:any, id:any){
   return data
 }
 
+async getArtistRequirement(id:any){
+  const {data, error} = await supabase.from('artist_requirement').select().eq('id_artist', id)
+  if(error) throw error
+  return data
+}
 
 
+async addArtistRequirement(arr:any){
+  const {data, error} = await supabase.from('artist_requirement').insert(arr)
+  if(error) throw error
+  return data
+}
+
+async editArtistRequirement(arr:any, id:any){
+  const {data, error} = await supabase.from('artist_requirement').update(arr).eq('id', id)
+  if(error) throw error
+  return data
+}
 
 
 

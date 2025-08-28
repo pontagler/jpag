@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AlertService } from '../../services/alert.service';
+import { VisitorService } from '../../services/visitor.service';
 
 @Component({
   selector: 'app-header',
@@ -11,23 +12,32 @@ import { AlertService } from '../../services/alert.service';
   standalone: false,
 })
 export class HeaderComponent {
-
+urlID:any;
   constructor(
     private route: ActivatedRoute, 
     private auth: AuthService, 
     private router: Router,
-    private alertService: AlertService
-  ){}
+    private alertService: AlertService,
+    private visitorService: VisitorService
+  ){
+    effect(() => {
+       this.urlID = this.visitorService.getRouteID();
+     
+    });
+  }
+  
 
   ngOnInit() {
     // You can access route data here if needed
-    this.urlID = this.route.snapshot.data['urlID'];
+   
+  
   }
 
-  urlID:any; // Default value, can be set dynamically based on route or other logic
+
 
   // CSS for the header menu items based ont he urlID
 getMenuItemClass(urlID: any) {
+   console.log('urlID changed function called:', this.urlID);
   
   if(urlID == this.urlID){
    return 'border-b-2 border-solid  border-pont-green text-pont-green hover:text-green-700';

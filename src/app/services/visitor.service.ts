@@ -51,6 +51,19 @@ async getFeaturedArtist(){
     return data;
 
 }
+
+routeID = signal<any>(1);
+ 
+setRouteID(id:any){
+  if (this.routeID() !== id) {
+      this.routeID.set(id);
+    }
+}
+
+getRouteID(){
+  return this.routeID();
+}
+
   
 
 }

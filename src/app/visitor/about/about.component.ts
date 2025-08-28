@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { VisitorService } from '../../services/visitor.service';
 
 @Component({
   selector: 'app-about',
@@ -7,7 +8,14 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   templateUrl: './about.component.html'
 })
-export class AboutComponent {
+export class AboutComponent implements OnInit {
+
+  constructor(private visitorService: VisitorService){
+     
+  }
+  ngOnInit(): void {
+        this.visitorService.setRouteID(5);
+  }
   teamMembers = [
     {
       name: 'Jean-Pierre',

@@ -3,6 +3,7 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventService } from '../../services/event.service';
+import { VisitorService } from '../../services/visitor.service';
 
 @Component({
   selector: 'app-events',
@@ -14,7 +15,8 @@ export class EventsComponent implements OnInit {
 
 	constructor(
 		private eventService: EventService,
-		private router: Router
+		private router: Router,
+		private visitorService: VisitorService
 	) {}
 
 	// Data
@@ -43,6 +45,7 @@ export class EventsComponent implements OnInit {
 
 	async ngOnInit(): Promise<void> {
 		await this.loadEvents();
+		   this.visitorService.setRouteID(2);
 	}
 
 	private async loadEvents(): Promise<void> {

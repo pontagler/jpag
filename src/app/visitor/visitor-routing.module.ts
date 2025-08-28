@@ -13,14 +13,14 @@ import { AboutComponent } from './about/about.component';
 const routes: Routes = [
     {path: '',component: VisitorComponent,
       children: [
-        {path: '', component:HomeComponent, data: { urlID: 317 }},
-        {path: 'artists', component:ArtistsComponent, data: { urlID: 311 }},
-        {path: 'artists/:id', component:ArtistDetailComponent, data: { urlID: 312}},
-        {path: 'locations', component:LocationsComponent, data: { urlID: 313}},
-        {path: 'locations/:id', component:LocationDetailComponent, data: { urlID: 314}},
-        {path: 'events', component:EventsComponent, data: { urlID: 315}},
-        {path: 'events/:id', component:DetailComponent, data: { urlID: 316}},
-        {path: 'about', component:AboutComponent, data: { urlID: 318}},
+        {path: '', component:HomeComponent},
+        {path: 'artists', component:ArtistsComponent },
+        {path: 'artists/:id', component:ArtistDetailComponent},
+        {path: 'locations', component:LocationsComponent},
+        {path: 'locations/:id', component:LocationDetailComponent},
+        {path: 'events', component:EventsComponent},
+        {path: 'events/:id', component:DetailComponent},
+        {path: 'about', component:AboutComponent},
       ]
   },
 ];

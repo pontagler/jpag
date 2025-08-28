@@ -43,6 +43,24 @@ export class ArtistDetailComponent implements OnInit {
   isEditMode: boolean = false;             // Edit mode toggle
   isSubmitting: boolean = false;           // Submission state indicator
   loggedUser: any;                      // Logged Current user
+  // Requirement section state
+  reqShowEdit: boolean = false;
+  artistRequirement: any = [];
+  reqFormData: {
+    ribNumber: string;
+    gusoNumber: string;
+    securityNumber: string;
+    alergies: string;
+    foodRestriction: string;
+    requirements: string;
+  } = {
+    ribNumber: '',
+    gusoNumber: '',
+    securityNumber: '',
+    alergies: '',
+    foodRestriction: '',
+    requirements: ''
+  };
   // Form properties
   instruments: any = [];                   // Instruments array
   changeSystem: boolean = true;            // System settings edit state
@@ -98,6 +116,8 @@ export class ArtistDetailComponent implements OnInit {
         console.log('Artist Profile loaded:', this.instruments);
         console.log('Sample instrument structure:', this.instruments[0]);
         this.loading = false;
+        // Load requirement section data
+        await this.loadArtistRequirement();
       } else {
         this.error = 'Artist ID not found in route parameters';
         this.loading = false;
@@ -108,6 +128,71 @@ export class ArtistDetailComponent implements OnInit {
       this.loading = false;
       console.error('Error loading artist profile:', error);
     }
+  }
+
+  async loadArtistRequirement(): Promise<void> {
+    if (!this.artistID) return;
+    try {
+      const data = await this.artistService.getArtistRequirement(this.artistID);
+      this.artistRequirement = data || [];
+      if (Array.isArray(data) && data.length > 0) {
+        const row = data[0];
+        this.reqFormData = {
+          ribNumber: row?.rib || '',
+          gusoNumber: row?.guso_nb || '',
+          securityNumber: row?.security_nb || '',
+          alergies: row?.arlergies || '',
+          foodRestriction: row?.food_restriction || '',
+          requirements: row?.requirement || ''
+        };
+      }
+    } catch (e) {
+      console.error('Failed to load artist requirement', e);
+    }
+  }
+
+  async onReqSubmit(): Promise<void> {
+    if (!this.artistID) return;
+    const payload: any = {
+      id_artist: this.artistID,
+      rib: this.reqFormData.ribNumber || null,
+      guso_nb: this.reqFormData.gusoNumber || null,
+      security_nb: this.reqFormData.securityNumber || null,
+      arlergies: this.reqFormData.alergies || null,
+      food_restriction: this.reqFormData.foodRestriction || null,
+      requirement: this.reqFormData.requirements || null
+    };
+
+    try {
+      if (!Array.isArray(this.artistRequirement) || this.artistRequirement.length === 0) {
+        await this.artistService.addArtistRequirement({
+          ...payload,
+          created_by: this.loggedUser
+        });
+      } else {
+        const existing = this.artistRequirement[0];
+        await this.artistService.editArtistRequirement({
+          ...payload,
+          updated_by: this.loggedUser,
+          last_updated_on: new Date().toISOString()
+        }, existing.id);
+      }
+
+      await this.loadArtistRequirement();
+      this.reqShowEdit = false;
+      this.alertService.showAlert('Successful', 'Requirements saved', 'success');
+    } catch (e: any) {
+      console.error('Failed to save artist requirement', e);
+      this.alertService.showAlert('Internal Error', e?.message || 'Failed to save', 'error');
+    }
+  }
+
+  maskRib(value: string | null | undefined): string {
+    if (!value) return '-';
+    const str = String(value);
+    if (str.length <= 4) return str;
+    const last4 = str.slice(-4);
+    return 'x'.repeat(str.length - 4) + last4;
   }
 
   /**

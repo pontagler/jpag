@@ -74,6 +74,12 @@ case 6:
 
     this.router.navigate(['/artistspace/profile/account']);
 break;
+
+case 7:
+
+    this.router.navigate(['/artistspace/profile/requirement']);
+break;
+
 default:
     this.router.navigate(['/artistspace/profile/artist']);
 }

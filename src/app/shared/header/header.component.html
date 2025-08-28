@@ -19,72 +19,93 @@
         />
       </div>
       <nav class="hidden md:flex items-center space-x-14">
-        <a
-          href="/#discover"
+        <!-- <a
+          href="/"
           [ngClass]="
             'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-            getMenuItemClass(1)
+            getMenuItemClass(317)
           "
         >
           Discover
           <span
-            [ngClass]="(urlID === 1) ? 'w-full' : 'w-0 group-hover:w-full'"
+            [ngClass]="(urlID === 317) ? 'w-full' : 'w-0 group-hover:w-full'"
             class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
           ></span>
-        </a>
-        <a
-          href="/concerts"
-          [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-            getMenuItemClass(2)
-          "
-        >
-          Events
-          <span
-            [ngClass]="(urlID === 2) ? 'w-full' : 'w-0 group-hover:w-full'"
-            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-          ></span>
-        </a>
-        <a
-          href="/artists"
-          [ngClass]="
-            'text-pont-green font-medium text-xl relative group ' +
-            getMenuItemClass(3)
-          "
-        >
-          Artists
-          <span
-            [ngClass]="(urlID === 3) ? 'w-full' : 'w-0 group-hover:w-full'"
-            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-          ></span>
-        </a>
+        </a> -->
 
         <a
-          href="/#venues"
-          [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-            getMenuItemClass(4)
-          "
-        >
-          Locations
-          <span
-            [ngClass]="(urlID === 4) ? 'w-full' : 'w-0 group-hover:w-full'"
-            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-          ></span>
-        </a>
-        <a
-          href="/#about"
-          [ngClass]="
-            'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-            getMenuItemClass(5)
-          "
-        >
-          About
-          <span
-            [ngClass]="(urlID === 5) ? 'w-full' : 'w-0 group-hover:w-full'"
-            class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-          ></span>
-        </a>
+  [routerLink]="'/'"
+  [ngClass]="
+    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
+    getMenuItemClass(1)
+  "
+>
+  Discover
+  <span
+    [ngClass]="(urlID === 1) ? 'w-full' : 'w-0 group-hover:w-full'"
+    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+  ></span>
+</a>
+
+ <a
+  [routerLink]="'/events'"
+  [ngClass]="
+    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
+    getMenuItemClass(2)
+  "
+>
+  Events
+  <span
+    [ngClass]="(urlID === 2) ? 'w-full' : 'w-0 group-hover:w-full'"
+    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+  ></span>
+</a>
+
+ <a
+  [routerLink]="'/artists'"
+  [ngClass]="
+    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
+    getMenuItemClass(3)
+  "
+>Artists
+  
+  <span
+    [ngClass]="(urlID === 3) ? 'w-full' : 'w-0 group-hover:w-full'"
+    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+  ></span>
+</a>
+
+
+<a
+  [routerLink]="'/locations'"
+  [ngClass]="
+    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
+    getMenuItemClass(4)
+  "
+>Locations
+  
+  <span
+    [ngClass]="(urlID === 4) ? 'w-full' : 'w-0 group-hover:w-full'"
+    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+  ></span>
+</a>
+
+    <a
+  [routerLink]="'/about'"
+  [ngClass]="
+    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
+    getMenuItemClass(5)
+  "
+>About
+  
+  <span
+    [ngClass]="(urlID === 5) ? 'w-full' : 'w-0 group-hover:w-full'"
+    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
+  ></span>
+</a>   
+      
+        
+       
       </nav>
 
      <div class="hidden md:flex items-center space-x-4" >

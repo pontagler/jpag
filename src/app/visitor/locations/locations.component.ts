@@ -44,6 +44,7 @@ export class LocationsComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadLocations();
+     this.visitorService.setRouteID(4);
   }
 
   private async loadLocations(): Promise<void> {

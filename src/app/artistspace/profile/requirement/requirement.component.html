@@ -1,0 +1,91 @@
+<div class="w-full max-w-full overflow-hidden">
+  <div class="bg-white rounded-xl p-4 shadow-md mb-4">
+    <div class="flex flex-row justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">📋 Requirements</h1>
+      <div *ngIf="!showEdit" (click)="showEdit = true"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <i class="fas fa-pen-to-square text-md"></i>
+        <p class="text-sm">Edit</p>
+      </div>
+
+      <div *ngIf="showEdit" (click)="showEdit = false"
+        class="flex flex-row space-x-2 text-gray-500 bg-gray-100 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
+        <i class="fas fa-xmark text-md"></i>
+        <p class="text-sm">Close</p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Read-only preview (minimal, no DB yet) -->
+      <div *ngIf="!showEdit" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="p-3 rounded-lg bg-gray-50">
+          <p class="text-xs text-gray-500">RIB Number</p>
+          <p class="font-medium">{{ maskRib(formData.ribNumber) }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50">
+          <p class="text-xs text-gray-500">GUSO Number</p>
+          <p class="font-medium">{{ formData.gusoNumber || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50">
+          <p class="text-xs text-gray-500">Security Number</p>
+          <p class="font-medium">{{ formData.securityNumber || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50 lg:col-span-2">
+          <p class="text-xs text-gray-500">Alergies</p>
+          <p class="font-medium whitespace-pre-line">{{ formData.alergies || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50 lg:col-span-2">
+          <p class="text-xs text-gray-500">Food Restriction</p>
+          <p class="font-medium whitespace-pre-line">{{ formData.foodRestriction || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50 lg:col-span-2">
+          <p class="text-xs text-gray-500">Requirements</p>
+          <p class="font-medium whitespace-pre-line">{{ formData.requirements || '-' }}</p>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <form *ngIf="showEdit" (ngSubmit)="onSubmit()" #reqForm="ngForm" class="space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium mb-1">RIB Number</label>
+            <input type="text" name="ribNumber" [(ngModel)]="formData.ribNumber"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium mb-1">GUSO Number</label>
+            <input type="text" name="gusoNumber" [(ngModel)]="formData.gusoNumber"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="flex-1 lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Security Number</label>
+            <input type="text" name="securityNumber" [(ngModel)]="formData.securityNumber"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Alergies</label>
+            <textarea name="alergies" rows="3" [(ngModel)]="formData.alergies"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Food Restriction</label>
+            <textarea name="foodRestriction" rows="3" [(ngModel)]="formData.foodRestriction"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Requirements</label>
+            <textarea name="requirements" rows="4" [(ngModel)]="formData.requirements"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button type="button" (click)="showEdit = false"
+            class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

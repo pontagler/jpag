@@ -5,6 +5,7 @@
         let tab of [
           { id: 'details', label: 'Details' },
           { id: 'portfolio', label: 'Portfolio' },
+          { id: 'requirement', label: 'Requirement' },
           { id: 'education', label: 'Education & Awards' },
           { id: 'system', label: 'System' },
           { id: 'account', label: 'Account' }
@@ -239,6 +240,109 @@
     </div>
   </section>
 
+  <!-- Section 02b: Requirement -->
+  <section *ngIf="isActive('requirement')" class="requirement-section">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+          <i class="fa-solid fa-clipboard-list"></i>
+        </span>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Requirements</h2>
+          <p class="text-sm text-gray-500">Artist performance and admin requirements</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button 
+          *ngIf="!reqShowEdit"
+          (click)="reqShowEdit = true"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
+          <i class="fas fa-edit"></i>
+          <span>Edit</span>
+        </button>
+        <button 
+          *ngIf="reqShowEdit"
+          (click)="reqShowEdit = false"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-800 hover:bg-gray-50">
+          <i class="fas fa-times"></i>
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Read-only preview -->
+      <div *ngIf="!reqShowEdit" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="p-3 rounded-lg bg-gray-50">
+          <p class="text-xs text-gray-500">RIB Number</p>
+          <p class="font-medium">{{ maskRib(reqFormData.ribNumber) }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50">
+          <p class="text-xs text-gray-500">GUSO Number</p>
+          <p class="font-medium">{{ reqFormData.gusoNumber || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50">
+          <p class="text-xs text-gray-500">Security Number</p>
+          <p class="font-medium">{{ reqFormData.securityNumber || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50 lg:col-span-2">
+          <p class="text-xs text-gray-500">Alergies</p>
+          <p class="font-medium whitespace-pre-line">{{ reqFormData.alergies || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50 lg:col-span-2">
+          <p class="text-xs text-gray-500">Food Restriction</p>
+          <p class="font-medium whitespace-pre-line">{{ reqFormData.foodRestriction || '-' }}</p>
+        </div>
+        <div class="p-3 rounded-lg bg-gray-50 lg:col-span-2">
+          <p class="text-xs text-gray-500">Requirements</p>
+          <p class="font-medium whitespace-pre-line">{{ reqFormData.requirements || '-' }}</p>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <form *ngIf="reqShowEdit" (ngSubmit)="onReqSubmit()" #reqForm="ngForm" class="space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium mb-1">RIB Number</label>
+            <input type="text" name="ribNumber" [(ngModel)]="reqFormData.ribNumber"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium mb-1">GUSO Number</label>
+            <input type="text" name="gusoNumber" [(ngModel)]="reqFormData.gusoNumber"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="flex-1 lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Security Number</label>
+            <input type="text" name="securityNumber" [(ngModel)]="reqFormData.securityNumber"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Alergies</label>
+            <textarea name="alergies" rows="3" [(ngModel)]="reqFormData.alergies"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Food Restriction</label>
+            <textarea name="foodRestriction" rows="3" [(ngModel)]="reqFormData.foodRestriction"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1">Requirements</label>
+            <textarea name="requirements" rows="4" [(ngModel)]="reqFormData.requirements"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button type="button" (click)="reqShowEdit = false"
+            class="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50">Cancel</button>
+          <button type="submit"
+            class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">Save</button>
+        </div>
+      </form>
+    </div>
+  </section>
   <!-- Section 02: Portfolio -->
   <section *ngIf="isActive('portfolio')" class="portfolio-section">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">

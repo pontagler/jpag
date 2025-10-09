@@ -26,7 +26,7 @@ export class EventService {
 
   //Get Event lists
 async getEventsList(){
-  const {data, error} = await supabase.rpc('get_event_list')
+  const {data, error} = await supabase.rpc('get_events_with_details')
   if(error) throw error
   return data;
 }

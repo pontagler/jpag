@@ -32,13 +32,13 @@ export class EventsComponent implements OnInit {
 	// Filter selections
 	selectedProgramme: string = '';
 	selectedType: string = '';
-	selectedStatus: '' | 'upcoming' | 'past' = '';
-	sortBy: 'date' | 'date-asc' = 'date';
+	selectedEditionName: string = '';
+	sortBy: 'date' | 'date-asc' | 'edition' | 'event_type' | 'edition_type' | 'event_domain' = 'date';
 
 	// Option lists
 	programmeOptions: string[] = [];
 	typeOptions: string[] = [];
-	statusOptions: Array<'upcoming' | 'past'> = ['upcoming', 'past'];
+	editionNameOptions: string[] = [];
 
 	// UI toggles per event id
 	private expandedDates: Set<any> = new Set<any>();
@@ -71,29 +71,49 @@ export class EventsComponent implements OnInit {
 
 	private normalizeEvent(raw: any): any {
 		const shows = Array.isArray(raw?.event_dates)
-			? raw.event_dates.map((d: any) => ({ date: d?.date, time: d?.time }))
+			? raw.event_dates.map((d: any) => ({ date: d?.date, time: d?.time, location: d?.location }))
 			: [];
 		const artistDisplay = Array.isArray(raw?.event_artists)
-			? raw.event_artists.map((a: any) => `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim()).filter((s: string) => !!s).join(', ')
+			? raw.event_artists
+				.map((a: any) => (a?.artist ?? `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim()))
+				.filter((s: string) => !!s)
+				.join(', ')
 			: '';
-		const editionDisplay = [raw?.edition_name, raw?.edition_year].filter((v: any) => !!v).join(' ');
-		const statusNormalized: 'upcoming' | 'past' | '' = typeof raw?.status === 'number'
-			? (raw.status === 1 ? 'upcoming' : raw.status === 0 ? 'past' : '')
-			: ((raw?.status || '') as string).toString().toLowerCase() as any;
+		const editionDisplay = (raw?.edition && String(raw.edition))
+			? String(raw.edition)
+			: [raw?.edition_name, raw?.edition_year].filter((v: any) => !!v).join(' ');
+		const showTimes: number[] = Array.isArray(shows)
+			? shows.map(s => new Date(s?.date as any).getTime()).filter(t => !isNaN(t))
+			: [];
+		const startOfToday = new Date();
+		startOfToday.setHours(0, 0, 0, 0);
+		let statusNormalized: 'upcoming' | 'completed' | '' = '';
+		if (showTimes.length > 0) {
+			const latestShow = Math.max(...showTimes);
+			statusNormalized = latestShow < startOfToday.getTime() ? 'completed' : 'upcoming';
+		}
+		const instruments = Array.isArray(raw?.event_instruments)
+			? raw.event_instruments.map((i: any) => ({ instrument: i?.name || '' })).filter((x: any) => !!x.instrument)
+			: [];
+		const firstShowLocation = shows.length > 0 ? (shows[0]?.location || '') : '';
 		return {
 			...raw,
 			rawStatus: raw?.status,
 			id: raw?.id ?? raw?.id_event ?? null,
 			title: raw?.title || raw?.name || '',
 			description: raw?.teaser || raw?.description || '',
-			location: raw?.location || raw?.location_addresss || '',
-			programme: raw?.programme || '',
+			location: firstShowLocation || raw?.location || raw?.location_addresss || '',
+			programme: raw?.edition_type || '',
 			eventType: raw?.event_type || raw?.event || '',
+			edition: raw?.edition || '',
+			editionType: raw?.edition_type || '',
+			eventDomain: raw?.event_domain || '',
 			status: statusNormalized,
 			shows,
 			imageUrl: raw?.photo || raw?.cover_image || '',
 			artistDisplay,
 			editionDisplay,
+			instruments,
 			bookingUrl: raw?.booking_url || ''
 		};
 	}
@@ -113,12 +133,12 @@ export class EventsComponent implements OnInit {
 		this.applyFilters();
 	}
 
-	onStatusChange(value: '' | 'upcoming' | 'past'): void {
-		this.selectedStatus = (value as any) || '';
+	onEditionNameChange(value: string): void {
+		this.selectedEditionName = value || '';
 		this.applyFilters();
 	}
 
-	onSortChange(value: 'date' | 'date-asc'): void {
+	onSortChange(value: 'date' | 'date-asc' | 'edition' | 'event_type' | 'edition_type' | 'event_domain'): void {
 		this.sortBy = value || 'date';
 		this.applyFilters();
 	}
@@ -127,7 +147,6 @@ export class EventsComponent implements OnInit {
 		this.searchTerm = '';
 		this.selectedProgramme = '';
 		this.selectedType = '';
-		this.selectedStatus = '';
 		this.sortBy = 'date';
 		this.filteredEvents = [...this.allEvents];
 	}
@@ -141,7 +160,7 @@ export class EventsComponent implements OnInit {
 		const search = (this.searchTerm || '').trim().toLowerCase();
 		const progLc = (this.selectedProgramme || '').toLowerCase();
 		const typeLc = (this.selectedType || '').toLowerCase();
-		const statusSel = this.selectedStatus;
+		const edNameLc = (this.selectedEditionName || '').toLowerCase();
 
 		const now = new Date().getTime();
 
@@ -160,22 +179,34 @@ export class EventsComponent implements OnInit {
 				const typeStr = (ev?.eventType || '').toString().toLowerCase();
 				const matchesType = typeLc.length === 0 ? true : typeStr === typeLc;
 
-				const dateMs = this.getPrimaryDateMs(ev);
-				const derivedStatus: 'upcoming' | 'past' | '' = isNaN(dateMs) ? (ev?.status || '') as any : (dateMs >= now ? 'upcoming' : 'past');
-				const evStatus = (ev?.status || '') as 'upcoming' | 'past' | '' || derivedStatus;
-				const matchesStatus = !statusSel ? true : evStatus === statusSel;
+				const editionNameStr = (ev?.editionDisplay || ev?.edition || '').toString().toLowerCase();
+				const matchesEditionName = edNameLc.length === 0 ? true : editionNameStr === edNameLc;
 
-				return matchesSearch && matchesProgramme && matchesType && matchesStatus;
+				const dateMs = this.getPrimaryDateMs(ev);
+				const derivedStatus: 'upcoming' | 'completed' | '' = isNaN(dateMs) ? ((ev?.status as any) || '') : (dateMs >= now ? 'upcoming' : 'completed');
+				const _evStatus = ((ev?.status as any) || derivedStatus) as 'upcoming' | 'completed' | '';
+
+				return matchesSearch && matchesProgramme && matchesType && matchesEditionName;
 			})
 			.sort((a: any, b: any) => {
-				const da = this.getPrimaryDateMs(a);
-				const db = this.getPrimaryDateMs(b);
-				if (isNaN(da) && isNaN(db)) return 0;
-				if (isNaN(da)) return 1;
-				if (isNaN(db)) return -1;
-				return this.sortBy === 'date'
-					? (db - da)
-					: (da - db);
+				if (this.sortBy === 'date' || this.sortBy === 'date-asc') {
+					const da = this.getPrimaryDateMs(a);
+					const db = this.getPrimaryDateMs(b);
+					if (isNaN(da) && isNaN(db)) return 0;
+					if (isNaN(da)) return 1;
+					if (isNaN(db)) return -1;
+					return this.sortBy === 'date' ? (db - da) : (da - db);
+				}
+				const getStr = (ev: any): string => {
+					switch (this.sortBy) {
+						case 'edition': return (ev?.editionDisplay || ev?.edition || '').toString();
+						case 'event_type': return (ev?.eventType || '').toString();
+						case 'edition_type': return (ev?.editionType || ev?.programme || '').toString();
+						case 'event_domain': return (ev?.eventDomain || '').toString();
+						default: return '';
+					}
+				};
+				return getStr(a).localeCompare(getStr(b));
 			});
 	}
 
@@ -194,14 +225,18 @@ export class EventsComponent implements OnInit {
 	private computeOptionLists(): void {
 		const programmeSet = new Set<string>();
 		const typeSet = new Set<string>();
+		const editionNameSet = new Set<string>();
 		for (const ev of this.allEvents) {
-			const prog = (ev?.programme || '').toString().trim();
+			const prog = (ev?.programme || ev?.editionType || '').toString().trim();
 			if (prog) programmeSet.add(prog);
 			const type = (ev?.eventType || '').toString().trim();
 			if (type) typeSet.add(type);
+			const edName = (ev?.editionDisplay || ev?.edition || '').toString().trim();
+			if (edName) editionNameSet.add(edName);
 		}
 		this.programmeOptions = Array.from(programmeSet).sort((a, b) => a.localeCompare(b));
 		this.typeOptions = Array.from(typeSet).sort((a, b) => a.localeCompare(b));
+		this.editionNameOptions = Array.from(editionNameSet).sort((a, b) => a.localeCompare(b));
 	}
 
 	isDatesExpanded(eventId: any): boolean {

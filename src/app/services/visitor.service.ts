@@ -16,14 +16,24 @@ export class VisitorService {
   ) { }
 
 async getArtistForVisitor(){
-  const {data, error} = await supabase.rpc('get_artists_for_visitors')
+  const {data, error} = await supabase.rpc('get_artists_with_details')
   if(error) throw error
   return data;
 }
 
 
+
+async getArtistProfile_v1(artistId: string): Promise<any> {
+  console.log('this.artists--->', artistId);
+  const { data, error } = await supabase.rpc('get_artist_full_details', { p_id_artist: artistId });
+
+  if (error) throw error;
+  return data;
+}
+
+
   async getArtistProfile(artistId: string): Promise<any> {
-    const { data, error } = await supabase.rpc('get_artist_profile_v1', { artist_id: artistId });
+    const { data, error } = await supabase.rpc('get_artist_full_details', { p_id_artist: artistId });
 
     if (error) throw error;
     return data;
@@ -39,7 +49,7 @@ async getLocationList(){
 
 
 async getUpcomingEvents(){
-  const { data, error } = await supabase.rpc('get_event_list_home');
+  const { data, error } = await supabase.rpc('get_upcoming_events');
     if (error) throw error;
     return data;
 
@@ -51,6 +61,24 @@ async getFeaturedArtist(){
     return data;
 
 }
+
+  async subscribeNewsletter(payload: { name?: string | null; phone?: string | null; email: string }): Promise<{ id: number } | null> {
+    const clean = {
+      name: (payload.name ?? '').trim() || null,
+      phone: (payload.phone ?? '').trim() || null,
+      email: (payload.email ?? '').trim()
+    };
+    if (!clean.email) {
+      throw new Error('Email is required');
+    }
+    const { data, error } = await supabase
+      .from('newsletter')
+      .insert({ name: clean.name, phone: clean.phone, email: clean.email })
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data as any;
+  }
 
 routeID = signal<any>(1);
  

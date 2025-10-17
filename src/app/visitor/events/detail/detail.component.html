@@ -15,10 +15,16 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="grid lg:grid-cols-2 gap-8">
         <div class="relative">
-          <img [src]="event.imageUrl || '/assets/images/profile/c1.png'" [alt]="event.title" class="w-full h-96 object-cover rounded-lg shadow" />
+          <div class="relative"> <img [src]="event.imageUrl || '/assets/images/profile/c1.png'" [alt]="event.title" class="w-full h-96 object-cover rounded-lg shadow" /> 
+            <div *ngIf="event.creditPhoto" class="absolute bottom-2 left-2 text-[11px] text-white/90 bg-black/40 px-2 py-1 rounded">
+              ©: {{ event.creditPhoto }}
+             </div>
+          </div>
+         
           <div class="absolute top-4 left-4 flex gap-2">
             <span class="px-2 py-1 rounded text-white text-sm bg-green-700">{{ event.eventType || event.eventKind  | titlecase}}</span>
           </div>
+          
         </div>
 
         <div class="space-y-4">
@@ -28,7 +34,8 @@
             <div class="flex flex-wrap gap-2">
                 @for(x of event.artists; track x; let last = $last; let i = $index) {
                     <h2 class="text-xl lg:text-2xl font-medium text-pont-rust mb-2">
-                      {{ x.name | titlecase }}
+                      <a *ngIf="x.id || x.id_artist; else plainName" [routerLink]="['/artists', (x.id || x.id_artist)]" class="hover:underline">{{ x.name | titlecase }}</a>
+                      <ng-template #plainName>{{ x.name | titlecase }}</ng-template>
                       <span class="text-pont-rust" *ngIf="!last && i < event.artists.length - 2">, </span>
                       <span class="text-pont-rust" *ngIf="i === event.artists.length - 2"> & </span>
                     </h2>
@@ -42,15 +49,25 @@
             <div class="flex gap-2 mb-3 flex-wrap">
               <span *ngFor="let inst of event.instruments" class="px-2 py-1 rounded-full border text-black font-medium text-sm bg-slate-50 border-slate-200">{{ inst | titlecase }}</span>
             </div>
-            <p class="text-gray-700 leading-relaxed">{{ event.teaser }}</p>
+            <p class="text-gray-700 leading-relaxed" [ngStyle]="!showFullTeaser ? {
+              display: ' -webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            } : {}">{{ event.teaser }}</p>
+            <button *ngIf="event.teaser && event.teaser.length > 0" (click)="toggleTeaser()" class="text-green-700 underline text-xs">
+              {{ showFullTeaser ? 'View less' : 'View more' }}
+            </button>
           </div>
 
           <div class="space-y-2 text-sm text-gray-700">
-            <div *ngFor="let d of displayedDates" class="flex items-center">
+            <div *ngFor="let d of displayedDates" class="flex items-center flex-wrap gap-2" [ngClass]="{ 'line-through opacity-60': isDateTimePast(d) }">
                 <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
               <span class="font-medium">{{ formatDate(d.date) }}</span>
               <span class="mx-2">-</span>
               <span class="font-medium">{{ formatTime(d.time) }}</span>
+              <span class="mx-2">•</span>
+              <span class="text-gray-600"> <i class="fa-solid fa-location-dot text-pont-green mt-1"></i> {{ d.location }}</span>
             </div>
             <button *ngIf="hasMoreDates" (click)="toggleDates()" class="text-green-700 underline text-xs mt-1">
               {{ showAllDates ? 'Hide dates' : 'View all dates' }}
@@ -58,13 +75,7 @@
           </div>
 
 
-          <div class="flex space-x-1 text-lg">
-            <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
-            <p class="text-gray-500">{{event.location.name | titlecase}}, </p>
-            <p class="text-gray-500">{{event.location.city | titlecase}}</p>
-            <p class="text-gray-500">{{event.location.zip | uppercase}}</p>
-
-          </div>
+         
 
           <div class="flex space-x-3">
           
@@ -80,7 +91,7 @@
   <section class="bg-white py-6">
     <div class="max-w-7xl mx-auto px-4">
       <div class="mb-6">
-        <div class="grid grid-cols-4 w-full bg-gray-100 rounded-md p-1">
+        <div class="grid grid-cols-3 w-full bg-gray-100 rounded-md p-1">
           <button (click)="activeTab='details'"
                   class="px-4 py-2 rounded text-sm font-medium transition"
                   [ngClass]="{
@@ -88,14 +99,6 @@
                     'text-gray-600 hover:text-gray-900': activeTab!=='details'
                   }">
             Details
-          </button>
-          <button (click)="activeTab='location'"
-                  class="px-4 py-2 rounded text-sm font-medium transition"
-                  [ngClass]="{
-                    'bg-white text-gray-900 shadow': activeTab==='location',
-                    'text-gray-600 hover:text-gray-900': activeTab!=='location'
-                  }">
-            Location
           </button>
           <button (click)="activeTab='media'"
           class="px-4 py-2 rounded text-sm font-medium transition"
@@ -118,7 +121,7 @@
 
       <div [ngSwitch]="activeTab">
         <div *ngSwitchCase="'details'">
-          <div class="grid lg:grid-cols-2 gap-8">
+          <div class="grid">
             <div class="border rounded-lg">
               <div class="p-4  font-semibold flex items-center text-2xl">
               
@@ -130,59 +133,10 @@
               </div>
             </div>
 
-            <div class="border rounded-lg">
-              <div class="p-4  font-semibold text-2xl">Shows</div>
-              <div class="p-4 space-y-4">
-                <div *ngFor="let piece of event.shows" class="border-l-4 border-green-700 pl-4">
-                  <h4 class="font-semibold text-gray-900">{{ piece.composer }}</h4>
-                  <p class="text-gray-700">{{ piece.piece }}</p>
-                  <p class="text-sm text-gray-500">{{ piece.duration }}</p>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
-
-        <div *ngSwitchCase="'location'">
-          <div class="border rounded-lg">
-            <div class="p-4 font-semibold flex items-center text-2xl">
-             
-              <i class="fa-regular fa-compass text-pont-green mr-2"></i>
-              {{ event.location?.name || 'Location' }}
-            </div>
-            <div class="p-4 grid lg:grid-cols-2 gap-8">
-              <div class="space-y-3">
-                <p class="text-gray-700">{{ event.location?.description }}</p>
-                <div class="space-y-2 text-gray-700">
-                  <div class="flex items-center">
-                    <i class="fa-solid fa-location-dot text-pont-green mr-2"></i>
-                    {{ event.location?.address }}</div>
-                  <div class="flex items-center">
-                    <i class="fa-solid fa-location-dot text-pont-green mr-2"></i>
-                    {{ event.location?.city }} {{ event.location?.zip }}</div>
-                  <div class="flex items-center" *ngIf="event.location?.phone">
-                  
-                    <i class="fa-solid fa-phone text-pont-green mr-2"></i>
-                    {{ event.location?.phone }}</div>
-                  <div class="flex items-center" *ngIf="event.location?.email">
-                   
-                    <i class="fa-solid fa-at text-pont-green mr-2"></i>
-                    {{ event.location?.email }}</div>
-                  <div class="flex items-center" *ngIf="event.location?.website">
-                    <i class="fa-solid fa-globe text-pont-green mr-2"></i>
-                    
-                    {{ event.location?.website }}</div>
-               
-                </div>
-              </div>
-              <div class="w-full">
-                <iframe title="Venue Location" width="100%" height="250" style="border:0;border-radius:8px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                  [src]="('https://www.google.com/maps?q=' + (event.location?.address || '') + '&output=embed') | safeUrl">
-                </iframe>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         <div *ngSwitchCase="'media'">
           <div class="grid lg:grid-cols-2 gap-8" *ngIf="event.media?.length; else noMedia">
@@ -209,11 +163,15 @@
               <div class="p-6 flex items-start gap-4">
                 <img [src]="a.photo || '/assets/images/profile/user-b.png'" [alt]="a.name" width="80" height="80" class="rounded-full object-cover" />
                 <div>
-                  <h3 class="text-xl font-bold text-gray-900">{{ a.name }}</h3>
-                  <p class="text-rose-700 font-medium" *ngIf="a.tagline">{{ a.tagline }}</p>
+                  <h3 class="text-xl font-bold text-gray-900">
+                    <a *ngIf="a.id || a.id_artist; else plainArtistName" [routerLink]="['/artists', (a.id || a.id_artist)]" class="hover:underline">{{ a.name }}</a>
+                    <ng-template #plainArtistName>{{ a.name }}</ng-template>
+                  </h3>
+                  <p class="text-rose-700 font-medium" *ngIf="a.tagline">{{ a.tagline | titlecase }}</p>
+                 <p class="text-gray-700 text-xs">{{ a.short_bio}}</p>
                 </div>
               </div>
-              <div class="px-6 pb-6"><p class="text-gray-700">{{ a.shortBio }}</p></div>
+          
             </div>
           </div>
           <ng-template #noArtists>

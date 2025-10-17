@@ -1,6 +1,6 @@
 <div class="min-h-screen">
   <!-- Hero Section -->
-  <section class="py-16 px-4" style="background-image: url('https://pekaexfrnhysdntbyqbl.supabase.co/storage/v1/object/public/hosts/fern1.png'); background-size: cover; background-position: center;">
+  <section class="py-16 px-4" style="background-image: url('../../../assets/images/background/frens.png'); background-size: cover; background-position: center;">
     <div class="max-w-7xl mx-auto">
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <!-- Left Content -->
@@ -37,7 +37,7 @@
         <!-- Right Image -->
         <div class="relative">
           <div class="relative rounded-md overflow-hidden shadow-2xl">
-            <img src="https://pekaexfrnhysdntbyqbl.supabase.co/storage/v1/object/public/hosts/bg.png" alt="Musicians performing" class="w-full h-[400px] object-cover" />
+            <img src="https://snbnywhixglgxstoqiyc.supabase.co/storage/v1/object/public/images/img3.png" alt="Musicians performing" class="w-full h-[400px] object-cover" />
           </div>
 
           <div class="absolute bottom-6 right-6 bg-white/95 backdrop-blur-sm rounded-full px-4 py-3 flex items-center space-x-3 shadow-lg transition-colors duration-300 hover:bg-pont-green hover:text-white cursor-pointer group">
@@ -47,7 +47,7 @@
                     <i class="fa-solid fa-play ml-0.5"></i>
                     </span>
                   </div>
-                  <div>
+                  <div (click)="goYoutube()">
                     <div class="font-semibold text-sm">Live Performance</div>
                     <div class="text-xs text-gray-600 transition-colors duration-300 group-hover:text-white">
                       Now Playing
@@ -71,39 +71,30 @@
       </div>
 
       <div class="grid lg:grid-cols-2 gap-8 mb-12">
-        <article class="group border-0 shadow-lg bg-white overflow-hidden rounded" *ngFor="let event of eventArray; let i = index" [attr.aria-label]="event.title">
+        <article class="group border-0 shadow-lg bg-white overflow-hidden rounded" *ngFor="let event of limitedEvents; let i = index" [attr.aria-label]="event.title">
           <div class="grid md:grid-cols-5 gap-0 h-full">
             <div class="md:col-span-2 relative h-full">
               <img [src]="event.photo" [alt]="event.title" class="w-full h-full object-cover" loading="lazy" decoding="async" />
               <div class="absolute top-4 left-4">
-                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-pont-rust text-white">{{ event.event_type | titlecase }}</span>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-pont-rust text-white">{{ (event.event_domain || event.edition_type || event.event_type) | titlecase }}</span>
               </div>
               <div class="absolute bottom-4 left-4">
                 <div class="flex flex-wrap space-x-2">
-
                   <span class="px-3 py-1 rounded-full text-xs font-semibold bg-pont-green text-white shadow" *ngFor="let x of event.instruments">{{ x.instrument | titlecase }}</span>
                  </div>
               </div>
             </div>
             <div class="md:col-span-3 p-6 flex flex-col justify-between h-full">
               <div>
-                <h5 class="text-sm text-black w-fit">{{ event.edition_name | titlecase }} {{ event.edition_year | titlecase }}</h5>
+                <h5 class="text-sm text-black w-fit">{{ event.editionDisplay || event.edition || (event.edition_name + ' ' + event.edition_year) }}</h5>
                 <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
-  <div class="flex flex-wrap gap-1 leading-tight">
-                <ng-container *ngFor="let x of event.event_artists; let last = last; let i = index">
-                    <h2 class="text-sm lg:text-md font-medium text-pont-rust leading-tight mb-0">
-                      {{ x.fname | titlecase }} {{ x.lname | titlecase }}
-                      <span class="text-pont-rust" *ngIf="!last && i < event.event_artists.length - 2">, </span>
-                      <span class="text-pont-rust" *ngIf="i === event.event_artists.length - 2"> & </span>
-                    </h2>
-                  </ng-container>
-                  
-                  
-        </div>
+                <div class="flex flex-wrap gap-1 leading-tight">
+                  <h2 class="text-sm lg:text-md font-medium text-pont-rust leading-tight mb-0">{{ event.artistDisplay }}</h2>
+                </div>
                 <!-- <p class="text-pont-green font-semibold mb-3">{{ concert.artist }}</p> -->
                 
                 
-                <p class="text-gray-600 mb-4 leading-tight mt-2">{{ (event.teaser?.length > 30) ? ((event.teaser | slice:0:100) + '…') : event.teaser }}</p>
+                <p class="text-gray-600 mb-4 text-xs leading-tight mt-2">{{ (event.teaser || '') | slice:0:120 }}{{ (event.teaser?.length || 0) > 120 ? '…' : '' }}</p>
                 <div class="space-y-2 mb-2">
                   <!-- <div class="flex items-center text-gray-700" *ngFor="let show of concert.shows | slice:0:2">
                     <span class="font-medium text-sm">{{ show.date }}</span>
@@ -111,15 +102,17 @@
                     <span class="text-sm">{{ show.time }}</span>
                   </div> -->
 
-                      <div class="space-y-2 text-sm text-gray-700">
-            <div *ngFor="let d of getVisibleDates(event, i)" class="flex items-center">
+                      <div class="space-y-1 text-sm text-gray-700 min-h-16">
+            <div *ngFor="let d of getVisibleDates(event, i); let idx = index" class="flex items-center min-w-0">
                 <i class="fa-regular fa-calendar text-pont-green mr-3" aria-hidden="true"></i>
-              <span class="font-medium">{{ formatDate(d.date) }}</span>
-              <span class="mx-2">-</span>
-              <span class="font-medium">{{ formatTime(d.time) }}</span>
+              <span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{ d?.date | date:'dd-MMM' }}</span>
+              <span class="mx-2">•</span>
+              <span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{ (d?.time || '') | slice:0:5 }}</span>
+              <span class="mx-2">•</span>
+              <span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}"><i class="fa-solid fa-location-dot mr-1"></i> {{ d?.location }}</span>
             </div>
-            <button *ngIf="event.event_dates?.length > 2" (click)="toggleDates(i)" class="text-green-700 underline text-xs mt-1">
-              {{ expandedEvents[i] ? 'hide' : 'show more' }}
+            <button *ngIf="(event.event_dates?.length || 0) > 2" (click)="toggleDates(i)" class="text-pont-green underline text-xs mt-1">
+              {{ expandedEvents[i] ? 'Hide all dates' : 'View all dates' }}
             </button>
           </div>
 
@@ -130,7 +123,7 @@
                 </div>
               </div>
               <div class="flex items-center justify-between">
-                <a routerLink="/events" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-6 py-2 rounded" [attr.aria-label]="'Book ' + event.title">Book Now</a>
+                <a [routerLink]="['/events', event.id]" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-6 py-2 rounded" [attr.aria-label]="'View ' + event.title">View Details</a>
               </div>
             </div>
           </div>
@@ -160,22 +153,27 @@
       </div>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-        <div class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded overflow-hidden" *ngFor="let artist of artistArray">
+        <div class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded overflow-hidden" *ngFor="let artist of artistArray; trackBy: trackByArtistId">
           <div class="relative overflow-hidden">
-            <img [src]="artist.photo" [alt]="artist.fname" class="w-full h-80 object-cover" />
+            <img [src]="artist.photo" [alt]="artist.fname + ' ' + artist.lname" class="w-full h-80 object-cover" />
           </div>
           <div class="p-6">
-            <h3 class="font-bold text-xl text-gray-900 mb-2">{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</h3>
-            <p class="text-pont-rust font-medium mb-2"> {{ artist.tagline  | titlecase}} </p>
+            <h3 class="font-bold text-xl text-gray-900 mb-2"><a [routerLink]="['/artists', artist.id_artist]" class="hover:text-pont-green">{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</a></h3>
+            <p class="text-pont-rust font-medium mb-2 text-sm"> {{ artist.tagline  | titlecase}} </p>
             <p class="text-sm text-gray-600 mb-3">{{ artist.short_bio }}</p>
             <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
               <div class="flex flex-wrap space-x-2">
-                @for(x of artist.instruments ; track x){
+                @for(x of (artist.instruments ?? []); track x.id_instrument){
               <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{ x.instrument | titlecase }}</span>
                 }
               </div>  
             </div>
-            <a routerLink="/artists" class="w-full bg-pont-green hover:bg-pont-green/90 text-white text-center block py-2 rounded">View Profile</a>
+            <div class="flex flex-wrap gap-2 mb-4">
+              @for(p of (artist.performance ?? []); track p.id_performance){
+              <span class="bg-pont-yellow/20 text-pont-rust px-2 py-1 rounded-full text-[11px] font-medium">{{ p.performance | titlecase }}</span>
+              }
+            </div>
+            <a [routerLink]="['/artists', artist.id_artist]" class="w-full bg-pont-green hover:bg-pont-green/90 text-white text-center block py-2 rounded">View Profile</a>
           </div>
         </div>
       </div>
@@ -195,13 +193,19 @@
       <p class="text-lg text-white mb-8">
         Subscribe to our newsletter and never miss an upcoming event or artist announcement
       </p>
-      <form class="space-y-4" (submit)="$event.preventDefault()">
+      <form class="space-y-4" (ngSubmit)="submitNewsletter()">
         <div class="grid md:grid-cols-2 gap-4">
-          <input type="text" placeholder="Your Name" class="h-12 px-3 rounded border outline-none" />
-          <input type="text" placeholder="Code Postal" class="h-12 px-3 rounded border outline-none" />
+          <input type="text" name="name" [(ngModel)]="newsletter.name" [disabled]="isSubmitting" placeholder="Your Name" class="h-12 px-3 rounded border outline-none" />
+          <input type="text" name="phone" [(ngModel)]="newsletter.phone" [disabled]="isSubmitting" placeholder="Phone" class="h-12 px-3 rounded border outline-none" />
         </div>
-        <input type="email" placeholder="Your Email Address" class="h-12 px-3 rounded border w-full outline-none" />
-        <button type="submit" class="bg-white text-pont-rust px-8 py-3 text-lg rounded">Subscribe to Newsletter</button>
+        <input type="email" name="email" [(ngModel)]="newsletter.email" [disabled]="isSubmitting" required placeholder="Your Email Address" class="h-12 px-3 rounded border w-full outline-none" />
+        <button type="submit" [disabled]="isSubmitting" [attr.aria-busy]="isSubmitting ? 'true' : 'false'" class="bg-white text-pont-rust px-8 py-3 text-lg rounded inline-flex items-center justify-center min-w-56">
+          <span *ngIf="isSubmitting" class="inline-flex items-center">
+            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+            Subscribing...
+          </span>
+          <span *ngIf="!isSubmitting">Subscribe to Newsletter</span>
+        </button>
       </form>
     </div>
   </section>

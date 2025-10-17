@@ -48,7 +48,32 @@ export class ArtistsComponent implements OnInit{
     this.isLoading = true;
     try {
       const artists = await this.visitorService.getArtistForVisitor();
-      this.allArtists = Array.isArray(artists) ? artists : [];
+      // Map API response to the shape expected by the UI
+      this.allArtists = Array.isArray(artists)
+        ? artists.map((a: any) => ({
+            id_artist: a?.id_artist,
+            fname: a?.fname,
+            lname: a?.lname,
+            photo: a?.photo,
+            credit_photo: a?.credit_photo,
+            // Map new fields to existing UI bindings
+            tagline: a?.title ?? '',
+            short_bio: a?.teaser ?? '',
+            // Normalize nested arrays
+            instruments: Array.isArray(a?.instruments)
+              ? a.instruments.map((i: any) => ({
+                  id_instrument: i?.id,
+                  instrument: i?.name,
+                }))
+              : [],
+            performance: Array.isArray(a?.performance_type)
+              ? a.performance_type.map((p: any) => ({
+                  id_performance: p?.id,
+                  performance: p?.name,
+                }))
+              : [],
+          }))
+        : [];
       this.filteredArtists = [...this.allArtists];
       this.computeOptionLists();
     } catch (error: any) {

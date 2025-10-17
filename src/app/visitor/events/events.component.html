@@ -150,23 +150,20 @@
 								<div class="p-6 flex flex-col h-full">
                                     <p class="text-lg">{{e.editionDisplay}}</p>
                                     
-									<h3 class="font-bold text-xl text-gray-900 mb-1">{{e?.title || e?.name}}</h3>
+									<h3 class="font-bold text-xl truncate text-gray-900 mb-1">{{e?.title || e?.name}}</h3>
 									<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
 									<p class="text-sm text-gray-600 mb-3">{{(e?.description || '') | slice:0:120}}{{(e?.description?.length || 0) > 120 ? '…' : ''}}</p>
-                                    <p class="text-xs text-gray-500 mb-4">
-										<i class="fa-solid fa-location-dot mr-1"></i>
-										{{e?.venue || e?.location || e?.city}}
-									</p>
-									<div class="space-y-1 text-sm text-gray-600 mb-4 min-h-[2.75rem]">
+                                 
+								<div class="space-y-1 text-sm text-gray-600 mb-4 min-h-16">
                                         @for(d of (e?.shows || []); track d; let i = $index){
 											@if(i < 2){
 								<div class="flex items-center min-w-0">
 													<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-                                                    <span class="text-xs">{{d?.date | date:'dd-MMM-yyyy'}}</span>
+										<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
 													<span class="mx-2">•</span>
-                                                    <span class="text-xs">{{d?.time | slice:0:5}}</span>
+										<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
                                                     <span class="mx-2">•</span>
-									<span class="text-xs truncate max-w-[10rem]">{{d?.location}}</span>
+										<span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}"> <i class="fa-solid fa-location-dot mr-1"></i> {{d?.location}}</span>
 												</div>
 											}
 										}
@@ -178,11 +175,13 @@
 														@if(i >= 2){
 									<div class="flex items-center text-gray-700 min-w-0">
 																<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-                                                                <span class="text-xs">{{d?.date | date:'dd-MMM-yyyy'}}</span>
+														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
 																<span class="mx-2">•</span>
-                                                                <span class="text-xs">{{d?.time | slice:0:5}}</span>
+														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
                                                                 <span class="mx-2">•</span>
-										<span class="text-xs truncate max-w-[10rem]">{{d?.location}}</span>
+														<span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+															<i class="fa-solid fa-location-dot mr-1"></i> 
+															{{d?.location}}</span>
 															</div>
 														}
 													}
@@ -193,9 +192,13 @@
 											</button>
 										}
 									</div>
-									<div class="mt-auto">
+								<div class="mt-auto">
+									@if(e?.isCompleted){
+										<p class="w-full inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">Completed</p>
+									} @else {
 										<p (click)="goToEventDetail(e.id)" class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">View Details</p>
-									</div>
+									}
+								</div>
 								</div>
 							</div>
 						</div>
@@ -224,48 +227,53 @@
                                             <p class="text-lg">{{e.editionDisplay}}</p>
 											<h3 class="text-xl font-bold text-gray-900">{{e?.title || e?.name}}</h3>
 											<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
-											<p class="text-sm text-gray-500">
-												<i class="fa-solid fa-location-dot mr-1"></i>
-												{{e?.venue || e?.location || e?.city}}
-											</p>
+											
 										</div>
-										<p (click)="goToEventDetail(e.id)" class="cursor-pointer inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">View Details</p>
+										@if(e?.isCompleted){
+											<p class="inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">Completed</p>
+										} @else {
+											<p (click)="goToEventDetail(e.id)" class="cursor-pointer inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">View Details</p>
+										}
 									</div>
 									
 									<p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(e?.description || '') | slice:0:180}}{{(e?.description?.length || 0) > 180 ? '…' : ''}}</p>
-                                    <div class="space-y-1 text-sm text-gray-600 mt-3 min-h-[2.75rem]">
+									<div class="space-y-1 text-sm text-gray-600 mt-3 min-h-16">
                                         @for(d of (e?.shows || []); track d; let i = $index){
                                             @if(i < 2){
-								<div class="flex items-center min-w-0 ">
+									<div class="flex items-center min-w-0 ">
                                                     <i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-                                                    <span class="text-xs">{{d?.date | date:'dd-MMM-yyyy'}}</span>
+													<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
                                                     <span class="mx-2">•</span>
-                                                    <span class="text-xs">{{d?.time | slice:0:5}}</span>
+													<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
                                                     <span class="mx-2">•</span>
-									<span class="text-xs ">{{d?.location}}</span>
+													<span class="text-xs " [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+														<i class="fa-solid fa-location-dot mr-1"></i>
+															{{d?.location}}</span>
                                                 </div>
                                             }
                                         }
                                         @if((e?.shows?.length || 0) > 2){
-                                            <button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
-                                                {{ isDatesExpanded(e.id) ? 'Hide all dates' : 'View all dates' }}
-                                            </button>
-                                            @if(isDatesExpanded(e.id)){
+														@if(isDatesExpanded(e.id)){
                                                 <div class="space-y-1 mt-1">
                                                     @for(d of e.shows; track d; let i = $index){
                                                         @if(i >= 2){
 									<div class="flex items-center text-gray-700 min-w-0">
                                                                 <i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-                                                                <span class="text-xs">{{d?.date | date:'dd-MMM-yyyy'}}</span>
+														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
                                                                 <span class="mx-2">•</span>
-                                                                <span class="text-xs">{{d?.time | slice:0:5}}</span>
+														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
                                                                 <span class="mx-2">•</span>
-										<span class="text-xs truncate max-w-[10rem]">{{d?.location}}</span>
+														<span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+															<i class="fa-solid fa-location-dot mr-1"></i>
+															{{d?.location}}</span>
                                                             </div>
                                                         }
                                                     }
                                                 </div>
-                                            }
+														}
+														<button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
+															{{ isDatesExpanded(e.id) ? 'Hide all dates' : 'View all dates' }}
+														</button>
                                         }
                                     </div>
 									

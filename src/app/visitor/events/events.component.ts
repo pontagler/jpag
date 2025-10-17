@@ -74,10 +74,15 @@ export class EventsComponent implements OnInit {
 			? raw.event_dates.map((d: any) => ({ date: d?.date, time: d?.time, location: d?.location }))
 			: [];
 		const artistDisplay = Array.isArray(raw?.event_artists)
-			? raw.event_artists
-				.map((a: any) => (a?.artist ?? `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim()))
-				.filter((s: string) => !!s)
-				.join(', ')
+			? (() => {
+				const names: string[] = raw.event_artists
+					.map((a: any) => (a?.artist ?? `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim()))
+					.filter((s: string) => !!s);
+				if (names.length === 0) return '';
+				if (names.length === 1) return names[0];
+				if (names.length === 2) return `${names[0]} & ${names[1]}`;
+				return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`;
+			})()
 			: '';
 		const editionDisplay = (raw?.edition && String(raw.edition))
 			? String(raw.edition)
@@ -92,6 +97,7 @@ export class EventsComponent implements OnInit {
 			const latestShow = Math.max(...showTimes);
 			statusNormalized = latestShow < startOfToday.getTime() ? 'completed' : 'upcoming';
 		}
+		const isCompleted = Boolean((raw as any)?.is_completed) || statusNormalized === 'completed';
 		const instruments = Array.isArray(raw?.event_instruments)
 			? raw.event_instruments.map((i: any) => ({ instrument: i?.name || '' })).filter((x: any) => !!x.instrument)
 			: [];
@@ -108,12 +114,13 @@ export class EventsComponent implements OnInit {
 			edition: raw?.edition || '',
 			editionType: raw?.edition_type || '',
 			eventDomain: raw?.event_domain || '',
-			status: statusNormalized,
+			status: isCompleted ? 'completed' : statusNormalized,
 			shows,
 			imageUrl: raw?.photo || raw?.cover_image || '',
 			artistDisplay,
 			editionDisplay,
 			instruments,
+			isCompleted,
 			bookingUrl: raw?.booking_url || ''
 		};
 	}
@@ -237,6 +244,27 @@ export class EventsComponent implements OnInit {
 		this.programmeOptions = Array.from(programmeSet).sort((a, b) => a.localeCompare(b));
 		this.typeOptions = Array.from(typeSet).sort((a, b) => a.localeCompare(b));
 		this.editionNameOptions = Array.from(editionNameSet).sort((a, b) => a.localeCompare(b));
+	}
+
+	isShowPast(show: any): boolean {
+		if (!show) return false;
+		const dateInput = show?.date;
+		if (!dateInput) return false;
+		const dt = new Date(dateInput);
+		if (isNaN(dt.getTime())) return false;
+		const timeStr = (show?.time || '').toString();
+		if (timeStr) {
+			const parts = timeStr.split(':');
+			const hours = parseInt(parts[0] || '0', 10);
+			const minutes = parseInt(parts[1] || '0', 10);
+			if (!isNaN(hours) && !isNaN(minutes)) {
+				dt.setHours(hours, minutes, 0, 0);
+			}
+		} else {
+			// Without time, consider the show active until end of its day
+			dt.setHours(23, 59, 59, 999);
+		}
+		return dt.getTime() < Date.now();
 	}
 
 	isDatesExpanded(eventId: any): boolean {

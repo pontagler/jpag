@@ -25,10 +25,10 @@
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-4">
-            <button (click)="goToEvents()" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">
+            <button (click)="donation()" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">
               Donation
             </button>
-            <button (click)="goToArtists()" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-8 py-3 text-lg rounded bg-transparent">
+            <button (click)="becomeMember()" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-8 py-3 text-lg rounded bg-transparent">
               Become member
             </button>
           </div>
@@ -116,10 +116,10 @@
             </button>
           </div>
 
-                  <div class="flex items-center text-gray-700">
+                  <!-- <div class="flex items-center text-gray-700">
                     <i class="fa-solid fa-location-dot text-pont-green mr-3" aria-hidden="true"></i>
                     <span>{{ event.location || 'Location' }}</span>
-                  </div>
+                  </div> -->
                 </div>
               </div>
               <div class="flex items-center justify-between">

@@ -134,7 +134,8 @@ export class DetailComponent implements OnInit {
         id: d?.id,
         date: d?.date,
         time: d?.time,
-        location: d?.location || ''
+        location: d?.location || '',
+        id_location: d?.id_location ?? d?.location_id ?? null
       })),
       shows: shows.map((s: any) => ({
         id: s?.id,

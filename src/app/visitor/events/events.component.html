@@ -4,7 +4,7 @@
 		class="relative bg-orange-50"
 		style="background-image: url('/assets/images/background/bg1.webp'); background-size: cover; background-position: center;"
 	>
-		<div class="absolute inset-0 z-0"></div>
+		<div class="absolute inset-0 z-0" id="events-background"></div>
 		<div class="relative z-10 text-center px-9 py-16">
 			<h1 class="text-4xl lg:text-5xl font-bold text-gray-700 mb-4">
 				All <span class="text-pont-rust">Events</span>
@@ -152,8 +152,9 @@
                                     
 									<h3 class="font-bold text-xl truncate text-gray-900 mb-1">{{e?.title || e?.name}}</h3>
 									<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
+									<div class="h-20">
 									<p class="text-sm text-gray-600 mb-3">{{(e?.description || '') | slice:0:120}}{{(e?.description?.length || 0) > 120 ? '…' : ''}}</p>
-                                 
+									</div>
 								<div class="space-y-1 text-sm text-gray-600 mb-4 min-h-16">
                                         @for(d of (e?.shows || []); track d; let i = $index){
 											@if(i < 2){
@@ -236,7 +237,8 @@
 										}
 									</div>
 									
-									<p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(e?.description || '') | slice:0:180}}{{(e?.description?.length || 0) > 180 ? '…' : ''}}</p>
+									<p class="text-sm text-gray-600 mt-3 leading-relaxed truncate">{{(e?.description || '') | slice:0:180}}{{(e?.description?.length || 0) > 180 ? '…' : ''}}</p>
+								
 									<div class="space-y-1 text-sm text-gray-600 mt-3 min-h-16">
                                         @for(d of (e?.shows || []); track d; let i = $index){
                                             @if(i < 2){

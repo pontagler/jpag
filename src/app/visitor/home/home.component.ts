@@ -45,6 +45,15 @@ goYoutube(){
   window.open('https://www.youtube.com/watch?v=wTH9TkJVHQY', '_blank');
 }
 
+becomeMember(){
+  window.open('https://www.helloasso.com/associations/les-journees-de-pont-ar-gler/adhesions/adherez-a-l-association', '_blank');
+}
+
+
+donation(){
+  window.open('https://www.helloasso.com/beta/associations/les-journees-de-pont-ar-gler/formulaires/7', '_blank');
+}
+
 async getUpcomingEvents(){
 
 try{

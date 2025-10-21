@@ -67,7 +67,11 @@
               <span class="mx-2">-</span>
               <span class="font-medium">{{ formatTime(d.time) }}</span>
               <span class="mx-2">•</span>
-              <span class="text-gray-600"> <i class="fa-solid fa-location-dot text-pont-green mt-1"></i> {{ d.location }}</span>
+              <span class="text-gray-600">
+                <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
+                <a *ngIf="d.id_location; else plainLoc" [routerLink]="['/locations', d.id_location]" class="underline hover:opacity-80">{{ d.location }}</a>
+                <ng-template #plainLoc>{{ d.location }}</ng-template>
+              </span>
             </div>
             <button *ngIf="hasMoreDates" (click)="toggleDates()" class="text-green-700 underline text-xs mt-1">
               {{ showAllDates ? 'Hide dates' : 'View all dates' }}

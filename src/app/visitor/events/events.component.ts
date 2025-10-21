@@ -33,7 +33,7 @@ export class EventsComponent implements OnInit {
 	selectedProgramme: string = '';
 	selectedType: string = '';
 	selectedEditionName: string = '';
-	sortBy: 'date' | 'date-asc' | 'edition' | 'event_type' | 'edition_type' | 'event_domain' = 'date';
+	sortBy: 'date-asc' | 'date' | 'edition' | 'event_type' | 'edition_type' | 'event_domain' = 'date';
 
 	// Option lists
 	programmeOptions: string[] = [];
@@ -146,7 +146,7 @@ export class EventsComponent implements OnInit {
 	}
 
 	onSortChange(value: 'date' | 'date-asc' | 'edition' | 'event_type' | 'edition_type' | 'event_domain'): void {
-		this.sortBy = value || 'date';
+		this.sortBy = value || 'date-asc';
 		this.applyFilters();
 	}
 
@@ -154,7 +154,7 @@ export class EventsComponent implements OnInit {
 		this.searchTerm = '';
 		this.selectedProgramme = '';
 		this.selectedType = '';
-		this.sortBy = 'date';
+		this.sortBy = 'date-asc';
 		this.filteredEvents = [...this.allEvents];
 	}
 
@@ -202,7 +202,7 @@ export class EventsComponent implements OnInit {
 					if (isNaN(da) && isNaN(db)) return 0;
 					if (isNaN(da)) return 1;
 					if (isNaN(db)) return -1;
-					return this.sortBy === 'date' ? (db - da) : (da - db);
+					return this.sortBy === 'date-asc' ? (db - da) : (da - db);
 				}
 				const getStr = (ev: any): string => {
 					switch (this.sortBy) {

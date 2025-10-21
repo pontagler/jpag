@@ -26,7 +26,7 @@ export class EventService {
 
   //Get Event lists
 async getEventsList(){
-  const {data, error} = await supabase.rpc('get_event_list')
+  const {data, error} = await supabase.rpc('get_events_with_details')
   if(error) throw error
   return data;
 }
@@ -34,8 +34,8 @@ async getEventsList(){
 
   //Get Event details
   async getEventDetail(id:any){
-    const {data, error} = await supabase.rpc('get_event_info', {p_id_event: id})
-    if(error) throw error
+    const { data, error } = await supabase.rpc('get_single_events_with_details', { p_event_id: id });
+    if (error) throw error;
     return data;
   }
 

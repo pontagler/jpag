@@ -7,7 +7,7 @@ import { SafeUrlPipe } from '../../../shared/safe-url.pipe';
 @Component({
   selector: 'app-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SafeUrlPipe],
+  imports: [CommonModule, RouterModule],
   templateUrl: './detail.component.html'
 })
 export class DetailComponent implements OnInit {
@@ -17,6 +17,7 @@ export class DetailComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
   activeTab: 'details' | 'location' | 'artists' | 'media' = 'details';
   showAllDates: boolean = false;
+  showFullTeaser: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -68,43 +69,73 @@ export class DetailComponent implements OnInit {
     this.showAllDates = !this.showAllDates;
   }
 
+  toggleTeaser(): void {
+    this.showFullTeaser = !this.showFullTeaser;
+  }
+
+  isDateTimePast(d: { date?: string | Date; time?: string | null }): boolean {
+    if (!d || !d.date) return false;
+    const base = new Date(d.date);
+    if (isNaN(base.getTime())) return false;
+    if (d.time) {
+      const [h, m] = String(d.time).split(':');
+      const hours = Number(h);
+      const minutes = Number(m);
+      if (!Number.isNaN(hours)) base.setHours(hours);
+      if (!Number.isNaN(minutes)) base.setMinutes(minutes);
+      base.setSeconds(0, 0);
+    }
+    return base.getTime() < Date.now();
+  }
+
   private normalizeEvent(raw: any): any {
     const eventDates = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
     const shows = Array.isArray(raw?.event_shows) ? raw.event_shows : [];
     const artists = Array.isArray(raw?.event_artists) ? raw.event_artists : [];
     const media = Array.isArray(raw?.event_media) ? raw.event_media : [];
-    const instruments = Array.isArray(raw?.instruments) ? raw.instruments : [];
+    const instruments = Array.isArray(raw?.instruments)
+      ? raw.instruments
+      : (Array.isArray(raw?.event_instruments) ? raw.event_instruments : []);
 
     const artistDisplay = artists
       .map((a: any) => `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim())
       .filter((s: string) => !!s)
       .join(', ');
 
-    const editionDisplay = [raw?.edition_name, raw?.edition_year]
-      .filter((v: any) => !!v)
-      .join(' ');
+    const editionDisplay = (raw?.edition && String(raw.edition).trim().length > 0)
+      ? raw.edition
+      : [raw?.edition_name, raw?.edition_year]
+          .filter((v: any) => !!v)
+          .join(' ');
 
     const statusNormalized: 'upcoming' | 'past' | '' = typeof raw?.status === 'number'
       ? (raw.status === 1 ? 'upcoming' : raw.status === 0 ? 'past' : '')
-      : ((raw?.status || '') as string).toString().toLowerCase() as any;
+      : (
+          (raw?.is_active === true && 'upcoming')
+          || (raw?.is_completed === true && 'past')
+          || (((raw?.status || '') as string).toString().toLowerCase() as any)
+        );
 
     return {
       id: raw?.id ?? raw?.id_event ?? null,
       host: raw?.host || '',
       eventKind: raw?.event || '',
       imageUrl: raw?.photo || '',
+      creditPhoto: raw?.credit_photo || '',
       title: raw?.title || '',
       status: statusNormalized,
       teaser: raw?.teaser || '',
       programme: raw?.programme || '',
-      eventType: raw?.event_type || '',
+      eventType: raw?.event_type || raw?.event_domain || raw?.event || '',
       description: raw?.description || '',
       bookingUrl: raw?.booking_url || '',
       editionDisplay,
       dates: eventDates.map((d: any) => ({
         id: d?.id,
         date: d?.date,
-        time: d?.time
+        time: d?.time,
+        location: d?.location || '',
+        id_location: d?.id_location ?? d?.location_id ?? null
       })),
       shows: shows.map((s: any) => ({
         id: s?.id,
@@ -112,9 +143,11 @@ export class DetailComponent implements OnInit {
         piece: s?.description,
         duration: s?.time_manage
       })),
-      instruments: instruments.map((i: any) => i?.instrument).filter((v: any) => !!v),
+      instruments: instruments
+        .map((i: any) => (i?.instrument || i?.name))
+        .filter((v: any) => !!v),
       location: {
-        name: raw?.location?.name || '',
+        name: raw?.location?.name || (Array.isArray(eventDates) && eventDates[0]?.location) || '',
         address: raw?.location?.address || '',
         city: raw?.location?.city || '',
         country: raw?.location?.country || '',
@@ -126,18 +159,22 @@ export class DetailComponent implements OnInit {
         description: raw?.location?.description || ''
       },
       artists: artists.map((a: any) => ({
-        name: `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim(),
+        id: (a?.id ?? a?.id_artist ?? a?.artist_id ?? a?.id_user ?? a?.user_id ?? null),
+        name: (
+          `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim()
+          || (a?.artist || '').trim()
+        ),
         photo: a?.photo || '',
-        tagline: a?.tagline || '',
-        shortBio: a?.short_bio || ''
+        tagline: a?.tagline || a?.teaser || '',
+        short_bio: a?.short_bio || ''
       })),
 
     media: media.map((a: any) => ({
-        id:a.id,
-        url:a.url || '',
-        image:a.image || '',
-        title:a.title || '',
-        description:a.description || '',
+        id: a?.id,
+        url: a?.url || '',
+        image: a?.image || '',
+        title: a?.title || '',
+        description: a?.description || '',
       })),
 
 

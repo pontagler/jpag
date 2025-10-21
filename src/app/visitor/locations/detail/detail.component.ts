@@ -2,11 +2,12 @@ import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LocationService } from '../../../services/location.service';
+import { SafeUrlPipe } from '../../../shared/safe-url.pipe';
 
 @Component({
   selector: 'app-location-detail',
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor, RouterModule],
+  imports: [CommonModule, NgIf, NgFor, RouterModule, SafeUrlPipe],
   templateUrl: './detail.component.html'
 })
 export class LocationDetailComponent implements OnInit {
@@ -72,5 +73,60 @@ export class LocationDetailComponent implements OnInit {
 
   goArtistLogin(): void {
     this.router.navigate(['/artistspace']);
+  }
+
+  // Computed helpers for contact fallback logic
+  get hasLocationContact(): boolean {
+    const loc = this.location || {};
+    return Boolean(loc.phone || loc.email || loc.website);
+  }
+
+  get showHostContact(): boolean {
+    const loc = this.location || {};
+    const hasHostContact = Boolean(loc.host_phone || loc.host_email);
+    return !this.hasLocationContact && hasHostContact;
+  }
+
+  get hostName(): string {
+    const loc = this.location || {};
+    return (loc.host || loc.host_name || 'Pontangler') as string;
+  }
+
+  get hostPhone(): string {
+    const loc = this.location || {};
+    return (loc.host_phone || '') as string;
+  }
+
+  get hostEmail(): string {
+    const loc = this.location || {};
+    return (loc.host_email || '') as string;
+  }
+
+  // Coordinates and map helpers
+  private parseNumber(value: any): number | null {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  get latValue(): number | null {
+    const loc = this.location || {};
+    return this.parseNumber(loc.lat ?? loc.latitude);
+  }
+
+  get lngValue(): number | null {
+    const loc = this.location || {};
+    return this.parseNumber(loc.long ?? loc.lng ?? loc.longitude);
+  }
+
+  get hasCoordinates(): boolean {
+    return this.latValue !== null && this.lngValue !== null;
+  }
+
+  get mapEmbedUrl(): string {
+    if (!this.hasCoordinates) return '';
+    const lat = this.latValue as number;
+    const lng = this.lngValue as number;
+    const zoom = 15;
+    return `https://www.google.com/maps?q=${lat},${lng}&z=${zoom}&output=embed`;
   }
 }

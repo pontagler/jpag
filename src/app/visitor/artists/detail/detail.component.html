@@ -119,6 +119,9 @@
       <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent">
         
       </div>
+      @if(artist.credit_cover){
+      <div class="absolute bottom-2 right-2 text-[10px] text-white/90 bg-black/30 px-2 py-0.5 rounded">© {{artist.credit_cover}}</div>
+      }
     </div>
   </div>
 
@@ -128,19 +131,22 @@
         <div class="flex flex-col md:flex-row gap-6 mb-8">
           <div class="relative">
             <img [src]="artist.photo" alt="Artist avatar" width="120" height="120" class="rounded-sm object-cover border-4 border-white shadow-lg" />
+            @if(artist.credit_photo){
+            <div class="text-[10px] text-gray-500 mt-1">© {{artist.credit_photo}}</div>
+            }
           </div>
           <div class="flex-1">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{{artist.fname | titlecase}} {{artist.lname | titlecase}}, 
-              <span class="text-pont-rust text-xl font-regular">{{artist.tagline | titlecase}}</span></h1>
+              <span class="text-pont-rust text-xl font-regular">{{artist.title | titlecase}}</span></h1>
               <div class="flex space-x-2">
                  @for(x of artist.instruments ?? [] ; track x){
-     <p class="text-xl text-pont-rust font-medium mb-2">{{x.instrument | titlecase}},</p>
+    <p class="text-xl text-pont-rust font-medium mb-2">{{x.name | titlecase}},</p>
                  }
               </div>
        
             <div class="flex flex-wrap gap-2 mb-6">
               @for(x of artist.performance_type ?? [] ; track x){
-              <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{x.performance_type | titlecase}}</span>
+              <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{x.name | titlecase}}</span>
               }
             </div>
           </div>
@@ -151,7 +157,7 @@
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Biography</h3>
               <p class="text-gray-700 leading-relaxed">
-                {{artist.long_bio | titlecase}}
+                {{artist.short_bio | titlecase}}
               </p>
             </div>
           </div>
@@ -192,77 +198,62 @@
       <div class="space-y-8">
         <div>
           <h3 class="text-xl font-bold text-gray-900 mb-4">Media</h3>
+          @if((artist.media ?? []).length === 0){
+            <p class="text-sm text-gray-600">No media available.</p>
+          } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-            @for(x of artist.media_video ?? [] ;  track x){
-            <div (click)="openInNewTab(x.url)" class="cursor-pointer transition-all duration-200 border border-pont-light-green/60 bg-white/80 shadow-md hover:shadow-xl hover:scale-[1.03] rounded-xl p-0">
+            @for(x of artist.media ?? []; track x){
+            <div (click)="x?.url && openInNewTab(x.url)" class="cursor-pointer transition-all duration-200 border border-pont-light-green/60 bg-white/80 shadow-md hover:shadow-xl hover:scale-[1.03] rounded-xl p-0">
               <div class="p-3 flex flex-col items-center">
                 <div class="relative w-24 h-16 flex items-center justify-center rounded-lg mb-2 overflow-hidden bg-gradient-to-br from-pont-light-green/40 to-pont-yellow/30 border border-pont-green/10 shadow-sm">
-                  <img [src]="x.image" alt="Media" class="object-cover w-full h-full" />
+                  <img [src]="x?.image" alt="Media" class="object-cover w-full h-full" />
                 </div>
-                <h4 class="font-serif font-semibold text-xs text-gray-900 text-center line-clamp-2 mb-1 mt-1">
-                {{x.title | titlecase}}
-                </h4>
-                <p class="text-[11px] text-pont-green/80 capitalize tracking-wide font-medium">Video</p>
+                <h4 class="font-serif font-semibold text-xs text-gray-900 text-center line-clamp-2 mb-1 mt-1">{{x?.title | titlecase}}</h4>
+                <p class="text-[11px] text-pont-green/80 capitalize tracking-wide font-medium">{{x?.type || 'Media'}}</p>
               </div>
             </div>
-          }
-            
-            
-         @for(x of artist.media_cd ?? [] ;  track x){
-            <div (click)="openInNewTab(x.url)" class="cursor-pointer transition-all duration-200 border border-pont-light-green/60 bg-white/80 shadow-md hover:shadow-xl hover:scale-[1.03] rounded-xl p-0">
-              <div class="p-3 flex flex-col items-center">
-                <div class="relative w-24 h-16 flex items-center justify-center rounded-lg mb-2 overflow-hidden bg-gradient-to-br from-pont-light-green/40 to-pont-yellow/30 border border-pont-green/10 shadow-sm">
-                  <img [src]="x.image" alt="Media" class="object-cover w-full h-full" />
-                </div>
-                <h4 class="font-serif font-semibold text-xs text-gray-900 text-center line-clamp-2 mb-1 mt-1">
-                {{x.title | titlecase}}
-                </h4>
-                <p class="text-[11px] text-pont-green/80 capitalize tracking-wide font-medium">CD</p>
-              </div>
-            </div>
-          }
-
-          
-
-
+            }
           </div>
+          }
         </div>
 
         <div>
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Upcoming Shows</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Upcoming Events</h3>
+          @if((artist.upcoming_event ?? []).length === 0){
+            <p class="text-sm text-gray-600">No upcoming event.</p>
+          } @else {
           <div class="space-y-4">
+            @for(e of artist.upcoming_event ?? []; track e){
             <div class="bg-white rounded shadow-sm">
               <div class="p-6">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h4 class="font-semibold text-gray-900 text-lg">Celtic Nights</h4>
-                    <p class="text-pont-rust font-medium">Auditorium Brest</p>
+                    <h4 class="font-semibold text-gray-900 text-lg">{{e?.title || e?.name || 'Show'}}</h4>
+                    <p class="text-pont-rust font-medium">{{ e?.location?.name || e?.location || e?.venue }}</p>
                     <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                      <div>2025-09-12</div>
-                      <div>19:30</div>
+                      <div>
+                        {{ e?.start_date | date:'mediumDate' }}
+                        @if(e?.end_date){ - {{ e?.end_date | date:'mediumDate' }} }
+                      </div>
+                      <div>
+                        @if(e?.start_time){ {{ e?.start_time }} }
+                        @if(e?.end_time){ - {{ e?.end_time }} }
+                        @if(!e?.start_time && !e?.end_time){
+                          {{ e?.start_date | date:'shortTime' }}
+                          @if(e?.end_date){ - {{ e?.end_date | date:'shortTime' }} }
+                        }
+                      </div>
                     </div>
                   </div>
-                  <a href="#" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white bg-transparent rounded px-3 py-1 text-sm">Get Tickets</a>
+                  @if(e?.url){
+                  <a [href]="e.url" target="_blank" rel="noopener" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white bg-transparent rounded px-3 py-1 text-sm">Get Tickets</a>
+                  }
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded shadow-sm">
-              <div class="p-6">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h4 class="font-semibold text-gray-900 text-lg">Summer Folk Gala</h4>
-                    <p class="text-pont-rust font-medium">Quimper Theatre</p>
-                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                      <div>2025-10-04</div>
-                      <div>20:00</div>
-                    </div>
-                  </div>
-                  <a href="#" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white bg-transparent rounded px-3 py-1 text-sm">Get Tickets</a>
-                </div>
-              </div>
-            </div>
+            }
           </div>
+          }
         </div>
       </div>
     </div>

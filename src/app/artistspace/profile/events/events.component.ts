@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-events',
-  imports: [NgClass, NgFor, NgIf],
+  imports: [NgClass, NgFor],
   templateUrl: './events.component.html',
   
 })

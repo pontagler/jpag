@@ -70,9 +70,29 @@ export class EventsComponent implements OnInit {
 	}
 
 	private normalizeEvent(raw: any): any {
-		const shows = Array.isArray(raw?.event_dates)
+		const showsRaw = Array.isArray(raw?.event_dates)
 			? raw.event_dates.map((d: any) => ({ date: d?.date, time: d?.time, location: d?.location }))
 			: [];
+		const shows = showsRaw.sort((a: any, b: any) => {
+			const toMs = (s: any): number => {
+				const dt = new Date(s?.date);
+				if (isNaN(dt.getTime())) return 0;
+				const timeStr = (s?.time || '').toString();
+				if (timeStr) {
+					const parts = timeStr.split(':');
+					const hours = parseInt(parts[0] || '0', 10);
+					const minutes = parseInt(parts[1] || '0', 10);
+					if (!isNaN(hours) && !isNaN(minutes)) {
+						dt.setHours(hours, minutes, 0, 0);
+					}
+				} else {
+					// If no time, treat as end of day
+					dt.setHours(23, 59, 59, 999);
+				}
+				return dt.getTime();
+			};
+			return toMs(a) - toMs(b); // earliest first
+		});
 		const artistDisplay = Array.isArray(raw?.event_artists)
 			? (() => {
 				const names: string[] = raw.event_artists
@@ -146,7 +166,7 @@ export class EventsComponent implements OnInit {
 	}
 
 	onSortChange(value: 'date' | 'date-asc' | 'edition' | 'event_type' | 'edition_type' | 'event_domain'): void {
-		this.sortBy = value || 'date-asc';
+		this.sortBy = value || 'date';
 		this.applyFilters();
 	}
 
@@ -154,7 +174,7 @@ export class EventsComponent implements OnInit {
 		this.searchTerm = '';
 		this.selectedProgramme = '';
 		this.selectedType = '';
-		this.sortBy = 'date-asc';
+		this.sortBy = 'date';
 		this.filteredEvents = [...this.allEvents];
 	}
 

@@ -1,9 +1,7 @@
 <div class="bg-cream">
 
-	<section
-		class="relative bg-orange-50"
-		style="background-image: url('/assets/images/background/bg1.webp'); background-size: cover; background-position: center;"
-	>
+	<section class="relative bg-orange-50"
+		style="background-image: url('/assets/images/background/bg1.webp'); background-size: cover; background-position: center;">
 		<div class="absolute inset-0 z-0" id="events-background"></div>
 		<div class="relative z-10 text-center px-9 py-16">
 			<h1 class="text-4xl lg:text-5xl font-bold text-gray-700 mb-4">
@@ -23,27 +21,26 @@
 						<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5">
 							<i class="fa-solid fa-magnifying-glass"></i>
 						</span>
-						<input
-							placeholder="Search by name, artist, location..."
+						<input placeholder="Search by name, artist, location..."
 							class="pl-10 h-12 w-full border border-gray-300 rounded-md focus:border-pont-green focus:outline-none"
-							type="text"
-							[ngModel]="searchTerm"
-							(ngModelChange)="onSearchChange($event)"
-						/>
+							type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" />
 					</div>
 				</div>
 
 				<div class="flex items-center gap-4">
-					<button (click)="showFilters = !showFilters" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-4 py-2 rounded-md transition">
+					<button (click)="showFilters = !showFilters"
+						class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-4 py-2 rounded-md transition">
 						<i class="fa-solid fa-sliders mr-2"></i>
 						Filters
 					</button>
 
 					<div class="flex border border-gray-300 rounded-lg overflow-hidden">
-						<button (click)="viewMode = 'grid'" class="px-3 py-2" [ngClass]="viewMode==='grid' ? 'bg-pont-green text-white' : 'text-gray-600'">
+						<button (click)="viewMode = 'grid'" class="px-3 py-2"
+							[ngClass]="viewMode==='grid' ? 'bg-pont-green text-white' : 'text-gray-600'">
 							<i class="fa-solid fa-table-cells"></i>
 						</button>
-						<button (click)="viewMode = 'list'" class="px-3 py-2" [ngClass]="viewMode==='list' ? 'bg-pont-green text-white' : 'text-gray-600'">
+						<button (click)="viewMode = 'list'" class="px-3 py-2"
+							[ngClass]="viewMode==='list' ? 'bg-pont-green text-white' : 'text-gray-600'">
 							<i class="fa-solid fa-list"></i>
 						</button>
 					</div>
@@ -51,63 +48,65 @@
 			</div>
 
 			@if(showFilters){
-				<div class="mb-8 border border-pont-green/20 rounded-lg p-4">
-					<div class="grid md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Edition Name</label>
-                            <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
-                                        [ngModel]="selectedEditionName"
-                                        (ngModelChange)="onEditionNameChange($event)">
-                                <option value="">All Editions</option>
-                                @for(opt of editionNameOptions; track opt){
-                                    <option [value]="opt">{{opt}}</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-                            <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
-                                        [ngModel]="selectedType"
-                                        (ngModelChange)="onTypeChange($event)">
-                                <option value="">All Types</option>
-                                @for(opt of typeOptions; track opt){
-                                    <option [value]="opt">{{opt}}</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Edition Type</label>
-                            <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
-                                        [ngModel]="selectedProgramme"
-                                        (ngModelChange)="onProgrammeChange($event)">
-                                <option value="">All Edition Types</option>
-                                @for(opt of programmeOptions; track opt){
-                                    <option [value]="opt">{{opt}}</option>
-                                }
-                            </select>
-                        </div>
-
-						<div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-							<select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
-										[ngModel]="sortBy"
-										(ngModelChange)="onSortChange($event)">
-								<option value="date">Date Latest</option>
-								<option value="date-asc">Date Oldest</option>
-                                <option value="edition">Edition</option>
-                                <option value="event_type">Event Type</option>
-                                <option value="edition_type">Edition Type</option>
-                                <option value="event_domain">Event Domain</option>
-							</select>
-						</div>
+			<div class="mb-8 border border-pont-green/20 rounded-lg p-4">
+				<div class="grid md:grid-cols-4 gap-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Edition Name</label>
+						<select
+							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+							[ngModel]="selectedEditionName" (ngModelChange)="onEditionNameChange($event)">
+							<option value="">All Editions</option>
+							@for(opt of editionNameOptions; track opt){
+							<option [value]="opt">{{opt}}</option>
+							}
+						</select>
 					</div>
 
-					<div class="mt-4">
-						<button (click)="clearFilters()" class="h-10 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Clear All</button>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+						<select
+							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+							[ngModel]="selectedType" (ngModelChange)="onTypeChange($event)">
+							<option value="">All Types</option>
+							@for(opt of typeOptions; track opt){
+							<option [value]="opt">{{opt}}</option>
+							}
+						</select>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Edition Type</label>
+						<select
+							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+							[ngModel]="selectedProgramme" (ngModelChange)="onProgrammeChange($event)">
+							<option value="">All Edition Types</option>
+							@for(opt of programmeOptions; track opt){
+							<option [value]="opt">{{opt}}</option>
+							}
+						</select>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+						<select
+							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
+							[ngModel]="sortBy" (ngModelChange)="onSortChange($event)">
+							<option value="date">Date Latest</option>
+							<option value="date-asc">Date Oldest</option>
+							<option value="edition">Edition</option>
+							<option value="event_type">Event Type</option>
+							<option value="edition_type">Edition Type</option>
+							<option value="event_domain">Event Domain</option>
+						</select>
 					</div>
 				</div>
+
+				<div class="mt-4">
+					<button (click)="clearFilters()"
+						class="h-10 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Clear
+						All</button>
+				</div>
+			</div>
 			}
 
 			<div class="mb-6">
@@ -115,195 +114,240 @@
 			</div>
 
 			@if(isLoading){
-				<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-					@for(_ of [0,1,2,3,4,5,6,7]; track _){
-						<div class="border-0 shadow-lg bg-white rounded p-0">
-							<div class="p-0">
-								<div class="w-full h-64 bg-gray-200 animate-pulse"></div>
-								<div class="p-6 space-y-3">
-									<div class="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-									<div class="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-									<div class="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div>
-									<div class="h-9 bg-gray-200 rounded animate-pulse"></div>
-								</div>
-							</div>
+			<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+				@for(_ of [0,1,2,3,4,5,6,7]; track _){
+				<div class="border-0 shadow-lg bg-white rounded p-0">
+					<div class="p-0">
+						<div class="w-full h-64 bg-gray-200 animate-pulse"></div>
+						<div class="p-6 space-y-3">
+							<div class="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+							<div class="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+							<div class="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div>
+							<div class="h-9 bg-gray-200 rounded animate-pulse"></div>
 						</div>
-					}
+					</div>
 				</div>
+				}
+			</div>
 			} @else if(viewMode === 'grid'){
-				<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-					@for(e of filteredEvents; track e.id){
-						<div class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded">
-							<div class="p-0">
-								<div class="relative overflow-hidden">
-									<img [src]="(e?.imageUrl || '/assets/images/venues/v1.png')" [alt]="e?.title || 'Event'" class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
-									<div class="absolute top-4 left-4">
-										<span class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(e?.event_domain || e?.edition_type || 'Event') | titlecase}}</span>
-									</div>
+			<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+				@for(e of filteredEvents; track e.id){
+				<div
+					class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded">
+					<div class="p-0">
+						<div class="relative overflow-hidden">
+							<img [src]="(e?.imageUrl || '/assets/images/venues/v1.png')" [alt]="e?.title || 'Event'"
+								class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" />
+							<div class="absolute top-4 left-4">
+								<span
+									class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(e?.event_domain
+									|| e?.edition_type || 'Event') | titlecase}}</span>
+							</div>
 
-										<div class="absolute bottom-4 left-4 space-x-4 flex">
-											@for(x of e.instruments; track x){
-										<span class="bg-gray-50  backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-gray-600">{{x.instrument | titlecase}}</span>
-											}
-									</div>
-								</div>
-								<div class="p-6 flex flex-col h-full">
-                                    <p class="text-lg">{{e.editionDisplay}}</p>
-                                    
-									<h3 class="font-bold text-xl truncate text-gray-900 mb-1">{{e?.title || e?.name}}</h3>
-									<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
-									<div class="h-20">
-									<p class="text-sm text-gray-600 mb-3">{{(e?.description || '') | slice:0:120}}{{(e?.description?.length || 0) > 120 ? '…' : ''}}</p>
-									</div>
-								<div class="space-y-1 text-sm text-gray-600 mb-4 min-h-16">
-                                        @for(d of (e?.shows || []); track d; let i = $index){
-											@if(i < 2){
-								<div class="flex items-center min-w-0">
-													<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-										<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
-													<span class="mx-2">•</span>
-										<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
-                                                    <span class="mx-2">•</span>
-										<span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}"> <i class="fa-solid fa-location-dot mr-1"></i> {{d?.location}}</span>
-												</div>
-											}
-										}
-										@if((e?.shows?.length || 0) > 2){
-										
-											@if(isDatesExpanded(e.id)){
-												<div class="space-y-1 mt-1">
-                                                    @for(d of e.shows; track d; let i = $index){
-														@if(i >= 2){
-									<div class="flex items-center text-gray-700 min-w-0">
-																<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
-																<span class="mx-2">•</span>
-														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
-                                                                <span class="mx-2">•</span>
-														<span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
-															<i class="fa-solid fa-location-dot mr-1"></i> 
-															{{d?.location}}</span>
-															</div>
-														}
-													}
-												</div>
-											}
-                                            <button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
-												{{ isDatesExpanded(e.id) ? 'Hide all dates' : 'View all dates' }}
-											</button>
-										}
-									</div>
-								<div class="mt-auto">
-									@if(e?.isCompleted){
-										<p class="w-full inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">Completed</p>
-									} @else {
-										<p (click)="goToEventDetail(e.id)" class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">View Details</p>
-									}
-								</div>
-								</div>
+							<div class="absolute bottom-4 left-4 space-x-4 flex">
+								@for(x of e.instruments; track x){
+								<span
+									class="bg-gray-50  backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-gray-600">{{x.instrument
+									| titlecase}}</span>
+								}
 							</div>
 						</div>
-					}
-				</div>
-			} @else {
-				<div class="space-y-6">
-					@for(e of filteredEvents; track e.id){
-						<div class="grid md:grid-cols-6 gap-0 border border-gray-200 rounded-xl bg-white overflow-hidden hover:shadow-xl transition">
-							<div class="md:col-span-2 relative">
-								<img [src]="(e?.imageUrl || '/assets/images/venues/v1.png')" [alt]="e?.title || 'Event'" class="w-full h-56 md:h-64 lg:h-72 object-cover" />
-								<div class="absolute top-3 left-3">
-									<span class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(e?.event_domain || e?.edition_type || 'Event') | titlecase}}</span>
-								</div>
+						<div class="p-6 flex flex-col h-full">
+							<p class="text-lg">{{e.editionDisplay}}</p>
 
-                                <div class="absolute bottom-5 left-4 space-x-4 flex">
-                                    @for(x of e.instruments; track x){
-                                <span class="bg-gray-50  backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-gray-600">{{x.instrument | titlecase}}</span>
-                                    }
-                            </div>
+							<h3 class="font-bold text-xl truncate text-gray-900 mb-1">{{e?.title || e?.name}}</h3>
+							<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
+							<div class="h-20">
+								<p class="text-sm text-gray-600 mb-3">{{(e?.description || '') |
+									slice:0:120}}{{(e?.description?.length || 0) > 120 ? '…' : ''}}</p>
 							</div>
-							<div class="md:col-span-4 p-5 md:p-6 flex flex-col justify-between">
-								<div>
-									<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-										<div>
-                                            <p class="text-lg">{{e.editionDisplay}}</p>
-											<h3 class="text-xl font-bold text-gray-900">{{e?.title || e?.name}}</h3>
-											<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
-											
-										</div>
-										@if(e?.isCompleted){
-											<p class="inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">Completed</p>
-										} @else {
-											<p (click)="goToEventDetail(e.id)" class="cursor-pointer inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">View Details</p>
-										}
-									</div>
-									
-									<p class="text-sm text-gray-600 mt-3 leading-relaxed truncate">{{(e?.description || '') | slice:0:180}}{{(e?.description?.length || 0) > 180 ? '…' : ''}}</p>
-								
-									<div class="space-y-1 text-sm text-gray-600 mt-3 min-h-16">
-                                        @for(d of (e?.shows || []); track d; let i = $index){
-                                            @if(i < 2){
-									<div class="flex items-center min-w-0 ">
-                                                    <i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-													<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
-                                                    <span class="mx-2">•</span>
-													<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
-                                                    <span class="mx-2">•</span>
-													<span class="text-xs " [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
-														<i class="fa-solid fa-location-dot mr-1"></i>
-															{{d?.location}}</span>
-                                                </div>
-                                            }
-                                        }
-                                        @if((e?.shows?.length || 0) > 2){
-														@if(isDatesExpanded(e.id)){
-                                                <div class="space-y-1 mt-1">
-                                                    @for(d of e.shows; track d; let i = $index){
-                                                        @if(i >= 2){
-									<div class="flex items-center text-gray-700 min-w-0">
-                                                                <i class="fa-regular fa-calendar text-pont-green mr-2"></i>
-														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date | date:'dd-MMM-yyyy'}}</span>
-                                                                <span class="mx-2">•</span>
-														<span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time | slice:0:5}}</span>
-                                                                <span class="mx-2">•</span>
-														<span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
-															<i class="fa-solid fa-location-dot mr-1"></i>
-															{{d?.location}}</span>
-                                                            </div>
-                                                        }
-                                                    }
-                                                </div>
-														}
-														<button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
-															{{ isDatesExpanded(e.id) ? 'Hide all dates' : 'View all dates' }}
-														</button>
-                                        }
-                                    </div>
-									
+							<div class="space-y-1 text-sm text-gray-600 mb-4 min-h-16">
+								@for(d of (e?.shows || []); track d; let i = $index){
+								@if(i < 2){ <div class="flex items-center min-w-0">
+									<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+									<span class="text-xs"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
+										date:'dd-MMM-yyyy'}}</span>
+									<span class="mx-2">•</span>
+									<span class="text-xs"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
+										slice:0:5}}</span>
+									<span class="mx-2">•</span>
+									<span class="text-xs truncate max-w-[10rem]"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}"> <i
+											class="fa-solid fa-location-dot mr-1"></i> {{d?.location}}</span>
+							</div>
+							}
+							}
+							@if((e?.shows?.length || 0) > 2){
+
+							@if(isDatesExpanded(e.id)){
+							<div class="space-y-1 mt-1">
+								@for(d of e.shows; track d; let i = $index){
+								@if(i >= 2){
+								<div class="flex items-center text-gray-700 min-w-0">
+									<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+									<span class="text-xs"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
+										date:'dd-MMM-yyyy'}}</span>
+									<span class="mx-2">•</span>
+									<span class="text-xs"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
+										slice:0:5}}</span>
+									<span class="mx-2">•</span>
+									<span class="text-xs truncate max-w-[10rem]"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+										<i class="fa-solid fa-location-dot mr-1"></i>
+										{{d?.location}}</span>
 								</div>
+								}
+								}
 							</div>
+							}
+							<button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
+								{{ isDatesExpanded(e.id) ? 'Hide all dates' : 'View all dates' }}
+							</button>
+							}
 						</div>
-					}
+						<div class="mt-auto">
+							@if(e?.isCompleted){
+							<p
+								class="w-full inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">
+								Completed</p>
+							} @else {
+							<p (click)="goToEventDetail(e.id)"
+								class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">
+								View Details</p>
+							}
+						</div>
+					</div>
 				</div>
+			</div>
 			}
 		</div>
-	</section>
+		} @else {
+		<div class="space-y-6">
+			@for(e of filteredEvents; track e.id){
+			<div
+				class="grid md:grid-cols-6 gap-0 border border-gray-200 rounded-xl bg-white overflow-hidden hover:shadow-xl transition">
+				<div class="md:col-span-2 relative">
+					<img [src]="(e?.imageUrl || '/assets/images/venues/v1.png')" [alt]="e?.title || 'Event'"
+						class="w-full h-56 md:h-64 lg:h-72 object-cover" />
+					<div class="absolute top-3 left-3">
+						<span
+							class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(e?.event_domain
+							|| e?.edition_type || 'Event') | titlecase}}</span>
+					</div>
 
-	<section class="py-16 px-4 bg-pont-light-green">
-		<div class="max-w-2xl mx-auto text-center">
-			<h2 class="text-3xl font-bold text-pont-green mb-4">Stay Connected</h2>
-			<p class="text-lg text-gray-700 mb-8">
-				Subscribe to our newsletter and never miss an upcoming concert or artist announcement
-			</p>
-
-			<form class="space-y-4">
-				<div class="grid md:grid-cols-2 gap-4">
-					<input type="text" placeholder="Your Name" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
-					<input type="text" placeholder="Code Postal" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+					<div class="absolute bottom-5 left-4 space-x-4 flex">
+						@for(x of e.instruments; track x){
+						<span
+							class="bg-gray-50  backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-gray-600">{{x.instrument
+							| titlecase}}</span>
+						}
+					</div>
 				</div>
-				<input type="email" placeholder="Your Email Address" class="h-12 w-full border border-pont-green focus:outline-none px-3 rounded" />
-				<button type="submit" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">Subscribe to Newsletter</button>
-			</form>
+				<div class="md:col-span-4 p-5 md:p-6 flex flex-col justify-between">
+					<div>
+						<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+							<div>
+								<p class="text-lg">{{e.editionDisplay}}</p>
+								<h3 class="text-xl font-bold text-gray-900">{{e?.title || e?.name}}</h3>
+								<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
+
+							</div>
+							@if(e?.isCompleted){
+							<p
+								class="inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">
+								Completed</p>
+							} @else {
+							<p (click)="goToEventDetail(e.id)"
+								class="cursor-pointer inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">
+								View Details</p>
+							}
+						</div>
+
+						<p class="text-sm text-gray-600 mt-3 leading-relaxed truncate">{{(e?.description || '') |
+							slice:0:180}}{{(e?.description?.length || 0) > 180 ? '…' : ''}}</p>
+
+						<div class="space-y-1 text-sm text-gray-600 mt-3 min-h-16">
+							@for(d of (e?.shows || []); track d; let i = $index){
+							@if(i < 2){ <div class="flex items-center min-w-0 ">
+								<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+								<span class="text-xs"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
+									date:'dd-MMM-yyyy'}}</span>
+								<span class="mx-2">•</span>
+								<span class="text-xs"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
+									slice:0:5}}</span>
+								<span class="mx-2">•</span>
+								<span class="text-xs " [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+									<i class="fa-solid fa-location-dot mr-1"></i>
+									{{d?.location}}</span>
+						</div>
+						}
+						}
+						@if((e?.shows?.length || 0) > 2){
+						@if(isDatesExpanded(e.id)){
+						<div class="space-y-1 mt-1">
+							@for(d of e.shows; track d; let i = $index){
+							@if(i >= 2){
+							<div class="flex items-center text-gray-700 min-w-0">
+								<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+								<span class="text-xs"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
+									date:'dd-MMM-yyyy'}}</span>
+								<span class="mx-2">•</span>
+								<span class="text-xs"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
+									slice:0:5}}</span>
+								<span class="mx-2">•</span>
+								<span class="text-xs truncate max-w-[10rem]"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+									<i class="fa-solid fa-location-dot mr-1"></i>
+									{{d?.location}}</span>
+							</div>
+							}
+							}
+						</div>
+						}
+						<button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
+							{{ isDatesExpanded(e.id) ? 'Hide all dates' : 'View all dates' }}
+						</button>
+						}
+					</div>
+
+				</div>
+			</div>
 		</div>
-	</section>
+		}
+</div>
+}
+</div>
+</section>
+
+<section class="py-16 px-4 bg-pont-light-green">
+	<div class="max-w-2xl mx-auto text-center">
+		<h2 class="text-3xl font-bold text-pont-green mb-4">Stay Connected</h2>
+		<p class="text-lg text-gray-700 mb-8">
+			Subscribe to our newsletter and never miss an upcoming concert or artist announcement
+		</p>
+
+		<form class="space-y-4">
+			<div class="grid md:grid-cols-2 gap-4">
+				<input type="text" placeholder="Your Name"
+					class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+				<input type="text" placeholder="Code Postal"
+					class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+			</div>
+			<input type="email" placeholder="Your Email Address"
+				class="h-12 w-full border border-pont-green focus:outline-none px-3 rounded" />
+			<button type="submit"
+				class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">Subscribe to
+				Newsletter</button>
+		</form>
+	</div>
+</section>
 
 </div>

@@ -159,8 +159,6 @@
           </div>
           <div class="p-6">
             <h3 class="font-bold text-xl text-gray-900 mb-2"><a [routerLink]="['/artists', artist.id_artist]" class="hover:text-pont-green">{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</a></h3>
-            <p class="text-pont-rust font-medium mb-2 text-sm"> {{ artist.tagline  | titlecase}} </p>
-            <p class="text-sm text-gray-600 mb-3">{{ artist.short_bio }}</p>
             <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
               <div class="flex flex-wrap space-x-2">
                 @for(x of (artist.instruments ?? []); track x.id_instrument){
@@ -168,6 +166,9 @@
                 }
               </div>  
             </div>
+            <div class="h-16">
+            <p class="text-sm text-gray-600 mb-3">{{ artist.tagline | titlecase}}</p>
+</div>
             <div class="flex flex-wrap gap-2 mb-4">
               @for(p of (artist.performance ?? []); track p.id_performance){
               <span class="bg-pont-yellow/20 text-pont-rust px-2 py-1 rounded-full text-[11px] font-medium">{{ p.performance | titlecase }}</span>

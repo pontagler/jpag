@@ -139,6 +139,12 @@
           <p class="text-lg text-gray-600 leading-relaxed">{{ location.public_description }}</p>
         </div>
 
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">Access Info</h2>
+          <p class="text-lg text-gray-600 leading-relaxed">{{ location.description }}</p>
+        </div>
+
+
         <div *ngIf="(location.amenities || []).length > 0">
           <h2 class="text-3xl font-bold text-gray-800 mb-6">What this place offers</h2>
           <div class="grid grid-cols-2 gap-4">

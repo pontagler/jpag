@@ -139,8 +139,8 @@
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{{artist.fname | titlecase}} {{artist.lname | titlecase}}, 
               <span class="text-pont-rust text-xl font-regular">{{artist.title | titlecase}}</span></h1>
               <div class="flex space-x-2">
-                 @for(x of artist.instruments ?? [] ; track x){
-    <p class="text-xl text-pont-rust font-medium mb-2">{{x.name | titlecase}},</p>
+                 @for(x of artist.instruments ?? [] ; track x; let last = $last){
+    <p class="text-xl text-pont-rust font-medium mb-2">{{x.name | titlecase}}@if(!last){,}</p>
                  }
               </div>
        
@@ -155,13 +155,14 @@
         <div class="space-y-8">
           <div class="bg-white rounded shadow-sm">
             <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-4">Biography</h3>
+              <h3 class="text-xl font-bold text-gray-900 mb-4">Biographie</h3>
               <p class="text-gray-700 text-sm leading-relaxed">
                 {{artist.long_bio || artist.short_bio | titlecase}}
               </p>
             </div>
           </div>
 
+          @if((artist.education ?? []).length > 0){
           <div class="bg-white rounded shadow-sm">
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Education & Experience</h3>
@@ -177,7 +178,9 @@
               </div>
             </div>
           </div>
+          }
 
+          @if((artist.awards ?? []).length > 0){
           <div class="bg-white rounded shadow-sm">
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Awards & Recognition</h3>
@@ -192,15 +195,14 @@
               </div>
             </div>
           </div>
+          }
         </div>
       </div>
 
       <div class="space-y-8">
+        @if((artist.media ?? []).length > 0){
         <div>
           <h3 class="text-xl font-bold text-gray-900 mb-4">Media</h3>
-          @if((artist.media ?? []).length === 0){
-            <p class="text-sm text-gray-600">No media available.</p>
-          } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @for(x of artist.media ?? []; track x){
             <div (click)="x?.url && openInNewTab(x.url)" class="cursor-pointer transition-all duration-200 border border-pont-light-green/60 bg-white/80 shadow-md hover:shadow-xl hover:scale-[1.03] rounded-xl p-0">
@@ -214,8 +216,8 @@
             </div>
             }
           </div>
-          }
         </div>
+        }
 
         <div>
           <h3 class="text-xl font-bold text-gray-900 mb-4">Upcoming Events</h3>

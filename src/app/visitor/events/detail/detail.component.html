@@ -149,8 +149,8 @@
                 <img [src]="a.image || '/assets/images/profile/user-b.png'" [alt]="a.name" width="80" height="80" class="rounded-full object-cover" />
                 <div>
                   <h3 class="text-xl font-bold text-gray-900">{{ a.title }}</h3>
-                  <p class="text-rose-700 font-medium" *ngIf="a.description">{{ a.description }}</p>
-                  <button (click)="a.url" class="bg-pont-green text-white px-4 py-1 rounded-lg">Visit</button>
+                  <p class="text-rose-700 text-sm font-medium" *ngIf="a.description">{{ a.description }}</p>
+                  <a [href]="a.url" target="_blank" rel="noopener noreferrer" class="bg-pont-green text-white px-4 py-1 rounded-lg inline-block">Visit</a>
                 </div>
               </div>
              

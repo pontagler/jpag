@@ -1,16 +1,16 @@
 <div class="bg-cream">
 
   <section
-    class="relative bg-orange-50"
-    style="background-image: url('/assets/images/background/bg3.webp'); background-size: cover; background-position: center;"
+    class="relative bg-orange-50 lg:h-80"
+    style="background-image: url('/assets/images/background/bg3.png'); background-size: cover; background-position: center;"
   >
     <div class="absolute inset-0 z-0"></div>
-    <div class="relative z-10 text-center px-9 py-16">
+    <div class="relative z-10 text-center px-9 py-16 lg:top-12">
       <h1 class="text-4xl lg:text-5xl font-bold text-gray-700 mb-4">
-        Unique <span class="text-pont-rust">Locations</span>
+         <span class="text-pont-rust">Lieux</span>
       </h1>
       <p class="text-lg text-black max-w-2xl mx-auto">
-        Discover extraordinary spaces perfect for intimate classical music performances
+        <!-- Discover extraordinary spaces perfect for intimate classical music performances -->
       </p>
     </div>
   </section>
@@ -24,7 +24,7 @@
               <i class="fa-solid fa-magnifying-glass"></i>
             </span>
             <input
-              placeholder="Search venue by name..."
+              placeholder="Rechercher des lieux par nom ..."
               class="pl-10 h-12 w-full border border-gray-300 rounded-md focus:border-pont-green focus:outline-none"
               type="text"
               [ngModel]="searchTerm"
@@ -36,7 +36,7 @@
         <div class="flex items-center gap-4">
           <button (click)="showFilters = !showFilters" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white px-4 py-2 rounded-md transition">
             <i class="fa-solid fa-sliders mr-2"></i>
-            Filters
+            Filtrer
           </button>
 
           <div class="flex border border-gray-300 rounded-lg overflow-hidden">
@@ -54,11 +54,11 @@
         <div class="mb-8 border border-pont-green/20 rounded-lg p-4">
           <div class="grid md:grid-cols-5 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Ville </label>
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedCity"
                       (ngModelChange)="onCityChange($event)">
-                <option value="">All Cities</option>
+                <option value="">Tous Ville</option>
                 @for(opt of cityOptions; track opt){
                   <option [value]="opt">{{opt | titlecase}}</option>
                 }
@@ -66,11 +66,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Jauge</label>
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedCapacity"
                       (ngModelChange)="onCapacityChange($event)">
-                <option value="all">All Capacities</option>
+                <option value="all">Tous Jauge</option>
                 <option value="under100">Under 100</option>
                 <option value="100-300">100-300</option>
                 <option value="over300">Over 300</option>
@@ -78,11 +78,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Type de lieux</label>
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedType"
                       (ngModelChange)="onTypeChange($event)">
-                <option value="">All Types</option>
+                <option value="">Tous les types</option>
                 @for(opt of typeOptions; track opt){
                   <option [value]="opt">{{opt | titlecase}}</option>
                 }
@@ -94,7 +94,7 @@
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedSpec"
                       (ngModelChange)="onSpecChange($event)">
-                <option value="">All Specs</option>
+                <option value="">Tous Specs</option>
                 @for(opt of specOptions; track opt){
                   <option [value]="opt">{{opt | titlecase}}</option>
                 }
@@ -106,7 +106,7 @@
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedAmenity"
                       (ngModelChange)="onAmenityChange($event)">
-                <option value="">All Amenities</option>
+                <option value="">Tous Amenities</option>
                 @for(opt of amenityOptions; track opt){
                   <option [value]="opt">{{opt | titlecase}}</option>
                 }
@@ -115,13 +115,13 @@
           </div>
 
           <div class="mt-4">
-            <button (click)="clearFilters()" class="h-10 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Clear All</button>
+            <button (click)="clearFilters()" class="h-10 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Effacer les filtres</button>
           </div>
         </div>
       }
 
       <div class="mb-6">
-        <p class="text-gray-600">Showing {{filteredLocations.length || 0}} of {{allLocations.length || 0}} locations</p>
+        <p class="text-gray-600">Afficher {{filteredLocations.length || 0}} of {{allLocations.length || 0}} Lieux</p>
       </div>
 
       @if(isLoading){
@@ -171,7 +171,7 @@
 
                   <div class="mt-auto">
                     <hr>
-                    <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded mt-4">View Details</p>
+                    <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded mt-4">Détail</p>
                   </div>
                 </div>
               </div>
@@ -198,7 +198,7 @@
                         {{v?.city || v?.proviance}}
                       </p>
                     </div>
-                    <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded">View Details</p>
+                    <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded">Détail</p>
                   </div>
                   <p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(v?.description || '') | slice:0:180}}{{(v?.description?.length || 0) > 180 ? '…' : ''}}</p>
                 
@@ -238,18 +238,18 @@
 
   <section class="py-16 px-4 bg-pont-light-green">
     <div class="max-w-2xl mx-auto text-center">
-      <h2 class="text-3xl font-bold text-pont-green mb-4">Stay Connected</h2>
+      <h2 class="text-3xl font-bold text-pont-green mb-4">Recevez nos actualités</h2>
       <p class="text-lg text-gray-700 mb-8">
-        Subscribe to our newsletter and never miss an upcoming concert or artist announcement
+        Inscrivez-vous à notre Newletter pour connaître toute la programmation de Pont Ar Gler
       </p>
 
       <form class="space-y-4">
         <div class="grid md:grid-cols-2 gap-4">
-          <input type="text" placeholder="Your Name" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
-          <input type="text" placeholder="Code Postal" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+          <input type="text" placeholder="Prénom Nom" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
+          <input type="text" placeholder="Téléphone" class="h-12 border border-pont-green focus:outline-none px-3 rounded" />
         </div>
-        <input type="email" placeholder="Your Email Address" class="h-12 w-full border border-pont-green focus:outline-none px-3 rounded" />
-        <button type="submit" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">Subscribe to Newsletter</button>
+        <input type="email" placeholder="Adresse email" class="h-12 w-full border border-pont-green focus:outline-none px-3 rounded" />
+        <button type="submit" class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-3 text-lg rounded">Souscrivez à la Newsletter</button>
       </form>
     </div>
   </section>

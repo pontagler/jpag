@@ -26,7 +26,9 @@ urlID:any;
     });
   }
   
-
+  goToArtistLogin(){
+    this.router.navigate(['/artistspace']);
+  }
   ngOnInit() {
     // You can access route data here if needed
    
@@ -40,7 +42,7 @@ getMenuItemClass(urlID: any) {
    console.log('urlID changed function called:', this.urlID);
   
   if(urlID == this.urlID){
-   return 'border-b-2 border-solid  border-pont-green text-pont-green hover:text-green-700';
+   return 'text-pont-green hover:text-green-700';
   }else{
     return '';
   }

@@ -637,7 +637,7 @@ export class ArtistDetailComponent implements OnInit {
       id_artist: this.artistID,
       id_performance: this.selectedPerf,
       created_by: this.loggedUser,
-      last_updated_by: this.loggedUser   
+      updated_by: this.loggedUser   
     }
 
     try{

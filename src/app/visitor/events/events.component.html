@@ -75,12 +75,12 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-1">Type d'édition
+						<label class="block text-sm font-medium text-gray-700 mb-1">Domaine
 						</label>
 						<select
 							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
 							[ngModel]="selectedProgramme" (ngModelChange)="onProgrammeChange($event)">
-							<option value="">Statut</option>
+							<option value="">Tous les domaines</option>
 							@for(opt of programmeOptions; track opt){
 							<option [value]="opt">{{opt}}</option>
 							}
@@ -88,7 +88,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Trier</label>
 						<select
 							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
 							[ngModel]="sortBy" (ngModelChange)="onSortChange($event)">
@@ -112,7 +112,7 @@
 			}
 
 			<div class="mb-6">
-				<p class="text-gray-600">Afficher  {{filteredEvents.length || 0}} of {{allEvents.length || 0}} les événements</p>
+				<p class="text-gray-600">Afficher  {{filteredEvents.length || 0}} événements sur {{allEvents.length || 0}} </p>
 			</div>
 
 			@if(isLoading){

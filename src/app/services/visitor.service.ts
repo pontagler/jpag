@@ -80,6 +80,25 @@ async getFeaturedArtist(){
     return data as any;
   }
 
+  async submitVisitorMessage(payload: { fname?: string | null; lname?: string | null; email: string; msg: string }): Promise<{ id: number } | null> {
+    const clean = {
+      fname: (payload.fname ?? '').trim() || null,
+      lname: (payload.lname ?? '').trim() || null,
+      email: (payload.email ?? '').trim(),
+      msg: (payload.msg ?? '').trim()
+    };
+    if (!clean.email || !clean.msg) {
+      throw new Error('Email and message are required');
+    }
+    const { data, error } = await supabase
+      .from('visitor_message')
+      .insert({ fname: clean.fname, lname: clean.lname, email: clean.email, msg: clean.msg })
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data as any;
+  }
+
 routeID = signal<any>(1);
  
 setRouteID(id:any){

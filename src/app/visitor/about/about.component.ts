@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { VisitorService } from '../../services/visitor.service';
 
 interface TeamMember {
@@ -22,7 +23,7 @@ interface PartnerLogo {
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './about.component.html'
 })
 export class AboutComponent implements OnInit {
@@ -33,6 +34,15 @@ export class AboutComponent implements OnInit {
   ngOnInit(): void {
         this.visitorService.setRouteID(5);
   }
+  isSubmitting = false;
+  submitError: string | null = null;
+  submitSuccess = false;
+  form = {
+    fname: '',
+    lname: '',
+    email: '',
+    msg: ''
+  };
   volunteers: Volunteers[] = [
     { name: 'Karine Courtois', image: 'assets/images/about/volunteer/karine.png' },
     { name: 'Véronique Dablin', image: 'assets/images/about/volunteer/veronique.png' },
@@ -65,11 +75,11 @@ export class AboutComponent implements OnInit {
   ];
 
   teamMembers: TeamMember[] = [
-    { name: 'Véronique Gaudrat', title:'Fondatrice et présidente', image: 'assets/images/about/team/veronique.png' },
     { name: 'Jacqueline Gaudrat', title:'Fondatrice et Trésorière', image: 'assets/images/about/team/jacqueline.png' },
+    { name: 'Véronique Gaudrat', title:'Fondatrice et présidente', image: 'assets/images/about/team/veronique.png' },
     { name: 'Gabrielle Perrier', title:'Secrétaire', image: 'assets/images/about/team/gabrielle.png' },
     { name: 'Jean Philippe Le Calvé', title:'Stetagy', image: 'assets/images/about/team/jean.png' },
-    
+    { name: 'Pascale Pouliquen', title:'Communication', image: 'assets/images/about/volunteer/pascale.png' }    
   ];
 
   partners: PartnerLogo[] = [
@@ -107,7 +117,25 @@ export class AboutComponent implements OnInit {
     { name: 'Private Partner 13', image: 'assets/images/about/mecenes/13.png' },
   ];
 
-  onSubmit(evt: Event) {
+  async onSubmit(evt: Event) {
     evt.preventDefault();
+    if (this.isSubmitting) return;
+    this.submitError = null;
+    this.submitSuccess = false;
+    this.isSubmitting = true;
+    try {
+      await this.visitorService.submitVisitorMessage({
+        fname: this.form.fname,
+        lname: this.form.lname,
+        email: this.form.email,
+        msg: this.form.msg
+      });
+      this.submitSuccess = true;
+      this.form = { fname: '', lname: '', email: '', msg: '' };
+    } catch (err: any) {
+      this.submitError = err?.message || 'Une erreur est survenue.';
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }

@@ -109,7 +109,7 @@
   <div class="max-w-7xl mx-auto w px-2 py-2 text-right mt-10">
     <a href="/artists" class="inline-flex items-center text-pont-green hover:text-pont-green/80 transition-colors font-medium">
       <span class="mr-2">&#8592;</span>
-      Back to Artists
+      Retour à l'artiste
     </a>
   </div>
 
@@ -157,7 +157,7 @@
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Biographie</h3>
               <p class="text-gray-700 text-sm leading-relaxed">
-                {{artist.long_bio || artist.short_bio | titlecase}}
+                {{artist.long_bio || artist.short_bio }}
               </p>
             </div>
           </div>
@@ -220,9 +220,9 @@
         }
 
         <div>
-          <h3 class="text-xl font-bold text-gray-900 mb-4">Upcoming Events</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Événements à venir          </h3>
           @if((artist.upcoming_event ?? []).length === 0){
-            <p class="text-sm text-gray-600">No upcoming event.</p>
+            <p class="text-sm text-gray-600">Non Événements à venir              .</p>
           } @else {
           <div class="space-y-4">
             @for(e of artist.upcoming_event ?? []; track e){

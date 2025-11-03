@@ -10,7 +10,7 @@
       <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ error || 'Venue Not Found' }}</h1>
       <button class="bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded" (click)="backToList()">
         <i class="fas fa-arrow-left mr-2"></i>
-        Back to Locations
+        Retour au lieu
       </button>
     </div>
   </div>
@@ -28,7 +28,7 @@
       </div>
       <button class="border bg-white/80 backdrop-blur-sm px-4 py-2 rounded" (click)="backToList()">
         <i class="fas fa-arrow-left mr-2 w-4 h-4"></i>
-        Back to all locations
+        Retour au lieu
       </button>
     </div>
 
@@ -135,25 +135,17 @@
         </div>
 
         <div>
-          <h2 class="text-3xl font-bold text-gray-800 mb-4">About this space</h2>
-          <p class="text-lg text-gray-600 leading-relaxed">{{ location.public_description }}</p>
-        </div>
-
-        <div>
-          <h2 class="text-3xl font-bold text-gray-800 mb-4">Access Info</h2>
+          
           <p class="text-lg text-gray-600 leading-relaxed">{{ location.description }}</p>
         </div>
 
-
-        <div *ngIf="(location.amenities || []).length > 0">
-          <h2 class="text-3xl font-bold text-gray-800 mb-6">What this place offers</h2>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex items-center space-x-3" *ngFor="let a of location.amenities">
-              <i class="far fa-check-circle text-pont-green"></i>
-              <span class="text-gray-700">{{ a.name }}</span>
-            </div>
-          </div>
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">Comment venir …</h2>
+          <p class="text-lg text-gray-600 leading-relaxed">{{ location.public_description }}</p>
         </div>
+
+
+     
       </div>
 
       <div *ngIf="hasCoordinates">

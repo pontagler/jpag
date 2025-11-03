@@ -148,7 +148,7 @@ export class RequestComponent {
     }
 
     const id_artist = this.artistID; // Replace with real user ID from auth
-    const id_host = '116ad27e-45bd-48d7-a2f7-096f8418ea65'; // Same
+    const id_host = '1'; // Same
 
     const request: ArtistRequest = {
       id_artist,
@@ -368,9 +368,5 @@ await this.artistService.delArtistRequest(id).then(()=>{
 }).catch(error=>{
   this.alertService.showAlert('Internal Error', error, 'error');
 })
-
 }
-
-
-
 }

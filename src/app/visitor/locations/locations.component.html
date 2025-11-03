@@ -158,17 +158,13 @@
                     {{v?.city || v?.proviance}}
                   </p>
                   <p class="text-sm text-gray-600 mb-4 min-h-10" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ v?.description || '' }}</p>
-                  <!-- <div class="text-xs text-gray-500 mb-3">
-                    <span class="font-semibold text-gray-800">Host:</span> {{v?.host}}
-                    <span class="mx-2">•</span>
-                    Hosting since {{v?.created_on | date:'mediumDate'}}
-                  </div> -->
-                  <div class="flex flex-wrap gap-2 mb-4">
+                <div class="h-14">
+                  <div class="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap no-scrollbar ">
                     @for(a of (v?.specs || []); track a?.id){
-                      <span class="bg-pont-light-green/30 text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{(a?.specs || a?.specs) | titlecase}}</span>
+                      <span class="bg-pont-light-green/30 text-pont-green px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">{{(a?.specs || a?.specs) | titlecase}}</span>
                     }
                   </div>
-
+                </div>
                   <div class="mt-auto">
                     <hr>
                     <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer w-full inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded mt-4">Détail</p>
@@ -202,24 +198,22 @@
                   </div>
                   <p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(v?.description || '') | slice:0:180}}{{(v?.description?.length || 0) > 180 ? '…' : ''}}</p>
                 
-                  <div class="flex flex-wrap gap-2 mt-4">
-                    @for(tag of (v?.types || []); track tag?.id){
-                      <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{tag?.type | titlecase}}</span>
-                    }
+                  <div class="flex gap-2 mt-4 overflow-x-auto whitespace-nowrap no-scrollbar">
+           
                     @for(s of (v?.specs || []); track s?.id){
-                      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">{{(s?.name || s?.spec || s?.specs) | titlecase}}</span>
+                      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">{{(s?.name || s?.spec || s?.specs) | titlecase}}</span>
                     }
                     @for(a of (v?.amenity || []); track a?.id){
-                      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">{{(a?.name || a?.amenity) | titlecase}}</span>
+                      <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">{{(a?.name || a?.amenity) | titlecase}}</span>
                     }
                   </div>
          <hr class="mt-4">
-            <div class="pt-4">
+            <!-- <div class="pt-4">
             <p class="text-sm font-semibold text-gray-800">Host: {{v?.host}}</p>
             <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
               <p>Hosting since {{v?.created_on | date:'dd-MMM-yyyy'}}</p>
             </div>
-          </div>
+          </div> -->
                    <!-- <hr>
                     <div class="text-xs text-gray-500 mt-2">
                     <span class="font-semibold text-gray-800">Host:</span> {{v?.host}}

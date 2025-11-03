@@ -5,14 +5,13 @@ import { AlertService } from '../../services/alert.service';
 import { VisitorService } from '../../services/visitor.service';
 
 @Component({
-  selector: 'app-header',
-  
-  templateUrl: './header.component.html',
-  
+  selector: 'app-artist-header',
   standalone: false,
+  
+  templateUrl: './artist-header.component.html'
 })
-export class HeaderComponent {
-urlID:any;
+export class ArtistHeaderComponent {
+  urlID:any;
   constructor(
     private route: ActivatedRoute, 
     public auth: AuthService, 
@@ -60,7 +59,6 @@ logout(){
 
 isMenuOpen: boolean = false;
 isLoggedIn: boolean = false;
-
 
 
 

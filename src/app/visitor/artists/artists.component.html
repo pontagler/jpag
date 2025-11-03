@@ -102,7 +102,7 @@
 
       <!-- Results Count -->
       <div class="mb-6">
-        <p class="text-gray-600">Afficher {{filteredArtists.length || 0}} des artists</p>
+        <p class="text-gray-600">Afficher  {{filteredArtists.length || 0}} des artists</p>
       </div>
 
       <!-- Artists View -->
@@ -146,7 +146,7 @@
                 </div>
                 <div class="p-6">
                   <h3 class="font-bold text-xl text-gray-900 mb-2">{{x.fname | titlecase}} {{x.lname | titlecase}}</h3>
-                  <p class="text-pont-rust font-medium mb-2">{{(x.tagline || '') | titlecase}}</p>
+                  <p class="text-pont-rust font-medium mb-2">{{(x.teaser || '') }}</p>
                   <p class="text-sm text-gray-600 mb-3 leading-6 min-h-[3rem]" style="-webkit-line-clamp: 2; -webkit-box-orient: vertical; display: -webkit-box; overflow: hidden;">{{(x.short_bio || '') | titlecase}}</p>
                   <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <div class="flex flex-wrap gap-2">

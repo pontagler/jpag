@@ -35,9 +35,9 @@ Cette approche a été couronnée de succès et maintenant des concerts sont org
 
         <!-- Meet the Team Section -->
         <section class="py-20 px-4">
-          <div class="max-w-6xl mx-auto justify-items-center items-center">
+          <div class="max-w-8xl mx-auto justify-items-center items-center">
             <h2 class="text-4xl font-bold text-center text-gray-800 mb-12">L’équipe </h2>
-            <div class="flex justify-items-center items-center space-x-16">
+            <div class="flex justify-items-center items-center space-x-8">
            
               <div class="text-center" *ngFor="let member of teamMembers">
                 <img [src]="member.image" [alt]="member.name" width="150" height="150" class="rounded-full mx-auto mb-3 shadow-lg object-cover" />
@@ -111,11 +111,11 @@ Cette approche a été couronnée de succès et maintenant des concerts sont org
           <div class="space-y-4">
             <div class="flex items-center space-x-4">
               <span class="w-6 h-6 text-pont-green">📧</span>
-              <a href="mailto:contact at pontargler.com" class="text-gray-700 hover:text-pont-rust">contact{{`&#64`}}pontargler.com</a>
+              <a href="mailto:contact at pontargler.com" class="text-gray-700 hover:text-pont-rust">{{'contact@pontargler.com'}}</a>
             </div>
             <div class="flex items-center space-x-4">
               <span class="w-6 h-6 text-pont-green">📞</span>
-              <span class="text-gray-700">+33 1 23 45 67 89</span>
+              <span class="text-gray-700">+33 12345 6789</span>
             </div>
             <div class="flex items-center space-x-4">
               <span class="w-6 h-6 text-pont-green">📍</span>
@@ -127,12 +127,23 @@ Cette approche a été couronnée de succès et maintenant des concerts sont org
         <div class="p-8 shadow-xl rounded-2xl bg-white">
           <form (submit)="onSubmit($event)">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <input placeholder="Prénom" class="h-12 border rounded px-3" />
-              <input placeholder="Nom" class="h-12 border rounded px-3" />
+              <input name="fname" [(ngModel)]="form.fname" [disabled]="isSubmitting" placeholder="Prénom" class="h-12 border rounded px-3" />
+              <input name="lname" [(ngModel)]="form.lname" [disabled]="isSubmitting" placeholder="Nom" class="h-12 border rounded px-3" />
             </div>
-            <input placeholder="Adresse e-mail" type="email" class="mb-6 h-12 w-full border rounded px-3" />
-            <textarea placeholder="Votre message" rows="5" class="mb-6 w-full border rounded p-3"></textarea>
-            <button type="submit" class="w-full h-12 text-lg bg-pont-green hover:bg-pont-green/90 text-white rounded-xl">Envoyer un message</button>
+            <input name="email" [(ngModel)]="form.email" [disabled]="isSubmitting" placeholder="Adresse e-mail" type="email" class="mb-6 h-12 w-full border rounded px-3" />
+            <textarea name="msg" [(ngModel)]="form.msg" [disabled]="isSubmitting" placeholder="Votre message" rows="5" class="mb-6 w-full border rounded p-3"></textarea>
+            <button type="submit" [disabled]="isSubmitting" class="w-full h-12 text-lg bg-pont-green hover:bg-pont-green/90 disabled:opacity-70 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center">
+              <span *ngIf="!isSubmitting">Envoyer un message</span>
+              <span *ngIf="isSubmitting" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                Envoi...
+              </span>
+            </button>
+            <div *ngIf="submitSuccess" class="mt-4 text-sm text-green-700">Merci, votre message a bien été envoyé.</div>
+            <div *ngIf="submitError" class="mt-4 text-sm text-red-700">{{ submitError }}</div>
           </form>
         </div>
       </div>

@@ -66,7 +66,7 @@ artistRequirement:any = [];
 
   async onSubmit(): Promise<void> {
     const payload: any = {
-      id_artist: this.id_artist,
+      id_artist: Number(this.id_artist),
       rib: this.formData.ribNumber || null,
       guso_nb: this.formData.gusoNumber || null,
       security_nb: this.formData.securityNumber || null,
@@ -81,15 +81,15 @@ artistRequirement:any = [];
         // Insert new row
         await this.artistService.addArtistRequirement({
           ...payload,
-          created_by: this.id_artist
+          created_by: this.userID
         });
       } else {
         // Update existing row
         const existing = this.artistRequirement[0];
         await this.artistService.editArtistRequirement({
           ...payload,
-          updated_by: this.id_artist,
-          last_updated_on: new Date().toISOString()
+          updated_by: this.userID,
+          last_updated: new Date().toISOString()
         }, existing.id);
       }
 

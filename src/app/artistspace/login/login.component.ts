@@ -11,8 +11,17 @@ import { ArtistService } from '../../services/artist.service';
 })
 export class LoginComponent {
   // Declare any properties needed for the component here
-  email: string = 'psx1ufg37i@daouse.com';
-  password: string = 'Saurabh@123';
+  // email: string = 'psx1ufg37i@daouse.com';
+  // password: string = 'Saurabh@123';
+
+  email: string = '';
+  password: string = '';
+  // Forgot password / recovery state
+  showForgot: boolean = false;
+  resetEmail: string = '';
+  isRecoveryMode: boolean = false;
+  newPassword: string = '';
+  confirmPassword: string = '';
 
   constructor(
     private artistService: ArtistService,
@@ -22,7 +31,12 @@ private router: Router // Inject the Router if you need to navigate after login
   
   ) {}
   ngOnInit() {
-    // Initialization logic can go here
+    // Detect Supabase password recovery deep link
+    const hash = typeof window !== 'undefined' ? window.location.hash : '';
+    if (hash && hash.includes('type=recovery')) {
+      this.isRecoveryMode = true;
+      this.alertService.showAlert('Reset Password', 'Enter a new password to complete recovery.', 'info');
+    }
   }
 
 
@@ -59,5 +73,44 @@ private router: Router // Inject the Router if you need to navigate after login
   }
 
   loading:any = false;
+
+  async sendResetEmail() {
+    try {
+      if (!this.resetEmail) {
+        this.alertService.showAlert('Missing Email', 'Please enter your email to reset.', 'error');
+        return;
+      }
+      await this.authService.requestPasswordReset(this.resetEmail);
+      this.alertService.showAlert('Email Sent', 'Check your inbox for the reset link.', 'success');
+      this.showForgot = false;
+      this.resetEmail = '';
+    } catch (err: any) {
+      this.alertService.showAlert('Reset Failed', err?.message || 'Could not send reset email.', 'error');
+    }
+  }
+
+  async updatePassword() {
+    try {
+      if (!this.newPassword || this.newPassword.length < 6) {
+        this.alertService.showAlert('Weak Password', 'Password must be at least 6 characters.', 'error');
+        return;
+      }
+      if (this.newPassword !== this.confirmPassword) {
+        this.alertService.showAlert('Mismatch', 'Passwords do not match.', 'error');
+        return;
+      }
+      await this.authService.changePassword(this.newPassword);
+      this.alertService.showAlert('Password Updated', 'You can now login with your new password.', 'success');
+      // Clear recovery state and URL hash
+      this.isRecoveryMode = false;
+      this.newPassword = '';
+      this.confirmPassword = '';
+      if (typeof window !== 'undefined') {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch (err: any) {
+      this.alertService.showAlert('Update Failed', err?.message || 'Could not update password.', 'error');
+    }
+  }
 
 }

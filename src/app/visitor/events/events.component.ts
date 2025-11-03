@@ -129,7 +129,7 @@ export class EventsComponent implements OnInit {
 			title: raw?.title || raw?.name || '',
 			description: raw?.teaser || raw?.description || '',
 			location: firstShowLocation || raw?.location || raw?.location_addresss || '',
-			programme: raw?.edition_type || '',
+			programme: raw?.event_domain || '',
 			eventType: raw?.event_type || raw?.event || '',
 			edition: raw?.edition || '',
 			editionType: raw?.edition_type || '',

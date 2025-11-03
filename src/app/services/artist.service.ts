@@ -53,6 +53,13 @@ export class ArtistService {
     return data;
   }
 
+  // Fetch artist FULL profile by artist_id
+  async getArtistFullProfile(artistId: string): Promise<any> {
+    const { data, error } = await supabase.rpc('get_artist_full_profile_v1', { artist_id: artistId });
+    if (error) throw error;
+    return data;
+  }
+
 
   async getArtistProfile_v1(artistId: string): Promise<any> {
     const { data, error } = await supabase.rpc('get_artist_profile_v1', { artist_id: artistId });
@@ -187,13 +194,13 @@ async uploadImageAndSaveData(
     const { data, error: insertError } = await supabase
       .from('artist_request_media')
       .insert([{
-        id_media: id_media,
+        id_media_type: id_media,
         id_request: idRequest,
         title: videoTitle,
         image: publicImageUrl, // will be null if no file
         description: videoUrl,
         created_by: createdBy,
-        last_updated_by: createdBy,
+        last_update: createdBy,
         id_auth: authID
       }])
       .select('id'); // get ID of inserted row
@@ -290,15 +297,27 @@ async getArtistRequests(artistId: string) {
 }
 
 async delArtistRequest(id_request:number){
-  const{data, error} = await supabase.from('artist_request').delete().eq('id', id_request)
+  // Delete child media rows first to satisfy FK constraint
+  const { error: mediaDeleteError } = await supabase
+    .from('artist_request_media')
+    .delete()
+    .eq('id_request', id_request);
 
-  if(error){
-    throw error;
-  }else{
-    await supabase.from('artist_request_media').delete().eq('id', id_request)
-    if (error) throw error
-    return data;
+  if (mediaDeleteError) {
+    throw mediaDeleteError;
   }
+
+  // Then delete the parent request
+  const { data, error } = await supabase
+    .from('artist_request')
+    .delete()
+    .eq('id', id_request);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
 
 getCurrentTimestamp() {
@@ -317,19 +336,19 @@ getCurrentTimestamp() {
 }
 
 async updateShortBio(id_artist:any, short_bio:any, userID:any){
-  const{data, error} = await supabase.from ('artists').update({short_bio: short_bio, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  const{data, error} = await supabase.from ('artists').update({short_bio: short_bio, last_update: this.getCurrentTimestamp(), updated_by: userID}).eq('id',id_artist)
   if(error) throw error
   return data;
 }
 
 async updateLongBio(id_artist:any, long_bio:any, userID:any){
-  const{data, error} = await supabase.from ('artists').update({long_bio: long_bio, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  const{data, error} = await supabase.from ('artists').update({long_bio: long_bio, last_update: this.getCurrentTimestamp(), updated_by: userID}).eq('id',id_artist)
   if(error) throw error
   return data;
 }
 
 async updateContact(id_artist:any, userID:any, email:any, phone:any, website:any, city:any, country:any){
-  const{data, error} = await supabase.from ('artists').update({email: email,  website:website, phone:phone, city:city, country:country, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  const{data, error} = await supabase.from ('artists').update({email: email,  website:website, phone:phone, city:city, country:country, last_update: this.getCurrentTimestamp(), updated_by: userID}).eq('id',id_artist)
   if(error) throw error
   return data;
 }
@@ -339,8 +358,8 @@ async updateInfo(
   userID:any, 
   f_name:any, 
   l_name:any, 
-  tagline:any){
-  const{data, error} = await supabase.from ('artists').update({fname: f_name,  lname:l_name, tagline:tagline, last_updated: this.getCurrentTimestamp(), last_updated_by: userID}).eq('id',id_artist)
+  teaser:any){
+  const{data, error} = await supabase.from ('artists').update({fname: f_name,  lname:l_name, teaser:teaser, last_update: this.getCurrentTimestamp(), updated_by: userID}).eq('id',id_artist)
   if(error) throw error
   return data;
 }
@@ -386,8 +405,8 @@ async replaceArtistPhoto(
     .from('artists')
     .update({
       photo: signedData.signedUrl,
-      last_updated: new Date().toISOString(),
-      last_updated_by: authID
+      last_update: new Date().toISOString(),
+      updated_by: authID
     })
     .eq('id', artistId);
 
@@ -443,8 +462,8 @@ async replaceArtistCover(
     .from('artists')
     .update({
       cover: signedData.signedUrl,
-      last_updated: new Date().toISOString(),
-      last_updated_by: authID
+      last_update: new Date().toISOString(),
+      updated_by: authID
     })
     .eq('id', artistId);
 
@@ -760,7 +779,7 @@ async deleteArtistMedia(id:any){
 
 
   async getAllPerfromance(){
-  const {data, error} = await supabase.from('sys_performance_type').select()
+  const {data, error} = await supabase.from('sys_artist_performance').select()
   if(error) throw error
   return data
 }
@@ -964,7 +983,8 @@ async getRequestDetail(id:any){
         description: desc,
         url:url,
         created_by: created_by,
-        last_updated_by: created_by
+        updated_by: created_by,
+        last_update: new Date().toISOString()
       }])
       .select('id'); // get ID of inserted row
 
@@ -1044,25 +1064,25 @@ async editArtistRequirement(arr:any, id:any){
 }
 
 async addArtistTimeOff(arr:any){
-  const {data, error} = await supabase.from('artist_timeoff').insert(arr)
+  const {data, error} = await supabase.from('artist_availability').insert(arr)
   if(error) throw error
   return data
 }
 
 async getArtistTimeOff(id:any){
-  const {data, error} = await supabase.from('artist_timeoff').select().eq('id_artist', id)
+  const {data, error} = await supabase.from('artist_availability').select().eq('id_artist', id)
   if(error) throw error
   return data
 }
 
 async deleteArtistTimeOff(id:any){
-  const {data, error} = await supabase.from('artist_timeoff').delete().eq('id', id)
+  const {data, error} = await supabase.from('artist_availability').delete().eq('id', id)
   if(error) throw error
   return data
 }
 
 async editArtistTimeOff(arr:any, id:any){
-  const {data, error} = await supabase.from('artist_timeoff').update(arr).eq('id', id)
+  const {data, error} = await supabase.from('artist_availability').update(arr).eq('id', id)
   if(error) throw error
   return data
 }
@@ -1071,4 +1091,10 @@ async editArtistTimeOff(arr:any, id:any){
 
 
 
+  // Fetch events with their dates for a given artist via RPC
+  async getEventsWithDates(artistId: string | number): Promise<any[]> {
+    const { data, error } = await supabase.rpc('get_events_with_dates', { p_id_artist: artistId });
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  }
 }

@@ -210,7 +210,7 @@ addPerformanceData(): void {
     id_artist: this.artistID,
     id_performance: id,
     created_by: this.authID,
-    last_updated_by: this.authID
+    updated_by: this.authID
   };
   try {
     this.artistService.addPerformance1(payload).then(() => {

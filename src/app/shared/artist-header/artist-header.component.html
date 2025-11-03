@@ -21,76 +21,7 @@
       <nav class="hidden md:flex items-center space-x-14">
 
 
-        <a
-  [routerLink]="'/'"
-  [ngClass]="
-    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-    getMenuItemClass(1)
-  "
->
-Accueil
-  <span
-    [ngClass]="(urlID === 1) ? 'w-full' : 'w-0 group-hover:w-full'"
-    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-  ></span>
-</a>
 
- <a
-  [routerLink]="'/events'"
-  [ngClass]="
-    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-    getMenuItemClass(2)
-  "
->
-Événements
-  <span
-    [ngClass]="(urlID === 2) ? 'w-full' : 'w-0 group-hover:w-full'"
-    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-  ></span>
-</a>
-
- <a
-  [routerLink]="'/artists'"
-  [ngClass]="
-    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-    getMenuItemClass(3)
-  "
->Artistes
-  
-  <span
-    [ngClass]="(urlID === 3) ? 'w-full' : 'w-0 group-hover:w-full'"
-    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-  ></span>
-</a>
-
-
-<a
-  [routerLink]="'/locations'"
-  [ngClass]="
-    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-    getMenuItemClass(4)
-  "
->Lieux
-  
-  <span
-    [ngClass]="(urlID === 4) ? 'w-full' : 'w-0 group-hover:w-full'"
-    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-  ></span>
-</a>
-
-    <a
-  [routerLink]="'/about'"
-  [ngClass]="
-    'text-gray-700 hover:text-pont-green transition-all duration-300 font-medium text-xl relative group ' +
-    getMenuItemClass(5)
-  "
->À propos
-  
-  <span
-    [ngClass]="(urlID === 5) ? 'w-full' : 'w-0 group-hover:w-full'"
-    class="absolute -bottom-1 left-0 h-0.5 bg-pont-green transition-all duration-300"
-  ></span>
-</a>   
       
         
        

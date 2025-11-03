@@ -4,13 +4,15 @@ import { HeaderComponent } from './header/header.component';
 import { FormsModule } from '@angular/forms';
 import { FooterComponent } from './footer/footer.component';
 import { RouterModule } from '@angular/router';
+import { ArtistHeaderComponent } from './artist-header/artist-header.component';
 
 
 
 @NgModule({
   declarations: [
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    ArtistHeaderComponent
   ],
   imports: [
     CommonModule,
@@ -19,6 +21,6 @@ RouterModule
   
     
   ],
-  exports: [HeaderComponent, FooterComponent],
+  exports: [HeaderComponent, FooterComponent, ArtistHeaderComponent],
 })
 export class SharedModule { }

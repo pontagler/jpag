@@ -21,6 +21,33 @@ export class AuthService {
 
   constructor() {
     // On app load, restore session from Supabase and update internal state
+    this.initAuth();
+  }
+
+  private async initAuth() {
+    try {
+      const { data } = await supabase.auth.getUser();
+      const user = data?.user || null;
+      if (user) {
+        this.session$.next(user);
+        this.userEmailAuth.set(true);
+        this.sigUserID.set(user.id);
+      } else {
+        this.session$.next(null);
+        this.userEmailAuth.set(false);
+        this.sigUserID.set(null);
+      }
+
+      // Keep signals in sync with auth state changes
+      supabase.auth.onAuthStateChange((_event, session) => {
+        const sUser = session?.user || null;
+        this.session$.next(session);
+        this.userEmailAuth.set(!!sUser);
+        this.sigUserID.set(sUser ? sUser.id : null);
+      });
+    } catch (_err) {
+      // Best-effort init; leave defaults if supabase is unreachable
+    }
   }
 
   /**
@@ -67,6 +94,8 @@ export class AuthService {
 
     // Reset signals upon logout
     this.userEmailAuth.set(false);
+    this.sigUserID.set(null);
+    this.session$.next(null);
   }
 
   /**
@@ -97,6 +126,20 @@ export class AuthService {
   async changePassword(new_password: any) {
     const { data, error } = await supabase.auth.updateUser({
       password: new_password
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Sends a password reset email via Supabase.
+   * The redirect returns the user to the login page where recovery is handled.
+   */
+  async requestPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/artistspace/login`;
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo
     });
 
     if (error) throw error;

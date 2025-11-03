@@ -80,8 +80,8 @@ submitMediaVideo(arr: any): void {
     url: arr.url,
     created_by: this.loggedUser,
     created_on: new Date(),
-    last_updated: new Date(),
-    last_updated_by: this.loggedUser
+    last_update: new Date(),
+    updated_by: this.loggedUser
   };
 
   try {
@@ -147,8 +147,8 @@ submitMediaCD(arr: any): void {
     url: arr.url,
     created_by: this.loggedUser,
     created_on: new Date(),
-    last_updated: new Date(),
-    last_updated_by: this.loggedUser
+    last_update: new Date(),
+    updated_by: this.loggedUser
   };
 
   try {

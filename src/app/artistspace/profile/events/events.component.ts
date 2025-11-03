@@ -1,31 +1,40 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ArtistService } from '../../../services/artist.service';
 
 @Component({
   selector: 'app-events',
-  imports: [NgClass, NgFor],
+  standalone: true,
+  imports: [ NgFor, NgIf, DatePipe],
   templateUrl: './events.component.html',
   
 })
-export class EventsComponent {
-activeTab: number | undefined;
-constructor() { }
-ngOninit(): void {
-  this.activeTab = 1;   
+export class EventsComponent implements OnInit {
+  constructor(private artistService: ArtistService) {}
 
-}events = [
-    {
-      title: 'Concert Cloud Nine',
-      status: 'Pending',
-      eventDate: '25 Aug 2025',
-      submittedDate: '25 Aug 2025',
-    },
-    {
-      title: 'Jazz Night Live',
-      status: 'Approved',
-      eventDate: '28 Aug 2025',
-      submittedDate: '26 Aug 2025',
-    },
-    // Add more events as needed
-  ];
+  events: any[] = [];
+  loading: boolean = false;
+  error: string | null = null;
+
+  async ngOnInit(): Promise<void> {
+    this.loading = true;
+    this.error = null;
+    try {
+      let artistId = this.artistService.getArtistID();
+      if (!artistId) {
+        const profile = this.artistService.getArtistProfilebyID();
+        artistId = profile?.id;
+      }
+      if (!artistId) {
+        this.events = [];
+        this.loading = false;
+        return;
+      }
+      this.events = await this.artistService.getEventsWithDates(artistId);
+    } catch (e: any) {
+      this.error = e?.message || 'Failed to load events';
+    } finally {
+      this.loading = false;
+    }
+  }
 }

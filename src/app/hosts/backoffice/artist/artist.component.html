@@ -51,7 +51,8 @@
     </div>
 
     <div class="flex flex-col">
-      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Upcoming Events</label>
+      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Événements à venir
+      </label>
       <div class="relative mt-1">
         <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
         <select [(ngModel)]="upcomingFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
@@ -116,7 +117,8 @@
           <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('upcomingEvents')">
             <span class="inline-flex items-center gap-2">
               <i class="fa-regular fa-calendar-check text-gray-400"></i>
-              <span>Upcoming Events</span>
+              <span>Événements à venir
+              </span>
               <i class="fas text-gray-400" [ngClass]="{
                 'fa-sort-up': sortKey==='upcomingEvents' && sortDirection==='asc',
                 'fa-sort-down': sortKey==='upcomingEvents' && sortDirection==='desc',

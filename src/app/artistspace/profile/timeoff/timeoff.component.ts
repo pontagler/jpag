@@ -19,10 +19,12 @@ export class TimeoffComponent implements  OnInit {
 
   artistData:any = [];
   id_artist:any;
+  userID:any;
   
   ngOnInit(): void {
     this.artistData = this.artistService.getArtistProfilebyID();
     this.id_artist = this.artistData.id;
+    this.userID = this.artistService.getLoggedUserID();
     this.loadTimeOff();
   }
   showEdit: boolean = true;
@@ -47,8 +49,8 @@ export class TimeoffComponent implements  OnInit {
       this.entries = (data || []).map((row: any) => ({
         id: row.id,
         startDate: row.start_date,
-        endDate: row.end_data,
-        days: this.calculateInclusiveDays(row.start_date, row.end_data),
+        endDate: row.end_date,
+        days: this.calculateInclusiveDays(row.start_date, row.end_date),
         note: row.notes || ''
       }));
     } catch (e) {
@@ -97,11 +99,11 @@ export class TimeoffComponent implements  OnInit {
 
   private async addEntry(): Promise<void> {
     const payload: any = {
-      id_artist: this.id_artist,
+      id_artist: Number(this.id_artist),
       start_date: this.startDate,
-      end_data: this.endDate,
+      end_date: this.endDate,
       notes: this.note?.trim() || null,
-      created_by: this.id_artist
+      created_by: this.userID
     };
     try {
       await this.artistService.addArtistTimeOff(payload);
@@ -117,12 +119,12 @@ export class TimeoffComponent implements  OnInit {
     const target = this.entries[index];
     if (!target || target.id == null) return;
     const payload: any = {
-      id_artist: this.id_artist,
+      id_artist: Number(this.id_artist),
       start_date: this.startDate,
-      end_data: this.endDate,
+      end_date: this.endDate,
       notes: this.note?.trim() || null,
-      updated_by: this.id_artist,
-      last_updated_on: new Date().toISOString()
+      updated_by: this.userID,
+      last_updated: new Date().toISOString()
     };
     try {
       await this.artistService.editArtistTimeOff(payload, target.id);

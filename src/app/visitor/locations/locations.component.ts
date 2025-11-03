@@ -149,11 +149,11 @@ export class LocationsComponent implements OnInit {
     if (!value || isNaN(value)) return filter === 'all';
     switch (filter) {
       case 'under100':
-        return value < 100;
+        return value < 50;
       case '100-300':
-        return value >= 100 && value <= 300;
+        return value >= 50 && value <= 200;
       case 'over300':
-        return value > 300;
+        return value > 200;
       case 'all':
       default:
         return true;

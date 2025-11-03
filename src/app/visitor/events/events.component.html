@@ -67,7 +67,7 @@
 						<select
 							class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
 							[ngModel]="selectedType" (ngModelChange)="onTypeChange($event)">
-							<option value="">Tous les type</option>
+							<option value="">Tous les types</option>
 							@for(opt of typeOptions; track opt){
 							<option [value]="opt">{{opt}}</option>
 							}

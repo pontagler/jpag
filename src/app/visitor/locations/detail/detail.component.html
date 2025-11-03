@@ -10,7 +10,7 @@
       <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ error || 'Venue Not Found' }}</h1>
       <button class="bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded" (click)="backToList()">
         <i class="fas fa-arrow-left mr-2"></i>
-        Retour au lieu
+        Retour à tous les lieux
       </button>
     </div>
   </div>
@@ -28,7 +28,7 @@
       </div>
       <button class="border bg-white/80 backdrop-blur-sm px-4 py-2 rounded" (click)="backToList()">
         <i class="fas fa-arrow-left mr-2 w-4 h-4"></i>
-        Retour au lieu
+        Retour à tous les lieux
       </button>
     </div>
 
@@ -62,7 +62,7 @@
           <div class="p-5 border-b">
             <h2 class="text-2xl font-bold text-pont-green flex items-center">
      <i class="fa-solid fa-star-of-life mr-3"></i>
-              Host Information
+     Organisateur
             </h2>
           </div>
           <div class="p-5 space-y-4">
@@ -71,7 +71,7 @@
               <div>
                 <p class="font-bold text-lg text-gray-800">{{ hostName }}</p>
                 <p class="text-sm text-gray-500">
-                  Hosting since {{ (location.created_on | date:'yyyy') || currentYear }}
+                  Depuis 2013
                 </p>
               </div>
             </div>

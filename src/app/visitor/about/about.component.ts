@@ -75,11 +75,11 @@ export class AboutComponent implements OnInit {
   ];
 
   teamMembers: TeamMember[] = [
+    { name: 'Gabrielle Perrier', title:'Secrétaire', image: 'assets/images/about/team/gabrielle.png' },
     { name: 'Jacqueline Gaudrat', title:'Fondatrice et Trésorière', image: 'assets/images/about/team/jacqueline.png' },
     { name: 'Véronique Gaudrat', title:'Fondatrice et présidente', image: 'assets/images/about/team/veronique.png' },
-    { name: 'Gabrielle Perrier', title:'Secrétaire', image: 'assets/images/about/team/gabrielle.png' },
-    { name: 'Jean Philippe Le Calvé', title:'Stetagy', image: 'assets/images/about/team/jean.png' },
-    { name: 'Pascale Pouliquen', title:'Communication', image: 'assets/images/about/volunteer/pascale.png' }    
+    { name: 'Jean Philippe Le Calvé', title:'Communication', image: 'assets/images/about/team/jean.png' },
+    { name: 'Pascale Pouliquen', title:'Organisation', image: 'assets/images/about/volunteer/pascale.png' }    
   ];
 
   partners: PartnerLogo[] = [

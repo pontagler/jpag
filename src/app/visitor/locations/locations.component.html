@@ -70,10 +70,10 @@
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedCapacity"
                       (ngModelChange)="onCapacityChange($event)">
-                <option value="all">Tous Jauge</option>
-                <option value="under100">Under 100</option>
-                <option value="100-300">100-300</option>
-                <option value="over300">Over 300</option>
+                <option value="all">Toutes les Jauges                </option>
+                <option value="under100">Moins de 50</option>
+                <option value="100-300">Entre 50 et 200</option>
+                <option value="over300">Plus de 200</option>
               </select>
             </div>
 
@@ -90,11 +90,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Specifications</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Spécifications</label>
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedSpec"
                       (ngModelChange)="onSpecChange($event)">
-                <option value="">Tous Specs</option>
+                <option value="">Toutes les spécifications</option>
                 @for(opt of specOptions; track opt){
                   <option [value]="opt">{{opt | titlecase}}</option>
                 }
@@ -102,11 +102,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Amenity</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Équipement</label>
               <select class="w-full h-10 px-3 border border-gray-300 rounded-md focus:border-pont-green focus:ring-0"
                       [ngModel]="selectedAmenity"
                       (ngModelChange)="onAmenityChange($event)">
-                <option value="">Tous Amenities</option>
+                <option value="">Tous les équipements</option>
                 @for(opt of amenityOptions; track opt){
                   <option [value]="opt">{{opt | titlecase}}</option>
                 }
@@ -121,7 +121,7 @@
       }
 
       <div class="mb-6">
-        <p class="text-gray-600">Afficher {{filteredLocations.length || 0}} of {{allLocations.length || 0}} Lieux</p>
+        <p class="text-gray-600">Afficher {{filteredLocations.length || 0}}  lieux sur {{allLocations.length || 0}}</p>
       </div>
 
       @if(isLoading){

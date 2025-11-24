@@ -94,15 +94,15 @@ Pour leur permettre de roder leur programme et de développer leur répertoire.
             </div>
             <div class="md:col-span-3 p-6 flex flex-col justify-between h-full">
               <div>
-                <h5 class="text-sm text-black w-fit">{{ event.editionDisplay || event.edition || (event.edition_name + ' ' + event.edition_year) }}</h5>
-                <h3 class="text-2xl font-bold text-gray-900">{{ event.title }}</h3>
+                <h5 class="text-sm text-black w-fit">{{ (event.editionDisplay || event.edition || (event.edition_name + ' ' + event.edition_year)) | stripHtml }}</h5>
+                <h3 class="text-2xl font-bold text-gray-900">{{ event.title | stripHtml }}</h3>
                 <div class="flex flex-wrap gap-1 leading-tight">
                   <h2 class="text-sm lg:text-md font-medium text-pont-rust leading-tight mb-0">{{ event.artistDisplay }}</h2>
                 </div>
                 <!-- <p class="text-pont-green font-semibold mb-3">{{ concert.artist }}</p> -->
                 
                 
-                <p class="text-gray-600 mb-4 text-xs leading-tight mt-2">{{ (event.teaser || '') | slice:0:120 }}{{ (event.teaser?.length || 0) > 120 ? '…' : '' }}</p>
+                <p class="text-gray-600 mb-4 text-xs leading-tight mt-2">{{ (event.teaser || '') | stripHtml | slice:0:120 }}{{ (event.teaser?.length || 0) > 120 ? '…' : '' }}</p>
                 <div class="space-y-2 mb-2">
                   <!-- <div class="flex items-center text-gray-700" *ngFor="let show of concert.shows | slice:0:2">
                     <span class="font-medium text-sm">{{ show.date }}</span>
@@ -175,7 +175,7 @@ Pour leur permettre de roder leur programme et de développer leur répertoire.
               </div>  
             </div>
             <div class="h-16">
-            <p class="text-sm text-gray-600 mb-3">{{ artist.tagline | titlecase}}</p>
+            <p class="text-sm text-gray-600 mb-3">{{ artist.tagline | stripHtml | titlecase}}</p>
 </div>
             <div class="flex flex-wrap gap-2 mb-4">
               @for(p of (artist.performance ?? []); track p.id_performance){

@@ -136,11 +136,11 @@
             }
           </div>
           <div class="flex-1">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{{artist.fname | titlecase}} {{artist.lname | titlecase}} 
-              <span class="text-pont-rust text-xl font-regular">{{artist.title | titlecase}}</span></h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{{artist.fname | stripHtml | titlecase}} {{artist.lname | stripHtml | titlecase}} 
+              <span class="text-pont-rust text-xl font-regular">{{artist.title | stripHtml | titlecase}}</span></h1>
               <div class="flex space-x-2">
                  @for(x of artist.instruments ?? [] ; track x; let last = $last){
-    <p class="text-xl text-pont-rust font-medium mb-2">{{x.name | titlecase}}@if(!last){,}</p>
+    <p class="text-xl text-pont-rust font-medium mb-2">{{x.name | stripHtml | titlecase}}@if(!last){,}</p>
                  }
               </div>
        
@@ -156,9 +156,8 @@
           <div class="bg-white rounded shadow-sm">
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Biographie</h3>
-              <p class="text-gray-700 text-sm leading-relaxed"  [innerHTML]="artist.long_bio">
-                <!-- {{artist.long_bio || artist.short_bio }} -->
-                
+              <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                {{(artist.long_bio || artist.short_bio) | stripHtml}}
               </p>
             </div>
           </div>

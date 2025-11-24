@@ -194,10 +194,10 @@
       <tbody class="divide-y divide-gray-100">
         <tr *ngFor="let e of displayedEvents" class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="navigateTo(e.id)">
           <td class="px-4 py-3 font-mono  text-gray-800 text-sm">{{ e.id }}</td>
-          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.event | titlecase }}</td>
-          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.programme | titlecase}}</td>
-          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.title |  titlecase }}</td>
-          <td class="px-4 py-3 text-gray-700 text-sm">{{ e.location | titlecase }}</td>
+          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.event | stripHtml | titlecase }}</td>
+          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.programme | stripHtml | titlecase}}</td>
+          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.title | stripHtml | titlecase }}</td>
+          <td class="px-4 py-3 text-gray-700 text-sm">{{ e.location | stripHtml | titlecase }}</td>
           <td class="px-4 py-3 text-gray-700 text-sm">
             <div class="flex flex-wrap items-center gap-1">
               <span *ngIf="e.eventDates.length > 0" class="px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs">{{ e.eventDates[0] | date:'yyyy-MM-dd' }} </span>

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { VisitorService } from '../../services/visitor.service';
 import { AlertService } from '../../services/alert.service';
 import { Router } from '@angular/router';
+import { StripHtmlPipe } from '../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-locations',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitleCasePipe],
+  imports: [CommonModule, FormsModule, TitleCasePipe, StripHtmlPipe],
   templateUrl: './locations.component.html'
 })
 export class LocationsComponent implements OnInit {

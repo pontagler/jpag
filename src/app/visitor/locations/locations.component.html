@@ -152,12 +152,12 @@
                   </div>
                 </div>
                 <div class="p-6 flex flex-col h-full">
-                  <h3 class="font-bold text-xl text-gray-900 mb-1 truncate">{{v?.location}}</h3>
+                  <h3 class="font-bold text-xl text-gray-900 mb-1 truncate">{{v?.location | stripHtml}}</h3>
                   <p class="text-sm text-gray-500 mb-3">
                     <i class="fa-solid fa-location-dot mr-1"></i>
-                    {{v?.city || v?.proviance}}
+                    {{(v?.city || v?.proviance) | stripHtml}}
                   </p>
-                  <p class="text-sm text-gray-600 mb-4 min-h-10" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ v?.description || '' }}</p>
+                  <p class="text-sm text-gray-600 mb-4 min-h-10" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ (v?.description || '') | stripHtml }}</p>
                 <div class="h-14">
                   <div class="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap no-scrollbar ">
                     @for(a of (v?.specs || []); track a?.id){
@@ -188,15 +188,15 @@
                 <div>
                   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
-                      <h3 class="text-xl font-bold text-gray-900">{{v?.location}}</h3>
+                      <h3 class="text-xl font-bold text-gray-900">{{v?.location | stripHtml}}</h3>
                       <p class="text-sm text-gray-500">
                         <i class="fa-solid fa-location-dot mr-1"></i>
-                        {{v?.city || v?.proviance}}
+                        {{(v?.city || v?.proviance) | stripHtml}}
                       </p>
                     </div>
                     <p (click)="goToLocationDetail(v.id_location)" class="cursor-pointer inline-flex items-center justify-center bg-pont-green hover:bg-pont-green/90 text-white px-4 py-2 rounded">Détail</p>
                   </div>
-                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(v?.description || '') | slice:0:180}}{{(v?.description?.length || 0) > 180 ? '…' : ''}}</p>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">{{(v?.description || '') | stripHtml | slice:0:180}}{{(v?.description?.length || 0) > 180 ? '…' : ''}}</p>
                 
                   <div class="flex gap-2 mt-4 overflow-x-auto whitespace-nowrap no-scrollbar">
            

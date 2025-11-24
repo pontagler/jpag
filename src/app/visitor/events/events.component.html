@@ -155,12 +155,12 @@
 							</div>
 						</div>
 						<div class="p-6 flex flex-col h-full">
-							<p class="text-lg">{{e.editionDisplay}}</p>
+							<p class="text-lg">{{e.editionDisplay | stripHtml}}</p>
 
-							<h3 class="font-bold text-xl truncate text-gray-900 mb-1">{{e?.title || e?.name}}</h3>
-							<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
+							<h3 class="font-bold text-xl truncate text-gray-900 mb-1">{{(e?.title || e?.name) | stripHtml}}</h3>
+							<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay | stripHtml}}</p>
 							<div class="h-20">
-								<p class="text-sm text-gray-600 mb-3">{{(e?.description || '') |
+								<p class="text-sm text-gray-600 mb-3">{{(e?.description || '') | stripHtml |
 									slice:0:120}}{{(e?.description?.length || 0) > 120 ? '…' : ''}}</p>
 							</div>
 							<div class="space-y-1 text-sm text-gray-600 mb-4 min-h-16">
@@ -253,8 +253,8 @@
 					<div>
 						<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
 							<div>
-								<p class="text-lg">{{e.editionDisplay}}</p>
-								<h3 class="text-xl font-bold text-gray-900">{{e?.title || e?.name}}</h3>
+								<p class="text-lg">{{e.editionDisplay | stripHtml}}</p>
+								<h3 class="text-xl font-bold text-gray-900">{{(e?.title || e?.name) | stripHtml}}</h3>
 								<p class="text-pont-rust font-medium mb-2 text-sm">{{e?.artistDisplay}}</p>
 
 							</div>

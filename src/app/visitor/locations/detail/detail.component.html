@@ -18,11 +18,11 @@
   <div *ngIf="location && !loading" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="flex justify-between items-center mb-8">
       <div>
-        <h1 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-800">{{ location.name }}</h1>
+        <h1 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-800">{{ location.name | stripHtml }}</h1>
         <div class="flex items-center gap-4 mt-2 text-gray-600">
           <div class="flex items-center space-x-2">
             <i class="fa-solid fa-location-dot w-5 h-5"></i>
-            <span class="font-semibold">{{ location.address }} {{ location.zip }}</span>
+            <span class="font-semibold">{{ location.address | stripHtml }} {{ location.zip | stripHtml }}</span>
           </div>
         </div>
       </div>
@@ -136,12 +136,12 @@
 
         <div>
           
-          <p class="text-lg text-gray-600 leading-relaxed">{{ location.description }}</p>
+          <p class="text-lg text-gray-600 leading-relaxed">{{ location.description | stripHtml }}</p>
         </div>
 
         <div>
           <h2 class="text-3xl font-bold text-gray-800 mb-4">Comment venir …</h2>
-          <p class="text-lg text-gray-600 leading-relaxed">{{ location.public_description }}</p>
+          <p class="text-lg text-gray-600 leading-relaxed">{{ location.public_description | stripHtml }}</p>
         </div>
 
 

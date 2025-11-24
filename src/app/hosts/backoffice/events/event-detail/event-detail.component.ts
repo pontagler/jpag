@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { EventService } from '../../../../services/event.service';
 import { CommonModule } from '@angular/common';
+import { StripHtmlPipe } from '../../../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, StripHtmlPipe],
   templateUrl: './event-detail.component.html'
 })
 export class EventDetailComponent implements OnInit {

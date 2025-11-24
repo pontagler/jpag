@@ -24,12 +24,12 @@
 
         <div class="space-y-4">
           <div>
-            <h3 class="text-lg text-black/80 font-medium">{{ event.editionDisplay }}</h3>
-            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ event.title | titlecase}}</h1>
+            <h3 class="text-lg text-black/80 font-medium">{{ event.editionDisplay | stripHtml }}</h3>
+            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ event.title | stripHtml | titlecase}}</h1>
             <div class="flex flex-wrap gap-2">
-              <span *ngFor="let inst of event.instruments" class="px-2 py-1 rounded-full border text-black font-medium text-sm bg-slate-50 border-slate-200">{{ inst | titlecase }}</span>
+              <span *ngFor="let inst of event.instruments" class="px-2 py-1 rounded-full border text-black font-medium text-sm bg-slate-50 border-slate-200">{{ inst | stripHtml | titlecase }}</span>
             </div>
-            <p class="text-gray-700 leading-relaxed mt-2">{{ event.teaser }}</p>
+            <p class="text-gray-700 leading-relaxed mt-2">{{ event.teaser | stripHtml }}</p>
           </div>
 
           <div class="space-y-2 text-sm text-gray-700">
@@ -83,7 +83,7 @@
                 About This Concert
               </div>
               <div class="p-4">
-                <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ event.description }}</p>
+                <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ event.description | stripHtml }}</p>
               </div>
             </div>
 
@@ -91,9 +91,9 @@
               <div class="p-4 font-semibold text-2xl">Shows</div>
               <div class="p-4 space-y-4">
                 <div *ngFor="let piece of event.shows" class="border-l-4 border-green-700 pl-4">
-                  <h4 class="font-semibold text-gray-900">{{ piece.composer }}</h4>
-                  <p class="text-gray-700">{{ piece.piece }}</p>
-                  <p class="text-sm text-gray-500">{{ piece.duration }}</p>
+                  <h4 class="font-semibold text-gray-900">{{ piece.composer | stripHtml }}</h4>
+                  <p class="text-gray-700">{{ piece.piece | stripHtml }}</p>
+                  <p class="text-sm text-gray-500">{{ piece.duration | stripHtml }}</p>
                 </div>
               </div>
             </div>

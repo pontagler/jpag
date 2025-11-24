@@ -10,6 +10,7 @@ import { ArtistCreateComponent } from './artist-create/artist-create.component';
 import { EventsComponent } from './events/events.component';
 import { AccountComponent } from './account/account.component';
 import { AccountDetailComponent } from './account/detail/detail.component';
+import { StripHtmlPipe } from '../../shared/strip-html.pipe';
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import { AccountDetailComponent } from './account/detail/detail.component';
     BackofficeRoutingModule,
     SharedModule,
     TruncatePipe,
+    StripHtmlPipe,
 
 ]
 })

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventService } from '../../services/event.service';
 import { VisitorService } from '../../services/visitor.service';
+import { StripHtmlPipe } from '../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitleCasePipe],
+  imports: [CommonModule, FormsModule, TitleCasePipe, StripHtmlPipe],
   templateUrl: './events.component.html'
 })
 export class EventsComponent implements OnInit {

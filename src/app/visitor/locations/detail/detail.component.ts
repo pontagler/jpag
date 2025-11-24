@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LocationService } from '../../../services/location.service';
 import { SafeUrlPipe } from '../../../shared/safe-url.pipe';
+import { StripHtmlPipe } from '../../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-location-detail',
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor, RouterModule, SafeUrlPipe],
+  imports: [CommonModule, NgIf, NgFor, RouterModule, SafeUrlPipe, StripHtmlPipe],
   templateUrl: './detail.component.html'
 })
 export class LocationDetailComponent implements OnInit {

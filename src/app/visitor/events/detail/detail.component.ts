@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { EventService } from '../../../services/event.service';
 import { SafeUrlPipe } from '../../../shared/safe-url.pipe';
+import { StripHtmlPipe } from '../../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, StripHtmlPipe],
   templateUrl: './detail.component.html'
 })
 export class DetailComponent implements OnInit {

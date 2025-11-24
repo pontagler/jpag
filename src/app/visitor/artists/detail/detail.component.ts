@@ -6,11 +6,12 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { FormsModule } from '@angular/forms';
+import { StripHtmlPipe } from '../../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, SharedModule, TitleCasePipe, RouterModule],
+  imports: [CommonModule, FormsModule, SharedModule, TitleCasePipe, RouterModule, StripHtmlPipe],
   templateUrl: './detail.component.html'
 })
 export class DetailComponent {

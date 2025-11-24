@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AlertService } from '../../services/alert.service';
 import { VisitorService } from '../../services/visitor.service';
+import { StripHtmlPipe } from '../../shared/strip-html.pipe';
 
 interface EventDateItem {
   date: string | Date | null | undefined;
@@ -14,7 +15,7 @@ interface EventDateItem {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, StripHtmlPipe],
   templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {

@@ -29,8 +29,8 @@
 
         <div class="space-y-4">
           <div>
-            <h3 class="text-lg text-black/80 font-medium">{{ event.editionDisplay }}</h3>
-            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ event.title | titlecase}}</h1>
+            <h3 class="text-lg text-black/80 font-medium">{{ event.editionDisplay | stripHtml }}</h3>
+            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ event.title | stripHtml | titlecase}}</h1>
             <div class="flex flex-wrap gap-2">
                 @for(x of event.artists; track x; let last = $last; let i = $index) {
                     <h2 class="text-xl lg:text-2xl font-medium text-pont-rust mb-2">
@@ -54,7 +54,7 @@
               WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden'
-            } : {}">{{ event.teaser }}</p>
+            } : {}">{{ event.teaser | stripHtml }}</p>
             <button *ngIf="event.teaser && event.teaser.length > 0" (click)="toggleTeaser()" class="text-green-700 underline text-xs">
               {{ showFullTeaser ? 'View less' : 'View more' }}
             </button>
@@ -136,7 +136,7 @@
                 About This Concert
               </div>
               <div class="p-4">
-                <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ event.description }}</p>
+                <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ event.description | stripHtml }}</p>
               </div>
             </div>
 
@@ -151,8 +151,8 @@
               <div class="p-6 flex items-start gap-4">
                 <img [src]="a.image || '/assets/images/profile/user-b.png'" [alt]="a.name" width="80" height="80" class="rounded-full object-cover" />
                 <div>
-                  <h3 class="text-xl font-bold text-gray-900">{{ a.title }}</h3>
-                  <p class="text-rose-700 text-sm font-medium" *ngIf="a.description">{{ a.description }}</p>
+                  <h3 class="text-xl font-bold text-gray-900">{{ a.title | stripHtml }}</h3>
+                  <p class="text-rose-700 text-sm font-medium" *ngIf="a.description">{{ a.description | stripHtml }}</p>
                   <a [href]="a.url" target="_blank" rel="noopener noreferrer" class="bg-pont-green text-white px-4 py-1 rounded-lg inline-block">Visit</a>
                 </div>
               </div>
@@ -171,11 +171,11 @@
                 <img [src]="a.photo || '/assets/images/profile/user-b.png'" [alt]="a.name" width="80" height="80" class="rounded-full object-cover" />
                 <div>
                   <h3 class="text-xl font-bold text-gray-900">
-                    <a *ngIf="a.id || a.id_artist; else plainArtistName" [routerLink]="['/artists', (a.id || a.id_artist)]" class="hover:underline">{{ a.name }}</a>
-                    <ng-template #plainArtistName>{{ a.name }}</ng-template>
+                    <a *ngIf="a.id || a.id_artist; else plainArtistName" [routerLink]="['/artists', (a.id || a.id_artist)]" class="hover:underline">{{ a.name | stripHtml }}</a>
+                    <ng-template #plainArtistName>{{ a.name | stripHtml }}</ng-template>
                   </h3>
-                  <p class="text-rose-700 font-medium" *ngIf="a.tagline">{{ a.tagline | titlecase }}</p>
-                 <p class="text-gray-700 text-xs">{{ a.short_bio}}</p>
+                  <p class="text-rose-700 font-medium" *ngIf="a.tagline">{{ a.tagline | stripHtml | titlecase }}</p>
+                 <p class="text-gray-700 text-xs">{{ a.short_bio | stripHtml }}</p>
                 </div>
               </div>
           

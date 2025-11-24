@@ -5,11 +5,12 @@ import { SharedModule } from "../../shared/shared.module";
 import { VisitorService } from '../../services/visitor.service';
 import { AlertService } from '../../services/alert.service';
 import { Router } from '@angular/router';
+import { StripHtmlPipe } from '../../shared/strip-html.pipe';
 
 @Component({
   selector: 'app-artists',
   standalone: true,
-  imports: [CommonModule, FormsModule, SharedModule, TitleCasePipe],
+  imports: [CommonModule, FormsModule, SharedModule, TitleCasePipe, StripHtmlPipe],
   templateUrl: './artists.component.html'
 })
 export class ArtistsComponent implements OnInit{

@@ -213,8 +213,8 @@
 						</div>
 						<div class="mt-auto">
 							@if(e?.isCompleted){
-							<p
-								class="w-full inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">
+							<p (click)="goToEventDetail(e.id)"
+								class="w-full inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-pointer">
 								Complété</p>
 							} @else {
 							<p (click)="goToEventDetail(e.id)"

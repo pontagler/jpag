@@ -46,8 +46,8 @@
             <i class="fa-regular fa-flag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
             <select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
               <option value="">All</option>
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
             </select>
             <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
           </div>
@@ -150,14 +150,25 @@
                 }"></i>
               </span>
             </th>
-            <th (click)="setSort('status')" class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none">
+            <th (click)="setSort('public')" class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none">
+              <span class="inline-flex items-center gap-2">
+                <i class="fa-regular fa-circle text-gray-400"></i>
+                <span>Public</span>
+                <i class="fas text-gray-400" [ngClass]="{
+                  'fa-sort-up': sortColumn==='public' && sortDirection==='asc',
+                  'fa-sort-down': sortColumn==='public' && sortDirection==='desc',
+                  'fa-sort': sortColumn!=='public'
+                }"></i>
+              </span>
+            </th>
+            <th (click)="setSort('is_active')" class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none">
               <span class="inline-flex items-center gap-2">
                 <i class="fa-regular fa-circle text-gray-400"></i>
                 <span>Status</span>
                 <i class="fas text-gray-400" [ngClass]="{
-                  'fa-sort-up': sortColumn==='status' && sortDirection==='asc',
-                  'fa-sort-down': sortColumn==='status' && sortDirection==='desc',
-                  'fa-sort': sortColumn!=='status'
+                  'fa-sort-up': sortColumn==='is_active' && sortDirection==='asc',
+                  'fa-sort-down': sortColumn==='is_active' && sortDirection==='desc',
+                  'fa-sort': sortColumn!=='is_active'
                 }"></i>
               </span>
             </th>
@@ -193,10 +204,11 @@
             <td class="px-4 py-3 text-gray-700">{{ loc.address }}</td>
             <td class="px-4 py-3 text-gray-700">{{ loc.city }}</td>
             <td class="px-4 py-3 text-gray-700">{{ loc.country }}</td>
+            <td class="px-4 py-3 text-gray-700">{{ loc.public }}</td>
             <td class="px-4 py-3">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="+loc.status === 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'">
-                <i class="fa-solid" [ngClass]="+loc.status === 1 ? 'fa-circle-check' : 'fa-circle' "></i>
-                {{ getStatusLabel(loc.status) }}
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="loc.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'">
+                <i class="fa-solid" [ngClass]="loc.is_active ? 'fa-circle-check' : 'fa-circle' "></i>
+                {{ loc.is_active ? 'Active' : 'Inactive' }}
               </span>
             </td>
             <td class="px-4 py-3 text-gray-700">{{ loc.capacity }}</td>

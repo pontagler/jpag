@@ -21,13 +21,13 @@
       </div>
       <div class="flex space-x-4">
          <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-400 text-black hover:bg-gray-800" (click)="toggleStatus()">
-        <i class="fas" [ngClass]="+location.status === 1 ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
-        <span>{{ +location.status === 1 ? 'Set Inactive' : 'Set Active' }}</span>
+        <i class="fas" [ngClass]="location.is_active ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+        <span>{{ location.is_active ? 'Set Inactive' : 'Set Active' }}</span>
       </button>
 
         <span class="inline-flex items-center px-2 py-1 text-xs rounded-full"
-              [ngClass]="{ 'bg-green-100 text-green-700': +location.status === 1, 'bg-gray-100 text-gray-700': +location.status !== 1 }">
-          {{ +location.status === 1 ? 'Active' : 'Inactive' }}
+              [ngClass]="{ 'bg-green-100 text-green-700': location.is_active, 'bg-gray-100 text-gray-700': !location.is_active }">
+          {{ location.is_active ? 'Active' : 'Inactive' }}
         </span>
       </div>
     </div>
@@ -65,9 +65,25 @@
 
           </div>
           <div class="mt-4">
-            <div class="text-gray-500 text-sm mb-1">Description</div>
+            <div class="text-gray-500 text-sm mb-1">Description for visitor</div>
             <div class="text-gray-900">{{ location.description || '—' }}</div>
           </div>
+
+          <div class="mt-4">
+            <div class="text-gray-500 text-sm mb-1">Comment venir</div>
+            <div class="text-gray-900">{{ location.public_description || '—' }}</div>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-gray-500 text-sm mb-1">Restricted Description</div>
+            <div class="text-gray-900">{{ location.restricted_description || '—' }}</div>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-gray-500 text-sm mb-1">Access Information</div>
+            <div class="text-gray-900">{{ location.public || '—' }}</div>
+          </div>
+
         </div>
 
         <div class="bg-gray-50 p-5 rounded-lg" *ngIf="location.images && location.images.length">
@@ -112,9 +128,12 @@
 
         <div class="bg-gray-50 p-5 rounded-lg text-sm text-gray-600">
           <div class="grid grid-cols-1 gap-2">
-            <div><span class="text-gray-500">Hosted By:</span> {{ location.host | titlecase }}</div>
-            <div><span class="text-gray-500">Created:</span> {{ location.created_on | date : 'medium' }}</div>
-            <div><span class="text-gray-500">Last Updated:</span> {{ location.last_updated_on | date : 'medium' }}</div>
+            <div><span class="text-gray-500 font-medium">City</span> {{ location.city | titlecase }}</div>
+            <div><span class="text-gray-500 font-medium">Country</span> {{ location.country | titlecase }}</div>
+            <div><span class="text-gray-500 font-medium">Zip</span> {{ location.zip | titlecase }}</div>
+            
+            <div><span class="text-gray-500 font-medium">Created:</span> {{ location.created_on | date : 'medium' }}</div>
+            <div><span class="text-gray-500 font-medium">Last Updated:</span> {{ location.last_updated_on | date : 'medium' }}</div>
           </div>
         </div>
       </div>

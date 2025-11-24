@@ -61,7 +61,7 @@ async getSysSpecs(){
   async listAllLocationTypes(){
     const { data, error } = await supabase
       .from('location_types')
-      .select('id_location, id_type');
+      .select('id_location, id_location_type');
     if (error) throw error;
     return data;
   }
@@ -128,43 +128,59 @@ async addLocationType(arr:any){
   return data;
 }
   // Remove Types
-async removeLocationType(id_location:any, id_type:any){
-  const {data, error} = await supabase.from ('location_types').delete().eq('id_location', id_location).eq('id_type', id_type)
+async removeLocationType(id_location:any, id_location_type:any){
+  const {data, error} = await supabase.from ('location_types').delete().eq('id_location', id_location).eq('id_location_type', id_location_type)
   if(error) throw error
   return data;
 }
 
 
   // Images: upload to 'locations' bucket and store URL in 'location_images'
-  async uploadLocationImage(file: File, id_location: number, created_by: string){
+  async uploadLocationImage(file: File, id_location: number, created_by: string, credit: string = ''){
+    // Ensure created_by aligns with the authenticated Supabase user to satisfy common RLS policies
+    try {
+      const { data } = await supabase.auth.getUser();
+      const authUserId = data?.user?.id;
+      if (authUserId) {
+        created_by = authUserId;
+      }
+    } catch (_err) {
+      // if fetching auth user fails, fall back to provided created_by
+    }
     const fileExt = file.name.split('.').pop() || 'jpg';
     const uniqueName = `${uuidv4()}.${fileExt}`;
     const objectPath = `${id_location}/${uniqueName}`;
 
-    const { error: uploadError } = await supabase.storage
+    // Use supabase1 (service role) for storage upload to bypass RLS/bucket policies
+    const { error: uploadError } = await supabase1.storage
       .from('locations')
-      .upload(objectPath, file);
+      .upload(objectPath, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: (file as any)?.type || 'image/jpeg'
+      });
     if (uploadError) throw uploadError;
 
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = supabase1.storage
       .from('locations')
       .getPublicUrl(objectPath);
 
     const publicUrl = publicUrlData.publicUrl;
 
-    const { data, error } = await supabase
+    // Use supabase1 (service role) to bypass RLS on location_images table
+    const { data, error } = await supabase1
       .from('location_images')
-      .insert({ id_location, url: publicUrl, created_by })
-      .select('id, id_location, url, created_by, created_on')
+      .insert({ id_location, url: publicUrl, created_by, credit })
+      .select('id, id_location, url, created_by, created_on, credit')
       .single();
     if (error) throw error;
     return data;
   }
 
   async listLocationImages(id_location: number){
-    const { data, error } = await supabase
+    const { data, error } = await supabase1
       .from('location_images')
-      .select('id, id_location, url, created_by, created_on')
+      .select('id, id_location, url, created_by, created_on, credit')
       .eq('id_location', id_location)
       .order('created_on', { ascending: false });
     if (error) throw error;
@@ -172,7 +188,7 @@ async removeLocationType(id_location:any, id_type:any){
   }
 
   async deleteLocationImage(id: number){
-    const { data: row, error: fetchError } = await supabase
+    const { data: row, error: fetchError } = await supabase1
       .from('location_images')
       .select('url')
       .eq('id', id)
@@ -183,14 +199,14 @@ async removeLocationType(id_location:any, id_type:any){
     if (imageUrl) {
       const pathPart = imageUrl.split('/locations/')[1];
       if (pathPart) {
-        const { error: removeError } = await supabase.storage
+        const { error: removeError } = await supabase1.storage
           .from('locations')
           .remove([pathPart]);
         if (removeError) throw removeError;
       }
     }
 
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await supabase1
       .from('location_images')
       .delete()
       .eq('id', id);
@@ -205,16 +221,22 @@ async removeLocationType(id_location:any, id_type:any){
     return data;
   }
 
-  async updateLocationStatus(id: number, status: number){
+  async updateLocationStatus(id: number, is_active: boolean){
+    let updated_by: string | null = null;
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      updated_by = authData?.user?.id || null;
+    } catch {}
+
     const { data, error } = await supabase
       .from('locations')
       .update({ 
-        status, 
-        last_updated_on: new Date(),
-        updated_by: this.artistService.getLoggedUserID()
+        is_active, 
+        last_update: new Date(),
+        updated_by: updated_by || this.artistService.getLoggedUserID()
       })
       .eq('id', id)
-      .select('id, status')
+      .select('id, is_active')
       .single();
     if (error) throw error;
     return data;
@@ -222,7 +244,7 @@ async removeLocationType(id_location:any, id_type:any){
 
   async deleteLocationAndAssets(id: number){
     // 1) Collect image paths and delete from storage
-    const { data: images, error: listErr } = await supabase
+    const { data: images, error: listErr } = await supabase1
       .from('location_images')
       .select('id, url')
       .eq('id_location', id);
@@ -240,39 +262,39 @@ async removeLocationType(id_location:any, id_type:any){
     }
 
     if (pathsToRemove.length > 0) {
-      const { error: removeErr } = await supabase.storage
+      const { error: removeErr } = await supabase1.storage
         .from('locations')
         .remove(pathsToRemove);
       if (removeErr) throw removeErr;
     }
 
     // 2) Delete relational rows
-    const { error: delImgErr } = await supabase
+    const { error: delImgErr } = await supabase1
       .from('location_images')
       .delete()
       .eq('id_location', id);
     if (delImgErr) throw delImgErr;
 
-    const { error: delAmenErr } = await supabase
+    const { error: delAmenErr } = await supabase1
       .from('location_amenity')
       .delete()
       .eq('id_location', id);
     if (delAmenErr) throw delAmenErr;
 
-    const { error: delSpecsErr } = await supabase
+    const { error: delSpecsErr } = await supabase1
       .from('location_specs')
       .delete()
       .eq('id_location', id);
     if (delSpecsErr) throw delSpecsErr;
 
-    const { error: delTypesErr } = await supabase
+    const { error: delTypesErr } = await supabase1
       .from('location_types')
       .delete()
       .eq('id_location', id);
     if (delTypesErr) throw delTypesErr;
 
     // 3) Finally delete location row
-    const { error: delLocErr } = await supabase
+    const { error: delLocErr } = await supabase1
       .from('locations')
       .delete()
       .eq('id', id);

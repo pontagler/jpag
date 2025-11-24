@@ -52,6 +52,21 @@
         <textarea class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" rows="3" [(ngModel)]="details.description" maxlength="200" placeholder="Short description"></textarea>
         <div class="text-right text-xs text-gray-500">{{ details.description.length || 0 }}/200</div>
       </div>
+      <div class="md:col-span-2">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Public Description</label>
+        <textarea class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" rows="3" [(ngModel)]="details.public_description" placeholder="Shown publicly to users"></textarea>
+      </div>
+      <div class="md:col-span-2">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Restricted Description</label>
+        <textarea class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" rows="3" [(ngModel)]="details.restricted_description" placeholder="Internal details, not shown publicly"></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Public</label>
+        <div class="mt-2 flex items-center gap-2">
+          <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-pont-green focus:ring-pont-green" [(ngModel)]="details.public" />
+          <span class="text-sm text-gray-700">Make this location public</span>
+        </div>
+      </div>
       <div>
         <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Address *</label>
         <input class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" [(ngModel)]="details.address" placeholder="Street address" />
@@ -60,10 +75,10 @@
         <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">City *</label>
         <input class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" [(ngModel)]="details.city" placeholder="City" />
       </div>
-      <div>
+      <!-- <div>
         <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Proviance</label>
         <input class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" [(ngModel)]="details.proviance" placeholder="Province/State" />
-      </div>
+      </div> -->
       <div>
         <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Country *</label>
         <input class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200" [(ngModel)]="details.country" placeholder="Country" />
@@ -208,6 +223,7 @@
           />
         </svg>
         <p class="text-sm text-gray-500">Click or drag images here to upload</p>
+        <p class="text-sm text-gray-500">700 x 400px recommended</p>
         <input
           #fileInput
           id="fileInput"
@@ -222,19 +238,32 @@
     
     <div *ngIf="isLoadingImages" class="text-sm text-gray-500">Loading images...</div>
     <div *ngIf="existingImages.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div *ngFor="let img of existingImages" class="relative">
-        <img [src]="img.url" class="w-full h-32 object-cover rounded-lg border" />
-        <button class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 text-xs" (click)="deleteExistingImage(img.id)">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <div *ngFor="let img of existingImages" class="flex flex-col">
+        <div class="relative">
+          <img [src]="img.url" class="w-full h-32 object-cover rounded-lg border" />
+          <button class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 text-xs" (click)="deleteExistingImage(img.id)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="mt-1 text-xs text-gray-600" *ngIf="img.credit">
+          Credit: {{ img.credit }}
+        </div>
       </div>
     </div>
     <div *ngIf="imagePreviews.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div *ngFor="let img of imagePreviews; let i = index" class="relative">
-        <img [src]="img" class="w-full h-32 object-cover rounded-lg border" />
-        <button class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 text-xs" (click)="removeImage(i)">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <div *ngFor="let img of imagePreviews; let i = index" class="flex flex-col">
+        <div class="relative">
+          <img [src]="img" class="w-full h-32 object-cover rounded-lg border" />
+          <button class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 text-xs" (click)="removeImage(i)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <input 
+          type="text" 
+          [(ngModel)]="imageCredits[i]" 
+          placeholder="Credit (optional)" 
+          class="mt-1 px-2 py-1 text-xs rounded border border-gray-200 focus:border-pont-green focus:outline-none"
+        />
       </div>
     </div>
     <div class="flex items-center justify-between pt-2">

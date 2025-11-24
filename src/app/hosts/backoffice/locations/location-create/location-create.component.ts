@@ -3,6 +3,7 @@ import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertService } from '../../../../services/alert.service';
+import { AuthService } from '../../../../services/auth.service';
 import { LocationService } from '../../../../services/location.service';
 import { ArtistService } from '../../../../services/artist.service';
 
@@ -18,7 +19,8 @@ export class LocationCreateComponent implements OnInit {
     private route: ActivatedRoute,
     private alertService: AlertService,
     private locationService: LocationService,
-    private aritstService: ArtistService
+    private aritstService: ArtistService,
+    private authService: AuthService
   ) { }
 
   loggedUsers: any;
@@ -45,10 +47,13 @@ export class LocationCreateComponent implements OnInit {
   details = {
     name: '',
     description: '', // max 200 chars
+    public_description: '',
+    restricted_description: '',
+    public: false as boolean,
     capacity: '',
     address: '',
     city: '',
-    proviance: '',
+    // proviance: '',
     country: '',
     lat: '',
     long: '',
@@ -76,6 +81,7 @@ export class LocationCreateComponent implements OnInit {
   // Step 3: Images
   images: File[] = [];
   imagePreviews: string[] = [];
+  imageCredits: string[] = []; // Store credit for each image
   uploading: boolean = false;
   existingImages: any[] = [];
   isLoadingImages: boolean = false;
@@ -156,6 +162,7 @@ export class LocationCreateComponent implements OnInit {
   removeImage(index: number): void {
     if (index < 0 || index >= this.images.length) return;
     this.images.splice(index, 1);
+    this.imageCredits.splice(index, 1); // Remove credit at same index
     const url = this.imagePreviews.splice(index, 1)[0];
     if (url) URL.revokeObjectURL(url);
   }
@@ -168,11 +175,14 @@ export class LocationCreateComponent implements OnInit {
       }
       this.uploading = true;
       const createdBy = this.loggedUsers;
-      await Promise.all(this.images.map(file => this.locationService.uploadLocationImage(file, this.catchID, createdBy)));
+      await Promise.all(this.images.map((file, index) => 
+        this.locationService.uploadLocationImage(file, this.catchID, createdBy, this.imageCredits[index] || '')
+      ));
       // clear local selections
       this.images = [];
       this.imagePreviews.forEach(url => URL.revokeObjectURL(url));
       this.imagePreviews = [];
+      this.imageCredits = [];
       await this.loadLocationImages();
       this.alertService.showAlert('Uploaded', 'Images have been uploaded', 'success');
     } catch (err: any) {
@@ -185,23 +195,29 @@ export class LocationCreateComponent implements OnInit {
   catchID: number = 2;
 
   async detailSubmit() {
+    const currentUser = await this.authService.getCurrentUser();
+    const authId = currentUser?.id || this.loggedUsers;
+
     let arr = {
-      id_host: '116ad27e-45bd-48d7-a2f7-096f8418ea65',
+      id_host: 1,
       name: this.details.name,
       address: this.details.address,
       lat: this.details.lat,
       long: this.details.long,
       description: this.details.description,
+      public_description: this.details.public_description,
+      restricted_description: this.details.restricted_description,
+      public: this.details.public ? 'ALL' : 'No',
       capacity: this.details.capacity,
       city: this.details.city,
-      proviance: this.details.proviance,
+     // proviance: this.details.proviance, // not used
       country: this.details.country,
       zip: this.details.zip,
       phone: this.details.phone,
       email: this.details.email,
       website: this.details.website,
-      created_by: this.loggedUsers,
-      updated_by: this.loggedUsers,
+      created_by: authId,
+      updated_by: authId,
     };
 
     try {
@@ -212,16 +228,19 @@ export class LocationCreateComponent implements OnInit {
           lat: arr.lat,
           long: arr.long,
           description: arr.description,
+          public_description: arr.public_description,
+          restricted_description: arr.restricted_description,
+          public: this.details.public ? 'ALL' : 'No',
           capacity: arr.capacity,
           city: arr.city,
-          proviance: arr.proviance,
+         // proviance: arr.proviance, // not used
           country: arr.country,
           zip: arr.zip,
           phone: arr.phone,
           email: arr.email,
           website: arr.website,
-          updated_by: this.loggedUsers,
-          last_updated_on: new Date(),
+          updated_by: authId,
+          last_update: new Date(),
         };
         await this.locationService.updateLocationDetails(this.catchID, updateArr);
         this.alertService.showAlert('Successful', 'Details updated', 'success');
@@ -250,10 +269,25 @@ export class LocationCreateComponent implements OnInit {
       this.details = {
         name: loc.name || '',
         description: loc.description || '',
+        public_description: loc.public_description || '',
+        restricted_description: loc.restricted_description || '',
+        public: ((): boolean => {
+          const v: any = (loc as any)?.public;
+          if (typeof v === 'boolean') return v;
+          if (typeof v === 'number') return v === 1;
+          if (typeof v === 'string') {
+            const s = v.trim().toUpperCase();
+            if (s === 'ALL') return true;
+            if (s === 'NO') return false;
+            if (s === 'TRUE' || s === '1') return true;
+            if (s === 'FALSE' || s === '0') return false;
+          }
+          return false;
+        })(),
         capacity: loc.capacity || '',
         address: loc.address || '',
         city: loc.city || '',
-        proviance: loc.proviance || '',
+       // proviance: loc.proviance || '', // not used
         country: loc.country || '',
         lat: loc.lat || '',
         long: loc.long || '',
@@ -542,6 +576,7 @@ async deleteExistingImage(id: number){
       this.images.push(file);
       const url = URL.createObjectURL(file);
       this.imagePreviews.push(url);
+      this.imageCredits.push(''); // Initialize with empty credit
     }
   }
 

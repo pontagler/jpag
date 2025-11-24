@@ -31,7 +31,7 @@ export class LocationsComponent implements OnInit {
   // filters
   searchName: string = '';
   filterCity: string = '';
-  filterStatus: string = '';
+  filterStatus: boolean | '' = '';
   filterAmenityId: string = '';
   filterSpecId: string = '';
   filterTypeId: string = '';
@@ -79,7 +79,7 @@ export class LocationsComponent implements OnInit {
       // build mapping indexes
       this.locationIdToAmenityIds = this.buildLocationIndex(amenMapRows, 'id_location', 'id_amenity');
       this.locationIdToSpecIds = this.buildLocationIndex(specMapRows, 'id_location', 'id_specs');
-      this.locationIdToTypeIds = this.buildLocationIndex(typeMapRows, 'id_location', 'id_type');
+      this.locationIdToTypeIds = this.buildLocationIndex(typeMapRows, 'id_location', 'id_location_type');
 
       this.applyFiltersAndSort();
     } catch (err: any) {
@@ -152,9 +152,13 @@ export class LocationsComponent implements OnInit {
       rows = rows.filter((r: any) => (r?.city || '') === this.filterCity);
     }
 
-    if (this.filterStatus) {
-      const desired = Number(this.filterStatus);
-      rows = rows.filter((r: any) => Number(r?.status) === desired);
+    if (this.filterStatus !== '') {
+      const desired = this.filterStatus as boolean;
+      rows = rows.filter((r: any) => {
+        const val = (r as any)?.is_active;
+        const active = val === true || val === 1 || val === '1';
+        return active === desired;
+      });
     }
 
     if (this.filterAmenityId) {
@@ -182,7 +186,7 @@ export class LocationsComponent implements OnInit {
         if (av == null) return -1 * dir;
         if (bv == null) return 1 * dir;
         // numeric compare for known numeric fields
-        const numericColumns = new Set(['id', 'status', 'capacity']);
+        const numericColumns = new Set(['id', 'is_active', 'capacity']);
         if (numericColumns.has(col)) {
           const an = Number(av);
           const bn = Number(bv);

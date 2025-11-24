@@ -5,7 +5,7 @@ import { ArtistService } from '../../../services/artist.service';
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [ NgFor, NgIf, DatePipe],
+  imports: [ NgFor, NgIf],
   templateUrl: './events.component.html',
   
 })

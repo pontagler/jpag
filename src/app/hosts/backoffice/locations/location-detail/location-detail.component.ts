@@ -36,6 +36,9 @@ export class LocationDetailComponent implements OnInit {
       this.location = Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
       if (!this.location) {
         this.error = 'Location not found';
+      } else {
+        const v: any = (this.location as any).is_active ?? (this.location as any).status;
+        (this.location as any).is_active = v === true || v === 1 || v === '1';
       }
     } catch (err: any) {
       this.error = err?.message || 'Failed to load location';
@@ -50,10 +53,16 @@ export class LocationDetailComponent implements OnInit {
 
   async toggleStatus(): Promise<void> {
     if (!this.location) return;
-    const newStatus = +this.location.status === 1 ? 0 : 1;
+    const currentActive = (this.location as any).is_active === true || (this.location as any).is_active === 1 || (this.location as any).is_active === '1';
+    const newActive = !currentActive;
     try {
-      await this.locationService.updateLocationStatus(this.location.id, newStatus);
-      this.location.status = newStatus;
+      await this.locationService.updateLocationStatus(this.location.id, newActive);
+      (this.location as any).is_active = newActive;
+      this.alertService.showAlert(
+        'Success',
+        `Location status updated to ${newActive ? 'Active' : 'Inactive'}.`,
+        'success'
+      );
     } catch (err) {
       console.error(err);
     }

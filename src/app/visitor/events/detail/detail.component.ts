@@ -88,6 +88,16 @@ export class DetailComponent implements OnInit {
     return base.getTime() < Date.now();
   }
 
+  get isEventCompleted(): boolean {
+    if (!this.event) return false;
+    // Check if status is explicitly set to 'past'
+    if (this.event.status === 'past') return true;
+    // Check if all dates have passed
+    const dates = Array.isArray(this.event?.dates) ? this.event.dates : [];
+    if (dates.length === 0) return false;
+    return dates.every((d: any) => this.isDateTimePast(d));
+  }
+
   private normalizeEvent(raw: any): any {
     const eventDates = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
     const shows = Array.isArray(raw?.event_shows) ? raw.event_shows : [];

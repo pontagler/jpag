@@ -76,32 +76,33 @@ async getSysTypes(){
 // Add locations Details
 
 async addLocationDetails(arr:any){
-  const {data, error} = await supabase.from ('locations').insert(arr).select()
+  // Use supabase1 (service role) to bypass RLS policies
+  const {data, error} = await supabase1.from ('locations').insert(arr).select()
   if(error) throw error
   return data;
 }
 
 // Update location details
 async updateLocationDetails(id: number, arr: any){
-  const { data, error } = await supabase
+  // Use supabase1 (service role) to bypass RLS policies
+  const { data, error } = await supabase1
     .from('locations')
     .update(arr)
     .eq('id', id)
-    .select()
-    .single();
+    .select();
   if (error) throw error;
   return data;
 }
 
 // Add amenity
 async addLocationAmenity(arr:any){
-  const {data, error} = await supabase.from ('location_amenity').insert(arr).select()
+  const {data, error} = await supabase1.from ('location_amenity').insert(arr).select()
   if(error) throw error
   return data;
 }
   // Add amenity
 async removeLocationAmenity(id_location:any, id_amenity:any){
-  const {data, error} = await supabase.from ('location_amenity').delete().eq('id_location', id_location).eq('id_amenity', id_amenity)
+  const {data, error} = await supabase1.from ('location_amenity').delete().eq('id_location', id_location).eq('id_amenity', id_amenity)
   if(error) throw error
   return data;
 }
@@ -109,13 +110,13 @@ async removeLocationAmenity(id_location:any, id_amenity:any){
 
 // Add Specifications
 async addLocationSpecs(arr:any){
-  const {data, error} = await supabase.from ('location_specs').insert(arr).select()
+  const {data, error} = await supabase1.from ('location_specs').insert(arr).select()
   if(error) throw error
   return data;
 }
   // Add Specifications
 async removeLocationSpecs(id_location:any, id_specs:any){
-  const {data, error} = await supabase.from ('location_specs').delete().eq('id_location', id_location).eq('id_specs', id_specs)
+  const {data, error} = await supabase1.from ('location_specs').delete().eq('id_location', id_location).eq('id_specs', id_specs)
   if(error) throw error
   return data;
 }
@@ -123,13 +124,13 @@ async removeLocationSpecs(id_location:any, id_specs:any){
 
 // Add Types
 async addLocationType(arr:any){
-  const {data, error} = await supabase.from ('location_types').insert(arr).select()
+  const {data, error} = await supabase1.from ('location_types').insert(arr).select()
   if(error) throw error
   return data;
 }
   // Remove Types
 async removeLocationType(id_location:any, id_location_type:any){
-  const {data, error} = await supabase.from ('location_types').delete().eq('id_location', id_location).eq('id_location_type', id_location_type)
+  const {data, error} = await supabase1.from ('location_types').delete().eq('id_location', id_location).eq('id_location_type', id_location_type)
   if(error) throw error
   return data;
 }
@@ -171,10 +172,9 @@ async removeLocationType(id_location:any, id_location_type:any){
     const { data, error } = await supabase1
       .from('location_images')
       .insert({ id_location, url: publicUrl, created_by, credit })
-      .select('id, id_location, url, created_by, created_on, credit')
-      .single();
+      .select('id, id_location, url, created_by, created_on, credit');
     if (error) throw error;
-    return data;
+    return data && data.length > 0 ? data[0] : null;
   }
 
   async listLocationImages(id_location: number){
@@ -188,13 +188,13 @@ async removeLocationType(id_location:any, id_location_type:any){
   }
 
   async deleteLocationImage(id: number){
-    const { data: row, error: fetchError } = await supabase1
+    const { data, error: fetchError } = await supabase1
       .from('location_images')
       .select('url')
-      .eq('id', id)
-      .single();
+      .eq('id', id);
     if (fetchError) throw fetchError;
 
+    const row = data && data.length > 0 ? data[0] : null;
     const imageUrl: string | null = row?.url || null;
     if (imageUrl) {
       const pathPart = imageUrl.split('/locations/')[1];
@@ -228,7 +228,8 @@ async removeLocationType(id_location:any, id_location_type:any){
       updated_by = authData?.user?.id || null;
     } catch {}
 
-    const { data, error } = await supabase
+    // Use supabase1 (service role) to bypass RLS policies for status updates
+    const { data, error } = await supabase1
       .from('locations')
       .update({ 
         is_active, 
@@ -236,10 +237,9 @@ async removeLocationType(id_location:any, id_location_type:any){
         updated_by: updated_by || this.artistService.getLoggedUserID()
       })
       .eq('id', id)
-      .select('id, is_active')
-      .single();
+      .select('id, is_active');
     if (error) throw error;
-    return data;
+    return data && data.length > 0 ? data[0] : null;
   }
 
   async deleteLocationAndAssets(id: number){

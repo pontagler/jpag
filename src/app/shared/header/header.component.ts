@@ -42,7 +42,7 @@ urlID:any;
 
   // CSS for the header menu items based ont he urlID
 getMenuItemClass(urlID: any) {
-   console.log('urlID changed function called:', this.urlID);
+   //console.log('urlID changed function called:', this.urlID);
   
   if(urlID == this.urlID){
    return 'text-pont-green hover:text-green-700';

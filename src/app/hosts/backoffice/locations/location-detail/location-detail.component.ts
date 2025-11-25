@@ -56,15 +56,28 @@ export class LocationDetailComponent implements OnInit {
     const currentActive = (this.location as any).is_active === true || (this.location as any).is_active === 1 || (this.location as any).is_active === '1';
     const newActive = !currentActive;
     try {
-      await this.locationService.updateLocationStatus(this.location.id, newActive);
-      (this.location as any).is_active = newActive;
+      const result = await this.locationService.updateLocationStatus(this.location.id, newActive);
+      if (result) {
+        (this.location as any).is_active = newActive;
+        this.alertService.showAlert(
+          'Success',
+          `Location status updated to ${newActive ? 'Active' : 'Inactive'}.`,
+          'success'
+        );
+      } else {
+        this.alertService.showAlert(
+          'Warning',
+          'Status update returned no data. Please refresh the page.',
+          'warning'
+        );
+      }
+    } catch (err: any) {
+      console.error('Error updating status:', err);
       this.alertService.showAlert(
-        'Success',
-        `Location status updated to ${newActive ? 'Active' : 'Inactive'}.`,
-        'success'
+        'Error',
+        err?.message || 'Failed to update location status',
+        'error'
       );
-    } catch (err) {
-      console.error(err);
     }
   }
 
@@ -95,6 +108,13 @@ export class LocationDetailComponent implements OnInit {
     })
 
 
+  }
+
+  stripHtml(html: string | null | undefined): string {
+    if (!html) return '—';
+    const tmp = document.createElement('DIV');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '—';
   }
 }
 

@@ -6,10 +6,11 @@ import { AlertService } from '../../../../services/alert.service';
 import { AuthService } from '../../../../services/auth.service';
 import { LocationService } from '../../../../services/location.service';
 import { ArtistService } from '../../../../services/artist.service';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-location-create',
-  imports: [CommonModule, FormsModule, NgClass],
+  imports: [CommonModule, FormsModule, NgClass, QuillModule],
   templateUrl: './location-create.component.html',
   standalone: true,
 })
@@ -87,6 +88,20 @@ export class LocationCreateComponent implements OnInit {
   isLoadingImages: boolean = false;
   isDragging: boolean = false;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  // Quill editor configuration
+  quillConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'header': [1, 2, 3, false] }],
+      ['link'],
+      ['clean']
+    ],
+    clipboard: {
+      matchVisual: false
+    }
+  };
 
   async getSysAmenity() {
     try {
@@ -300,7 +315,7 @@ export class LocationCreateComponent implements OnInit {
       // Prefill facility selections and options
       this.selectedAmenities = (loc.amenities || []).map((a:any)=> ({ id: a.id_amenity || a.id, name: a.name }));
       this.selectedSpecifications = (loc.specs || []).map((s:any)=> ({ id: s.id_specs || s.id, name: s.name }));
-      this.selectedTypes = (loc.types || []).map((t:any)=> ({ id: t.id_type || t.id, name: t.name }));
+      this.selectedTypes = (loc.types || []).map((t:any)=> ({ id: t.id_location_type || t.id, name: t.name }));
 
       // Remove already selected from available pools
       const amenityIds = new Set(this.selectedAmenities.map((x:any)=> Number(x.id)));
@@ -475,7 +490,7 @@ addType(): void {
 
     let arr = {
       id_location: this.catchID,
-      id_type: typeIdNum,
+      id_location_type: typeIdNum,
       created_by: this.loggedUsers,
     };
 

@@ -66,22 +66,22 @@
           </div>
           <div class="mt-4">
             <div class="text-gray-500 text-sm mb-1">Description for visitor</div>
-            <div class="text-gray-900">{{ location.description || '—' }}</div>
+            <div class="text-gray-900 prose prose-sm max-w-none" [innerHTML]="location.description || '—'"></div>
           </div>
 
           <div class="mt-4">
             <div class="text-gray-500 text-sm mb-1">Comment venir</div>
-            <div class="text-gray-900">{{ location.public_description || '—' }}</div>
+            <div class="text-gray-900 prose prose-sm max-w-none" [innerHTML]="location.public_description || '—'"></div>
           </div>
 
           <div class="mt-4">
             <div class="text-gray-500 text-sm mb-1">Restricted Description</div>
-            <div class="text-gray-900">{{ location.restricted_description || '—' }}</div>
+            <div class="text-gray-900 prose prose-sm max-w-none" [innerHTML]="location.restricted_description || '—'"></div>
           </div>
 
           <div class="mt-4">
             <div class="text-gray-500 text-sm mb-1">Access Information</div>
-            <div class="text-gray-900">{{ location.public || '—' }}</div>
+            <div class="text-gray-900 prose prose-sm max-w-none" [innerHTML]="location.public || '—'"></div>
           </div>
 
         </div>

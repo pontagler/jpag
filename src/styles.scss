@@ -48,3 +48,36 @@ app-footer {
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* Quill Editor Styles */
+@import 'quill/dist/quill.core.css';
+@import 'quill/dist/quill.snow.css';
+
+/* Custom Quill styling */
+.ql-container {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+}
+
+.ql-editor {
+  min-height: 120px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.ql-toolbar {
+  background-color: #f9fafb;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+

@@ -84,7 +84,12 @@ export class ArtistDetailComponent implements OnInit {
   updateAwardBtn:boolean = true;
   // Profile image upload state
   isUploadingProfile: boolean = false;
-
+  performance_type:any = [];
+  media_video:any = [];
+  media_cd:any = [];
+  media:any = [];
+  education:any = [];
+  awards:any = [];
   /**
    * Sets the active tab for navigation
    * @param tab - Tab identifier to activate
@@ -119,15 +124,32 @@ export class ArtistDetailComponent implements OnInit {
       // Validate artist ID exists
       if (this.artistID) {
         // Fetch artist profile using service
-        const profile = await this.artistService.getArtistProfile_v1(this.artistID);
-        this.artistProfile = profile[0];
-        this.instruments = profile[0].instruments;
+        const profile = await this.artistService.getArtistProfile_v3(this.artistID);
+        console.log('------------>:', profile);
+        // Check if profile data exists
+        if (!profile || profile.length === 0) {
+          this.error = 'Artist profile not found';
+          this.loading = false;
+          return;
+        }
+        
+        this.artistProfile = profile.artist;
+        this.education = profile.education || [];
+        this.awards = profile.awards || [];
+        this.instruments = profile?.instruments || [];
         this.selectedInstArray = this.instruments;
-        this.featureArtist = profile[0].is_featured;
-        this.activeArtist = profile[0].status;
+        this.featureArtist = profile.artist?.is_featured || false;
+        this.activeArtist = profile.artist?.is_active || false;
+        this.performance_type = profile?.performance_type || [];
+        this.media = profile?.media || [];
+        this.media_video = this.media.filter((item: { id_media: any; }) => item.id_media !== 2);
+        this.media_cd = this.media.filter((item: { id_media: any; }) => item.id_media !== 1);
 
-        console.log('Artist Profile loaded:', this.instruments);
-        console.log('Sample instrument structure:', this.instruments[0]);
+
+
+       
+        console.log('Artist Profile loaded:', this.artistProfile);
+        console.log('Instruments:', this.instruments);
         this.loading = false;
         // Load requirement section data
         await this.loadArtistRequirement();
@@ -173,8 +195,8 @@ export class ArtistDetailComponent implements OnInit {
       this.timeoffEntries = (data || []).map((row: any) => ({
         id: row.id,
         startDate: row.start_date,
-        endDate: row.end_data,
-        days: this.calculateInclusiveDays(row.start_date, row.end_data),
+        endDate: row.end_date,
+        days: this.calculateInclusiveDays(row.start_date, row.end_date),
         note: row.notes || ''
       }));
     } catch (e) {
@@ -205,7 +227,7 @@ export class ArtistDetailComponent implements OnInit {
         await this.artistService.editArtistRequirement({
           ...payload,
           updated_by: this.loggedUser,
-          last_updated_on: new Date().toISOString()
+          last_updated: new Date().toISOString()
         }, existing.id);
       }
 
@@ -268,7 +290,7 @@ export class ArtistDetailComponent implements OnInit {
     const payload: any = {
       id_artist: this.artistID,
       start_date: this.startDate,
-      end_data: this.endDate,
+      end_date: this.endDate,
       notes: this.note?.trim() || null,
       created_by: this.loggedUser
     };
@@ -291,10 +313,10 @@ export class ArtistDetailComponent implements OnInit {
     const payload: any = {
       id_artist: this.artistID,
       start_date: this.startDate,
-      end_data: this.endDate,
+      end_date: this.endDate,
       notes: this.note?.trim() || null,
       updated_by: this.loggedUser,
-      last_updated_on: new Date().toISOString()
+      last_updated: new Date().toISOString()
     };
     try {
       await this.artistService.editArtistTimeOff(payload, target.id);
@@ -352,7 +374,32 @@ export class ArtistDetailComponent implements OnInit {
    * @param id - Target ID for navigation
    */
   goTo(id: any): void {
-    // Implementation would go here
+  
+    
+  }
+
+  goToURL(id: any): void {
+    if (!id || typeof id !== 'string') {
+      console.warn('Invalid URL provided:', id);
+      return;
+    }
+  
+    let url = id.trim();
+    try {
+      // Try to parse as URL (handles most cases)
+      const urlObj = new URL(url);
+      url = urlObj.toString();
+    } catch {
+      // If it fails, assume it's a domain and prepend https://
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+    }
+  
+    const newWindow = window.open(url, '_blank');
+    if (!newWindow) {
+      alert('Popup blocked. Please allow popups for this site.');
+    }
   }
 
   /**
@@ -368,19 +415,26 @@ export class ArtistDetailComponent implements OnInit {
   updateSystemFunction(): void {
     // Prepare system update payload
     let arr = {
-      status: this.activeArtist == true ? 1 : 0,
-      is_featured: this.featureArtist,
-      last_updated: new Date(),
-      last_updated_by: this.loggedUser
+      is_active: this.activeArtist ? true : false,
+      is_featured: this.featureArtist ? true : false,
+      last_update: new Date(),
+      updated_by: this.loggedUser
     };
+
+    console.log('Updating system settings:', arr);
 
     try {
       // Call service to update artist status
-      const datax = this.artistService.updateArtistStatus(arr, this.artistID);
-      console.log(datax);
-      this.changeSystem = true; // Exit edit mode
+      this.artistService.updateArtistStatus(arr, this.artistID).then(() => {
+        this.alertService.showAlert('Success', 'System settings updated successfully', 'success');
+        this.changeSystem = true; // Exit edit mode
+      }).catch((error) => {
+        console.error('Error updating system settings:', error);
+        this.alertService.showAlert('Error', 'Failed to update system settings', 'error');
+      });
     } catch (error) {
-      console.log(error);
+      console.error('Error updating system settings:', error);
+      this.alertService.showAlert('Error', 'Failed to update system settings', 'error');
     }
   }
 
@@ -400,7 +454,7 @@ export class ArtistDetailComponent implements OnInit {
       fname: this.artistProfile.fname,
       lname: this.artistProfile.lname,
       phone: this.artistProfile.phone,
-      tagline: this.artistProfile.tagline,
+      teaser: this.artistProfile.tagline,
       website: this.artistProfile.website,
       city: this.artistProfile.city,
       proviance: this.artistProfile.proviance,
@@ -408,8 +462,8 @@ export class ArtistDetailComponent implements OnInit {
       photo: this.artistProfile.photo,
       short_bio: this.artistProfile.short_bio,
       long_bio: this.artistProfile.long_bio,
-      last_updated: new Date(),
-      last_updated_by: this.loggedUser
+      last_update: new Date(),
+      updated_by: this.loggedUser
     };
 
     try {
@@ -479,11 +533,12 @@ export class ArtistDetailComponent implements OnInit {
 
   // Get instruments for artist update
   getInstruments() {
+   
     try {
       this.artistService.getInstruments().subscribe({
         next: (instruments) => {
           this.allInstruments = instruments;
-          console.log('Instruments loaded:', this.allInstruments);
+        //  console.log('Instruments loaded:', this.allInstruments);
           this.getUniquePerfromance();
         },
         error: (error) => {
@@ -559,7 +614,7 @@ export class ArtistDetailComponent implements OnInit {
   deleteMediaVideo(id:any){
     try{
       this.artistService.deleteArtistMedia(id).then(()=>{
-        this.artistProfile.media_video = this.artistProfile.media_video.filter((item: { id: any; }) => item.id !== id);
+        this.media_video = this.media_video.filter((item: { id: any; }) => item.id !== id);
       
       })
     }catch(error:any){
@@ -571,8 +626,8 @@ export class ArtistDetailComponent implements OnInit {
   deleteMediacd(id:any){
     try{
       this.artistService.deleteArtistMedia(id).then(()=>{
-        this.artistProfile.media_cd = this.artistProfile.media_cd.filter((item: { id: any; }) => item.id !== id);
-      
+        this.media_cd = this.media_cd.filter((item: { id: any; }) => item.id !== id);
+
       })
     }catch(error:any){
       this.alertService.showAlert('Internal Error', error.message, 'error');
@@ -597,14 +652,17 @@ export class ArtistDetailComponent implements OnInit {
 
 
     getUniquePerfromance() {
+      console.log('----1/1 getUniquePerfromance--------->:', this.artistID);
     try {
-      this.artistService.getUniquePerfromance(this.artistID).subscribe({
+      console.log('---1/2 CALLING SERVICE getUniquePerfromance_v1--------->:');
+      this.artistService.getUniquePerfromance_v1(this.artistID).subscribe({
         next: (res) => {
+       
           this.uniquePerforamnceArr = res;
-          console.log('Instruments loaded:', this.allInstruments);
+          console.log('1/4 RECEIVED DATA FROM SERVICE getUniquePerfromance_v1:', res);
         },
         error: (error:any) => {
-          console.error('Error loading instruments:', error);
+          console.log('1/5 RECEIVED ERROR FROM SERVICE getUniquePerfromance_v1:', error);
           this.alertService.showAlert('Internal Error', error.message, 'error');
         }
       });
@@ -618,9 +676,15 @@ export class ArtistDetailComponent implements OnInit {
 
 
   deletePerforamcne(id:any){
+    let param  = { 
+      id_artist: this.artistID,
+      id_performance: id,
+    }
      try{
-      this.artistService.deleteArtistPerfromance(id).then(()=>{
-        this.artistProfile.performance_type = this.artistProfile.performance_type.filter((item: { id_ap: any; }) => item.id_ap !== id);
+      this.artistService.deleteArtistPerfromance_v1(param).then(()=>{
+        console.log('---deleteArtistPerfromance--------->:', param);
+
+        this.performance_type = this.performance_type.filter((item: { id: any; }) => item.id !== id);
 
         this.getUniquePerfromance();
       
@@ -690,7 +754,7 @@ EditNewEduInfo(x:any){
   delNewEduInfo(id:any){
      try{
       this.artistService.delNewEduInfo(id).then(()=>{
-        this.artistProfile.education = this.artistProfile.education.filter((item: { id: any; }) => item.id !== id);
+        this.education = this.education.filter((item: { id: any; }) => item.id !== id);
         this.alertService.showAlert('Successful', 'Education is deleted', 'success');
          this.updateDetailBtn = true;
       
@@ -725,7 +789,7 @@ submitEducation(){
     school: this.newEducation.school,
     year: this.newEducation.year,
     created_by: this.loggedUser,
-    created_on: new Date(),
+    created_on: new Date().toISOString(),
     last_updated: new Date(),
     last_updated_by: this.loggedUser
   }
@@ -755,7 +819,7 @@ clearForm(){
 delNewAwardInfo(id:any){
  try{
       this.artistService.delNewAwaInfo(id).then(()=>{
-        this.artistProfile.awards = this.artistProfile.awards.filter((item: { id: any; }) => item.id !== id);
+        this.awards = this.awards.filter((item: { id: any; }) => item.id !== id);
         this.alertService.showAlert('Successful', 'Award is deleted', 'success');
          this.updateAwardBtn = true;
       
@@ -834,8 +898,8 @@ submitMediaVideo(arr:any){
     url: arr.url,
     created_by: this.loggedUser,
     created_on: new Date(),
-    last_updated: new Date(),
-    last_updated_by: this.loggedUser
+    last_update: new Date(),
+    updated_by: this.loggedUser
   }
 
   try{
@@ -907,8 +971,8 @@ let dataArr = {
     url: arr.url,
     created_by: this.loggedUser,
     created_on: new Date(),
-    last_updated: new Date(),
-    last_updated_by: this.loggedUser
+    last_update: new Date(),
+    updated_by: this.loggedUser
   }
 
   try{

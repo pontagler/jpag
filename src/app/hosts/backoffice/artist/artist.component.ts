@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, Pipe, PipeTransform } from '@angular/core';
+import { Component, effect, OnInit, Pipe, PipeTransform, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { ArtistService } from '../../../services/artist.service';
 import { AlertService } from '../../../services/alert.service';
@@ -13,7 +13,8 @@ export class ArtistComponent implements OnInit {
   constructor(
     private router: Router, 
     private artistService: ArtistService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private cdr: ChangeDetectorRef
   ) {
     effect(() => {
       this.profileID = this.artistService.getArtistProfileID();
@@ -31,23 +32,12 @@ export class ArtistComponent implements OnInit {
   profileID:any;
   nameQuery: string = '';
   statusFilter: 'All' | 'Active' | 'Inactive' = 'All';
-  cityFilter: 'All' | string = 'All';
   upcomingFilter: 'All' | 'Yes' | 'No' = 'All';
 
   // Sorting
   sortKey: keyof Artist = 'createdOn';
   sortDirection: 'asc' | 'desc' = 'desc';
 
-
-  get uniqueCities(): string[] {
-    const cities = new Set<string>();
-    for (const artist of this.artists) {
-      if (artist.city && artist.city.trim().length > 0) {
-        cities.add(artist.city);
-      }
-    }
-    return Array.from(cities).sort((a, b) => a.localeCompare(b));
-  }
 
   get displayedArtists(): Artist[] {
     // Filter
@@ -57,15 +47,14 @@ export class ArtistComponent implements OnInit {
         : true;
       const matchesStatus =
         this.statusFilter === 'All' ? true : a.status === this.statusFilter;
-      const matchesCity =
-        this.cityFilter === 'All' ? true : a.city === this.cityFilter;
       const matchesUpcoming =
         this.upcomingFilter === 'All'
           ? true
           : this.upcomingFilter === 'Yes'
           ? a.upcomingEvents > 0
           : a.upcomingEvents === 0;
-      return matchesName && matchesStatus && matchesCity && matchesUpcoming;
+      
+      return matchesName && matchesStatus && matchesUpcoming;
     });
 
     // Sort
@@ -117,27 +106,26 @@ artists: Artist[] = [] ;
     try {
       const res = await this.artistService.getAllArtists();
       this.artists = (res || []).map((row: any) => {
-        const firstName = row.fname || row.first_name || '';
-        const lastName = row.lname || row.last_name || '';
-        const fullName = row.name || `${firstName} ${lastName}`.trim();
-
-        const createdOnRaw = row.createdon ?? row.created_on ?? row.created_at ?? null;
-        const createdOnDate = createdOnRaw ? new Date(createdOnRaw) : undefined as unknown as Date;
-
+        // Map from vw_get_all_artists view columns
+        const createdOnDate = row.created_on ? new Date(row.created_on) : undefined as unknown as Date;
+        
         return {
-          id: row.id,
-          name: fullName,
+          id: row.artist_id,
+          name: row.artist_name ?? '',
           phone: row.phone ?? '',
-          email: row.email ?? '',
-          city: row.city ?? '',
-          country: row.country ?? '',
-          isFeatured: (row.isFeatured ?? row.is_featured ?? false) as boolean,
-          upcomingEvents: (row.upcomingEvents ?? row.upcoming_events ?? 0) as number,
-          totalEvents: (row.totalEvents ?? row.total_events ?? 0) as number,
-          status: row.status ?? (row.is_active === false ? 'Inactive' : 'Active'),
+          email: '',
+          city: '',
+          country: '',
+          photo: row.photo ?? '',
+          isFeatured: (row.is_featured ?? false) as boolean,
+          upcomingEvents: parseInt(row.upcoming_events ?? 0, 10) as number,
+          totalEvents: parseInt(row.total_events ?? 0, 10) as number,
+          status: row.status === true ? 'Active' : 'Inactive',
           createdOn: createdOnDate,
         } as Artist;
       });
+      // Trigger change detection
+      this.cdr.detectChanges();
     } catch (error:any) {
       this.alertService.showAlert('Internal Error', error.message, 'error');
     }
@@ -158,6 +146,7 @@ export interface Artist {
   email: string;
   city: string;
   country: string;
+  photo: string;
   isFeatured: boolean;
   upcomingEvents: number;
   totalEvents: number;
@@ -170,9 +159,10 @@ export interface Artist {
   name: 'truncate'
 })
 export class TruncatePipe implements PipeTransform {
-  transform(value: string, length: number = 8): string {
+  transform(value: any, length: number = 8): string {
     if (!value) return '';
-    return value.substring(0, length);
+    const strValue = String(value);
+    return strValue.substring(0, length);
   }
 
 

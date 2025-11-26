@@ -33,7 +33,7 @@ constructor(private router: Router,
 
 
   getArtistProfile() {
-  this.artistService.getArtistFullProfile(this.artistProfileID).then(full => {
+  this.artistService.getArtistProfile_v2(this.artistProfileID).then(full => {
     const raw = full || {};
     const artist = raw.artist || {};
 

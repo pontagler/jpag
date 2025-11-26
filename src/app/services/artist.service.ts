@@ -1,6 +1,6 @@
 import { Injectable, signal, effect } from '@angular/core';
 import { supabase, supabase1 } from '../core/supabase';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, from, map, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from './auth.service';
 
@@ -65,6 +65,33 @@ export class ArtistService {
     const { data, error } = await supabase.rpc('get_artist_profile_v1', { artist_id: artistId });
 
     if (error) throw error;
+    return data;
+  }
+
+  async getArtistProfile_v2(artistId: string): Promise<any> {
+    console.log('Fetching artist profile for ID:', artistId);
+    const { data, error } = await supabase.rpc('get_artist_full_profile_v2', { artist_id: artistId });
+
+    if (error) {
+      console.error('Error fetching artist profile:', error);
+      throw error;
+    }
+    
+    console.log('Artist profile data received:', data);
+    return data;
+  }
+
+
+  async getArtistProfile_v3(artistId: string): Promise<any> {
+    console.log('Fetching artist profile for ID:', artistId);
+    const { data, error } = await supabase.rpc('get_artist_full_profile_v1', { artist_id: artistId });
+
+    if (error) {
+      console.error('Error fetching artist profile:', error);
+      throw error;
+    }
+    
+    console.log('Artist profile data received:', data);
     return data;
   }
 
@@ -509,13 +536,13 @@ async createSingleArtist_step01(arrData: any) {
   const profileData = {
     id: idProfile,
     id_user: signupData.data.user.id, // From created Supabase user
-    id_role: 'c9b3a78d-a288-42ce-9a88-a1d9a11bef08',
+    id_role: 3,
     first_name: arrData.personal.firstName,
     last_name: arrData.personal.lastName,
     email: arrData.personal.email, // fixed typo
     phone: arrData.personal.phone,
     city: arrData.personal.city,
-    proviance: arrData.personal.province,
+    // proviance: arrData.personal.province,
     country: arrData.personal.country,
     created_by: arrData.id_auth
   };
@@ -533,18 +560,18 @@ async createSingleArtist_step01(arrData: any) {
 
   // Step 3: Create artist
   const artistData = {
-    id: id_artist,
-    id_profile: profileData.id, // fixed to use profile ID only
+    //id: id_artist,
+    id_profile: profileData.id_user, // fixed to use profile ID only
     fname: arrData.personal.firstName,
     lname: arrData.personal.lastName,
-    tagline: arrData.personal.tagline,
+    teaser: arrData.personal.tagline,
     short_bio: arrData.personal.shortBio,
     long_bio: arrData.personal.longBio,
     email: arrData.personal.email,
     phone: arrData.personal.phone,
     website: arrData.personal.website,
     city: arrData.personal.city,
-    proviance: arrData.personal.province,
+    //proviance: arrData.personal.province,
     country: arrData.personal.country,
     photo: arrData.personal.profilePic,
     created_by: arrData.id_auth
@@ -565,15 +592,15 @@ async createSingleArtist_step01(arrData: any) {
 async createProfile(profileArr:any){
 
   let profileData = {
-    id: profileArr.id,
+//    id: profileArr.id,
     id_user: profileArr.id_user,
-    id_role: profileArr.id_role,
+    id_role: 3,
     first_name: profileArr.first_name,
     last_name: profileArr.last_name,
     email: profileArr.email,
     phone: profileArr.phone,
     city: profileArr.city,
-    proviance: profileArr.proviance,
+    //proviance: profileArr.proviance,
     country: profileArr.country,
     created_by: profileArr.created_by
   }
@@ -613,7 +640,7 @@ async createArtist(arr:any){
 
 //Get all the artists
 async getAllArtists(){
-  const {data, error} = await supabase.from('vw_get_all_artists').select()
+  const {data, error} = await supabase1.from('vw_get_all_artists').select()
   if(error) throw error
   return data;
 }
@@ -762,11 +789,12 @@ async deleteArtistMedia(id:any){
 
 
 
-  getUniquePerfromance(id_artist:any): Observable<any[]> {
+  getUniquePerfromance(artist_id:any): Observable<any[]> {
     return new Observable(observer => {
       supabase.rpc('get_unassigned_performance_types', {
-      artist_id: id_artist
+      artist_id: artist_id
     })        .then(({ data, error }) => {
+      console.log('----getUniquePerfromance--------->:', data, error);
           if (error) {
             observer.error(error);
           } else {
@@ -776,6 +804,23 @@ async deleteArtistMedia(id:any){
         });
     });
   }
+
+  getUniquePerfromance_v1(artist_id: any): Observable<any[]> {
+    console.log('----1/3 RECEIVED artist_id--------->:', artist_id);
+  
+    return from(
+      supabase.rpc('get_unassigned_performance_types_v1', {
+        artist_id: Number(artist_id)
+      })
+    ).pipe(
+      map(res => {
+        console.log('----getUniquePerfromance_v1--------->:', res.data);
+        if (res.error) throw res.error;
+        return res.data;
+      })
+    );
+  }
+  
 
 
   async getAllPerfromance(){
@@ -787,10 +832,21 @@ async deleteArtistMedia(id:any){
 
 
   async deleteArtistPerfromance(id:any){
-    
+    console.log('---deleteArtistPerfromance--------->:', id);
   const {data, error} = await supabase.from('artist_performance').delete().eq('id', id)
+  console.log('---deleteArtistPerfromance--------->:', data);
   if(error) throw error
+  console.log('---error--------->:', error);
   return data
+}
+
+async deleteArtistPerfromance_v1(param:any){
+  console.log('---deleteArtistPerfromance--------->:', param);
+const {data, error} = await supabase.from('artist_performance').delete().eq('id_artist', param.id_artist).eq('id_performance', param.id_performance)
+console.log('---deleteArtistPerfromance--------->:', data);
+if(error) throw error
+console.log('---error--------->:', error);
+return data
 }
 
 

@@ -6,7 +6,7 @@
           { id: 'details', label: 'Details' },
           { id: 'portfolio', label: 'Portfolio' },
           { id: 'requirement', label: 'Requirement' },
-          { id: 'timeoff', label: 'Time Off' },
+          { id: 'timeoff', label: 'Availability' },
           { id: 'education', label: 'Education & Awards' },
           { id: 'system', label: 'System' },
           { id: 'account', label: 'Account' }
@@ -96,7 +96,7 @@
 
       <div class="bg-gray-50 p-5 rounded-lg">
         <div class="mb-4">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Tagline</label>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Teaser</label>
           <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.tagline || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.tagline"
             class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
@@ -249,7 +249,7 @@
           <i class="fa-solid fa-calendar-xmark"></i>
         </span>
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">Time Off</h2>
+          <h2 class="text-lg font-semibold text-gray-900">Availability </h2>
           <p class="text-sm text-gray-500">Manage artist unavailability</p>
         </div>
       </div>
@@ -329,7 +329,7 @@
               </td>
             </tr>
             <tr *ngIf="timeoffEntries.length === 0">
-              <td colspan="5" class="px-4 py-6 text-center text-gray-500">No time off added yet.</td>
+              <td colspan="5" class="px-4 py-6 text-center text-gray-500">No Availability added yet.</td>
             </tr>
           </tbody>
         </table>
@@ -479,10 +479,10 @@
       <div *ngIf="updateDetailBtn" class="flex flex-wrap gap-2 mb-4">
         @for (x of instruments; track x) {
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full shadow-sm" [ngClass]="[
-            'bg-' + x.inst_color + '-100',
-            'text-' + x.inst_color + '-800'
+            'bg-' + x.color + '-100',
+            'text-' + x.color + '-800'
           ]">
-          {{ x.instrument }}
+          {{ x.instrument_name | titlecase }}
         </span>
         }
       </div>
@@ -504,10 +504,10 @@
         <div class="flex flex-wrap gap-2">
           @for (x of selectedInstArray; track x) {
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full shadow-sm" [ngClass]="[
-              'bg-' + x.inst_color + '-100',
-              'text-' + x.inst_color + '-800'
+              'bg-' + x.color + '-100',
+              'text-' + x.color + '-800'
             ]">
-            <span>{{ x.instrument }}</span>
+            <span>{{ x.instrument_name }}</span>
             <span (click)="delInstruments(x.id_instrument)" class="cursor-pointer">×</span>
           </span>
           }
@@ -528,9 +528,9 @@
       </div>
       
       <div class="bg-gray-50 p-6 rounded-lg">
-        @if (artistProfile.media_video && artistProfile.media_video.length > 0) {
+        @if (media_video && media_video.length > 0) {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (item of artistProfile.media_video; track $index) {
+            @for (item of media_video; track $index) {
             <div class="relative group">
               <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
                 <img [src]="item.image" [alt]="item.title" class="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -544,7 +544,7 @@
                   </button>
                 } @else {
                   <button class="mt-2 text-xs bg-black hover:bg-gray-800 text-white px-3 py-1 rounded-lg"
-                    (click)="goTo(item.url)">
+                    (click)="goToURL(item.url)">
                     Visit
                   </button>
                 }
@@ -556,11 +556,7 @@
           <div class="text-center py-8 text-gray-500">
             <i class="fas fa-video text-4xl mb-4"></i>
             <p class="text-lg">No video media added yet.</p>
-            <button 
-              (click)="addVideoMedia()" 
-              class="mt-4 text-sm px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
-              Add First Video
-            </button>
+           
           </div>
         }
       </div>
@@ -579,9 +575,9 @@
       </div>
       
       <div class="bg-gray-50 p-6 rounded-lg">
-        @if (artistProfile.media_cd && artistProfile.media_cd.length > 0) {
+        @if (media_cd && media_cd.length > 0) {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (item of artistProfile.media_cd; track $index) {
+            @for (item of media_cd; track $index) {
             <div class="relative group">
               <div class="overflow-hidden rounded-lg ring-1 ring-gray-200">
                 <img [src]="item.image" [alt]="item.title" class="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -596,7 +592,7 @@
                   </button>
                 } @else {
                   <button class="mt-2 text-xs bg-black hover:bg-gray-800 text-white px-3 py-1 rounded-lg"
-                    (click)="goTo(item.url)">
+                    (click)="goToURL(item.url)">
                     Visit
                   </button>
                 }
@@ -619,9 +615,9 @@
       </div>
       
       <div *ngIf="updateDetailBtn" class="flex flex-wrap gap-2 mb-4">
-        @for (x of artistProfile.performance_type; track x) {
+        @for (x of performance_type; track x) {
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
-          {{ x.performance_type }}
+          {{ x.name }}
         </span>
         }
       </div>
@@ -641,10 +637,10 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-          @for (x of artistProfile.performance_type; track x) {
+          @for (x of performance_type; track x) {
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
-            <span>{{ x.performance_type }}</span>
-            <span (click)="deletePerforamcne(x.id_ap)" class="cursor-pointer">×</span>
+            <span>{{ x.name }}</span>
+            <span (click)="deletePerforamcne(x.id)" class="cursor-pointer">×</span>
           </span>
           }
         </div>
@@ -696,7 +692,7 @@
 
     <!-- Education List -->
     <div class="space-y-6 mb-10">
-      @for(x of artistProfile.education; track x){
+      @for(x of education; track x){
       <div class="bg-white rounded-xl p-6 ring-1 ring-gray-100">
         <div class="grid grid-cols-1 gap-4">
           <!-- School Field -->
@@ -807,7 +803,7 @@
 
     <!-- Awards List -->
     <div class="space-y-6">
-      @for(x of artistProfile.awards; track x){
+      @for(x of awards; track x){
       <div class="bg-white rounded-xl p-6 ring-1 ring-gray-100">
         <div class="grid grid-cols-1 gap-4">
           <!-- Award Name Field -->
@@ -915,10 +911,10 @@
       <div class="flex items-center mb-6">
         <label class="mr-4 text-xs font-medium text-gray-600 uppercase tracking-wide min-w-max">Profile Active</label>
         <div class="flex items-center">
-          <input type="checkbox" [(ngModel)]="activeArtist" [checked]="artistProfile.status == 1"
+          <input type="checkbox" [(ngModel)]="activeArtist"
             [disabled]="changeSystem" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500" />
           <span class="ml-2 text-gray-600">
-            {{ activeArtist == 1 ? "Active" : "Inactive" }}
+            {{ activeArtist ? "Active" : "Inactive" }}
           </span>
         </div>
       </div>
@@ -926,7 +922,7 @@
       <div class="flex items-center mb-6">
         <label class="mr-4 text-xs font-medium text-gray-600 uppercase tracking-wide min-w-max">Featured</label>
         <div class="flex items-center">
-          <input type="checkbox" [(ngModel)]="featureArtist" [checked]="artistProfile.is_featured || false"
+          <input type="checkbox" [(ngModel)]="featureArtist"
             [disabled]="changeSystem" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500" />
           <span class="ml-2 text-gray-600">
             {{ featureArtist ? "True" : "False" }}

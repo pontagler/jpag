@@ -1020,5 +1020,55 @@ this.authService.magicLink(this.artistProfile.email).then(()=>{
   }
 }
 
+/**
+ * Deletes the artist profile and associated auth user
+ * Requires confirmation before proceeding with SweetAlert2
+ */
+async deleteArtistProfile(): Promise<void> {
+  if (!this.artistID || !this.artistProfile) {
+    this.alertService.showAlert('Error', 'Artist information not available', 'error');
+    return;
+  }
+
+  // SweetAlert2 confirmation dialog
+  const artistName = `${this.artistProfile.fname} ${this.artistProfile.lname}`;
+  const confirmed = await this.alertService.confirmDelete(
+    'Delete Artist?',
+    `Are you sure you want to permanently delete ${artistName}? This action cannot be undone and will remove all associated data.`,
+    'Yes, delete permanently'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    // Get the user ID for auth deletion
+    const userId = this.artistProfile.id_user || this.artistProfile.id_profile;
+    
+    if (!userId) {
+      this.alertService.showAlert('Error', 'User ID not found', 'error');
+      return;
+    }
+
+    // First delete the artist using the PostgreSQL function
+    await this.artistService.deleteArtist(this.artistID);
+    
+    // Then delete from auth.users
+    await this.artistService.deleteAuthUser(userId);
+    
+    this.alertService.showAlert('Success', 'Artist deleted successfully', 'success');
+    
+    // Navigate back to artist list after a short delay
+    setTimeout(() => {
+      window.history.back();
+    }, 1500);
+    
+  } catch (error: any) {
+    console.error('Error deleting artist:', error);
+    this.alertService.showAlert('Error', error.message || 'Failed to delete artist', 'error');
+  }
+}
+
 
 }

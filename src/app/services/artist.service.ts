@@ -1153,4 +1153,30 @@ async editArtistTimeOff(arr:any, id:any){
     if (error) throw error;
     return Array.isArray(data) ? data : [];
   }
+
+  /**
+   * Deletes an artist using the PostgreSQL function pont_delete_artist
+   * @param artistId - The artist ID to delete
+   */
+  async deleteArtist(artistId: string): Promise<any> {
+    const { data, error } = await supabase.rpc('pont_delete_artist', { 
+      artist_id: parseInt(artistId) 
+    });
+
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Deletes a user from Supabase auth.users
+   * @param userId - The user ID (from id_user or id_profile)
+   * Note: Uses service role key (supabase1) for admin privileges
+   */
+  async deleteAuthUser(userId: string): Promise<any> {
+    // Using the service role client (supabase1) with admin privileges
+    const { data, error } = await supabase1.auth.admin.deleteUser(userId);
+
+    if (error) throw error;
+    return data;
+  }
 }

@@ -32,5 +32,31 @@ dialogAlert(
     });
   }
 
+  /**
+   * Shows a confirmation dialog for dangerous actions like delete
+   * @param title - Dialog title
+   * @param text - Dialog message
+   * @param confirmButtonText - Text for confirm button (default: 'Yes, delete it!')
+   * @returns Promise<boolean> - true if confirmed, false if cancelled
+   */
+  async confirmDelete(
+    title: string,
+    text: string,
+    confirmButtonText: string = 'Yes, delete it!'
+  ): Promise<boolean> {
+    const result = await Swal.fire({
+      title: title,
+      text: text,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: 'Cancel',
+      reverseButtons: true
+    });
+    return result.isConfirmed;
+  }
+
 
 }

@@ -109,7 +109,7 @@
   <div class="max-w-7xl mx-auto w px-2 py-2 text-right mt-10">
     <a href="/artists" class="inline-flex items-center text-pont-green hover:text-pont-green/80 transition-colors font-medium">
       <span class="mr-2">&#8592;</span>
-      Retour à l'artiste
+      Retour à la liste
     </a>
   </div>
 
@@ -222,7 +222,7 @@
         <div>
           <h3 class="text-xl font-bold text-gray-900 mb-4">Événements à venir          </h3>
           @if((artist.upcoming_event ?? []).length === 0){
-            <p class="text-sm text-gray-600">Non Événements à venir              .</p>
+            <p class="text-sm text-gray-600">Pas d’événements à venir</p>
           } @else {
           <div class="space-y-4">
             @for(e of artist.upcoming_event ?? []; track e){

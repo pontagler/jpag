@@ -223,7 +223,7 @@
         <div class="bg-gray-50 p-5 rounded-lg">
           <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Short Bio</label>
           <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900">{{ artistProfile.short_bio || "N/A" }}</div>
-          <textarea *ngIf="!updateDetailBtn" maxlength="100" rows="3" [(ngModel)]="artistProfile.short_bio"
+          <textarea *ngIf="!updateDetailBtn"  rows="3" [(ngModel)]="artistProfile.short_bio"
             class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
           </textarea>
         </div>
@@ -233,7 +233,7 @@
         <div class="bg-gray-50 p-5 rounded-lg">
           <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Long Bio</label>
           <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900">{{ artistProfile.long_bio || "N/A" }}</div>
-          <textarea *ngIf="!updateDetailBtn" maxlength="100" rows="3" [(ngModel)]="artistProfile.long_bio"
+          <textarea *ngIf="!updateDetailBtn"  rows="3" [(ngModel)]="artistProfile.long_bio"
             class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
           </textarea>
         </div>

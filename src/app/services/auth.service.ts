@@ -151,11 +151,12 @@ export class AuthService {
    * Sends confirmation email to the provided address.
    */
   async createNewUser(email: any, password: any = 'qwerty') {
+    const redirectTo = `${window.location.origin}/confirm-artist`;
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
-        emailRedirectTo: 'http://localhost:4200/confirm-artist'
+        emailRedirectTo: redirectTo
       }
     });
 
@@ -168,11 +169,12 @@ export class AuthService {
    */
   async resendConfirmation(email: any) {
     console.log(email);
+    const redirectTo = `${window.location.origin}/confirm-artist`;
     const { data, error } = await supabase.auth.resend({
       type: 'signup',
       email: email,
       options: {
-        emailRedirectTo: 'http://localhost:4200/confirm-artist'
+        emailRedirectTo: redirectTo
       }
     });
 
@@ -185,9 +187,10 @@ export class AuthService {
    */
   async magicLink(email: any) {
     console.log(email);
+    const redirectTo = `${window.location.origin}/confirm-artist`;
     const { data, error } = await supabase.auth.signInWithOtp({
       email: email,
-      options: { emailRedirectTo: 'http://localhost:4200/confirm-artist' }
+      options: { emailRedirectTo: redirectTo }
     });
 
     if (error) throw error;

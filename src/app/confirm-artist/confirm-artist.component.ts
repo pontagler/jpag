@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ArtistService } from '../services/artist.service';
+import { AuthService } from '../services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
+import { supabase } from '../core/supabase';
 
 @Component({
   selector: 'app-confirm-artist',
@@ -12,10 +14,10 @@ import { SharedModule } from '../shared/shared.module';
 })
 export class ConfirmArtistComponent implements OnInit {
   constructor(
-      private route: ActivatedRoute,
+    private route: ActivatedRoute,
     private router: Router,
     private artistService: ArtistService,
-    
+    private authService: AuthService
   ){}
 
   newPassword: string = '';
@@ -23,17 +25,40 @@ export class ConfirmArtistComponent implements OnInit {
   
   showSuccess: boolean = false;
   isSubmitting: boolean = false;
-    token: string = '';
-    showError: boolean = false;
-    errorMessage: string = '';
+  isAuthenticating: boolean = true;
+  showError: boolean = false;
+  errorMessage: string = '';
 
-  ngOnInit(): void {
-         this.token = this.route.snapshot.queryParamMap.get('token') || '';
+  async ngOnInit(): Promise<void> {
+    // Check if there's a hash in the URL (Supabase auth callback)
+    const hash = window.location.hash;
     
-    // If no token, this might be a direct access to reset page
-    if (!this.token) {
+    if (hash && hash.includes('access_token')) {
+      // Supabase will automatically handle the session via the hash
+      // Wait a moment for the session to be established
+      setTimeout(async () => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            console.log('User authenticated successfully:', user.email);
+            this.isAuthenticating = false;
+          } else {
+            this.showError = true;
+            this.errorMessage = 'Authentication failed. Please try the link again.';
+            this.isAuthenticating = false;
+          }
+        } catch (error: any) {
+          console.error('Error getting user:', error);
+          this.showError = true;
+          this.errorMessage = 'Authentication failed. Please try the link again.';
+          this.isAuthenticating = false;
+        }
+      }, 1000);
+    } else {
+      // No hash found - might be direct access or expired link
+      this.isAuthenticating = false;
       this.showError = true;
-      this.errorMessage = 'Invalid reset link. Please request a new one.';
+      this.errorMessage = 'Invalid or expired confirmation link. Please request a new one.';
     }
   }
   get isPasswordMismatch(): boolean {

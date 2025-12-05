@@ -50,10 +50,36 @@ getMenuItemClass(urlID: any) {
   }
 }
 
-logout(){
-  this.auth.signOut();
-  this.alertService.showAlert('Logged Out', 'You have been logged out successfully.', 'success');
-  this.router.navigate(['/artistspace']);
+async logout(){
+  try {
+    // Get current user info before signing out
+    const currentUser = await this.auth.getCurrentUser();
+    if (currentUser) {
+      const userInfo = await this.auth.getUserInfo(currentUser.id);
+      const rolename = userInfo?.rolename;
+      
+      // Sign out
+      await this.auth.signOut();
+      this.alertService.showAlert('Logged Out', 'You have been logged out successfully.', 'success');
+      
+      // Redirect based on user role
+      if (rolename === 'admin') {
+        this.router.navigate(['/hosts']);
+      } else {
+        this.router.navigate(['/artistspace']);
+      }
+    } else {
+      // If no user found, just sign out and redirect to artist login
+      await this.auth.signOut();
+      this.alertService.showAlert('Logged Out', 'You have been logged out successfully.', 'success');
+      this.router.navigate(['/artistspace']);
+    }
+  } catch (error) {
+    // If error occurs, still sign out and redirect to artist login as fallback
+    await this.auth.signOut();
+    this.alertService.showAlert('Logged Out', 'You have been logged out successfully.', 'success');
+    this.router.navigate(['/artistspace']);
+  }
 }
 
 

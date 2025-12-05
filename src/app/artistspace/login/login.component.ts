@@ -14,8 +14,10 @@ export class LoginComponent {
   // email: string = 'psx1ufg37i@daouse.com';
   // password: string = 'Saurabh@123';
 
-  email: string = '';
-  password: string = '';
+  email: string = 'saurtrash@gmail.com';
+  password: string = 'Public@123';
+  
+  
   // Forgot password / recovery state
   showForgot: boolean = false;
   resetEmail: string = '';
@@ -64,8 +66,8 @@ private router: Router // Inject the Router if you need to navigate after login
         console.error('Login failed', error);
         this.alertService.showAlert('Login Failed', 'Please check your credentials and try again.', 'error');
         this.loading = false;
-        this.email = 'a@a.com';
-        this.password = 'qwerty';
+        this.email = 'saurtrash@gmail.com';
+        this.password = 'Public@123';
         // Handle login error, e.g., showing an error message to the user
       });
 

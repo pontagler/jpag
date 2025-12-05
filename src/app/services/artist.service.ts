@@ -934,7 +934,8 @@ async addNewCDVideo(arr:any){
 
 async  sendPasswordResetLink(email: string): Promise<void> {
   try {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {  redirectTo: 'http://localhost:4200/reset/'
+    const redirectTo = `${window.location.origin}/reset/`;
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {  redirectTo
 })
     
     if (error) {

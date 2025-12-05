@@ -2,7 +2,20 @@
 
 <main class="flex items-center justify-center py-12 px-4 min-h-screen">
   <div class="rounded-lg text-card-foreground w-full max-w-md shadow-2xl bg-white border-0">
-    <div class="flex flex-col space-y-1.5 p-6 text-center">
+    
+    <!-- Loading State -->
+    <div *ngIf="isAuthenticating" class="flex flex-col space-y-4 p-6 text-center">
+      <div class="mx-auto w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+        <svg class="animate-spin w-8 h-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <p class="text-gray-600 text-lg">Verifying your account...</p>
+    </div>
+
+    <!-- Success State Header -->
+    <div *ngIf="!isAuthenticating && !showError" class="flex flex-col space-y-1.5 p-6 text-center">
       <div class="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-600">
           <path d="M20 6 9 17l-5-5" />
@@ -14,7 +27,8 @@
       <p class="text-gray-500">Your email is verified. Set a password to finish.</p>
     </div>
 
-    <div class="p-6 pt-0 space-y-4" *ngIf="!showSuccess">
+    <!-- Password Setup Form -->
+    <div class="p-6 pt-0 space-y-4" *ngIf="!isAuthenticating && !showSuccess && !showError">
       <form (ngSubmit)="handleReset()" #resetForm="ngForm" class="space-y-4">
         <div class="space-y-2">
           <label class="text-sm font-medium leading-none text-gray-700" for="password">New Password</label>
@@ -72,7 +86,24 @@
       </form>
     </div>
 
-    <div class="p-6 pt-0 space-y-4 text-center" *ngIf="showSuccess">
+    <!-- Error State -->
+    <div *ngIf="!isAuthenticating && showError" class="p-6 space-y-4 text-center">
+      <div class="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-red-600">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <div class="text-xl font-semibold text-gray-800">Authentication Failed</div>
+      <p class="text-gray-600">{{ errorMessage }}</p>
+      <button (click)="navigateToLogin()" class="inline-flex items-center justify-center gap-2 px-4 py-2 w-full bg-pont-green hover:bg-pont-green/90 text-white h-12 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+        Back to Login
+      </button>
+    </div>
+
+    <!-- Success State -->
+    <div class="p-6 pt-0 space-y-4 text-center" *ngIf="!isAuthenticating && showSuccess">
       <div class="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-green-600">
           <path d="M20 6 9 17l-5-5" />

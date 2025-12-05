@@ -15,19 +15,21 @@ import { ArtistService } from '../../../../services/artist.service';
   templateUrl: './create-event.component.html'
 })
 export class CreateEventComponent implements OnInit {
-  step: 1 | 2 | 3 | 4 | 5 | 6 = 1;
+  step: 1 | 2 | 4 | 5 | 6 = 1; // Step 3 removed (no event_shows table)
 
   isSaving: boolean = false;
   isSavingDetails: boolean = false;
+  isLoadingEvent: boolean = false;
+  isDeleting: boolean = false;
   uploadPreviewUrl: string | null = null;
   mainImageFile: File | null = null;
   createdEventId: number | null = null;
   mediaStep: 1 | 2 = 1;
   isEditMode: boolean = false;
 
-  sysEvents: Array<{ id: number; name: string }> = [];
-  programmes: Array<{ id: number; name: string; id_event: number }> = [];
-  editions: Array<{ id: number; name: string; year: string; id_programme: number }> = [];
+  eventDomains: Array<{ id: number; name: string }> = [];
+  editionTypes: Array<{ id: number; name: string }> = [];
+  editions: Array<{ id: number; name: string; year: string; id_edition_type: number }> = [];
   eventTypes: Array<{ id: number; name: string }> = [];
   locations: any[] = [];
   artists: any[] = [];
@@ -54,18 +56,19 @@ export class CreateEventComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.detailsForm = this.fb.group({
-      id_event: [null, Validators.required],
-      id_programme: [null, Validators.required],
+      id_event_domain: [null],
+      id_edition_type: [null],
       id_edition: [null, Validators.required],
-      id_type: [null, Validators.required],
-      id_location: [null, Validators.required],
+      id_event_type: [null, Validators.required],
       title: ['', [Validators.required, Validators.maxLength(200)]],
-      teaser: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.maxLength(500)]],
-      booking_url: ['', []],
+      teaser: ['', [Validators.maxLength(200)]],
+      long_teaser: [''],
+      description: ['', [Validators.required, Validators.maxLength(2000)]],
+      booking_url: [''],
+      credit_photo: [''],
       status: [1, Validators.required],
-      dates: this.fb.array([]),
-      shows: this.fb.array([])
+      is_active: [false],
+      dates: this.fb.array([])
     });
 
     this.mediaForm = this.fb.group({
@@ -85,15 +88,17 @@ export class CreateEventComponent implements OnInit {
       this.isEditMode = !!editingId && !Number.isNaN(editingId);
       if (this.isEditMode) this.createdEventId = editingId as number;
 
-      const [sysEvents, eventTypes, locations, artists, instruments, availArtists] = await Promise.all([
-        this.eventService.listSysEvents(),
+      const [eventDomains, editionTypes, eventTypes, locations, artists, instruments, availArtists] = await Promise.all([
+        this.eventService.listSysEventDomains(),
+        this.eventService.listSysEventEditions(),
         this.eventService.listSysEventTypes(),
         this.eventService.listAllLocations(),
         this.eventService.listAllArtists(),
         this.eventService.listAllInstruments(),
         this.eventService.getAvailableArtists()
       ]);
-      this.sysEvents = sysEvents || [];
+      this.eventDomains = eventDomains || [];
+      this.editionTypes = editionTypes || [];
       this.eventTypes = eventTypes || [];
       this.locations = locations || [];
       this.artists = artists || [];
@@ -106,68 +111,58 @@ export class CreateEventComponent implements OnInit {
       })).filter((a: any) => a.id && a.id !== '');
          console.log('availArtists-00000', this.availableArtists);
       if (this.isEditMode && this.createdEventId) {
+        this.isLoadingEvent = true;
         await this.prefillForEdit(this.createdEventId);
+        this.isLoadingEvent = false;
       }
     } catch (err: any) {
+      this.isLoadingEvent = false;
       this.alertService.showAlert('Error', err.message || 'Failed to load lookups', 'error');
     }
-    // Initialize one empty date and one empty show row
+    // Initialize one empty date row
     if (this.eventDates.length === 0) this.addDate();
-    if (this.eventShows.length === 0) this.addShow();
     if (this.artistRows.length === 0) this.addArtistRow();
     this.loggedUser =  this.artistService.getLoggedUserID();
   }
 loggedUser:any;
   // Convenience getters
   get eventDates(): FormArray { return this.detailsForm.get('dates') as FormArray; }
-  get eventShows(): FormArray { return this.detailsForm.get('shows') as FormArray; }
   get mediaItems(): FormArray { return this.mediaForm.get('media') as FormArray; }
   get instrumentMappings(): FormArray { return this.artistsForm.get('instrumentMappings') as FormArray; }
   get teaserLength(): number { return (this.detailsForm.get('teaser')?.value || '').length; }
   get descriptionLength(): number { return (this.detailsForm.get('description')?.value || '').length; }
 
-  onEventChange(): void {
-    const id_event = this.detailsForm.get('id_event')?.value as number | null;
-    this.programmes = [];
-    this.editions = [];
-    this.detailsForm.patchValue({ id_programme: null, id_edition: null });
-    if (id_event) {
-      this.eventService.listProgrammesByEvent(id_event).then(rows => this.programmes = rows || []);
-    }
+  onEventDomainChange(): void {
+    // Event domain changed - currently doesn't filter anything, but can be used for future filtering
+    const id_event_domain = this.detailsForm.get('id_event_domain')?.value as number | null;
+    // Keep edition types and editions unchanged
   }
 
-  onProgrammeChange(): void {
-    const id_programme = this.detailsForm.get('id_programme')?.value as number | null;
+  onEditionTypeChange(): void {
+    const id_edition_type = this.detailsForm.get('id_edition_type')?.value as number | null;
     this.editions = [];
     this.detailsForm.patchValue({ id_edition: null });
-    if (id_programme) {
-      this.eventService.listEditionsByProgramme(id_programme).then(rows => this.editions = rows || []);
+    if (id_edition_type) {
+      this.eventService.listEditionsByType(id_edition_type).then(rows => this.editions = rows || []);
+    } else {
+      // Load all editions if no type selected
+      this.eventService.listEditionsByType(null).then(rows => this.editions = rows || []);
     }
   }
 
   // Dates
   addDate(): void {
     this.eventDates.push(this.fb.group({
-      date: ['', Validators.required],
-      time: ['', Validators.required]
+      start_date: ['', Validators.required],
+      end_date: [''],
+      time: ['', Validators.required],
+      id_location: [null],
+      flag: ['', Validators.required]
     }));
   }
 
   removeDate(index: number): void {
     this.eventDates.removeAt(index);
-  }
-
-  // Shows
-  addShow(): void {
-    this.eventShows.push(this.fb.group({
-      title: ['', Validators.required],
-      description: ['', Validators.required],
-      time_manage: ['']
-    }));
-  }
-
-  removeShow(index: number): void {
-    this.eventShows.removeAt(index);
   }
 
   // Media
@@ -340,7 +335,7 @@ loggedUser:any;
     if (this.step === 1) {
       this.showAnILoader = true;
       // Validate Details (exclude dates/shows)
-      const controlsToCheck = ['id_event','id_programme','id_edition','id_type','id_location','title','description','status'];
+      const controlsToCheck = ['id_edition','id_event_type','title','description','status'];
       let valid = true;
       for (const key of controlsToCheck) {
         const c = this.detailsForm.get(key);
@@ -349,39 +344,43 @@ loggedUser:any;
       if (!valid) {
         this.detailsForm.markAllAsTouched();
         this.alertService.showAlert('Validation', 'Please complete required fields in Detail', 'warning');
+        this.showAnILoader = false;
         return;
       }
       // Persist details first
       try {
         this.isSavingDetails = true;
-        const user = await this.authService.getCurrentUser();
-        const id_host = user?.id as string;
         const d = this.detailsForm.value as any;
         if (!this.createdEventId) {
           const newId = await this.eventService.createEventRow({
             title: d.title,
-            teaser: d.teaser,
+            teaser: d.teaser || null,
+            long_teaser: d.long_teaser || null,
             id_edition: d.id_edition,
-            id_location: d.id_location,
-            id_type: d.id_type,
-            id_host,
+            id_event_domain: d.id_event_domain || null,
+            id_event_type: d.id_event_type,
             description: d.description,
             booking_url: d.booking_url || null,
             photo: null,
-            status: d.status || 1
+            credit_photo: d.credit_photo || null,
+            status: d.status || 2,
+            is_active: d.is_active || false
           });
           this.createdEventId = newId;
           this.showAnILoader = false;
         } else {
           await this.eventService.updateEventRow(this.createdEventId, {
             title: d.title,
-            teaser: d.teaser,
+            teaser: d.teaser || null,
+            long_teaser: d.long_teaser || null,
             id_edition: d.id_edition,
-            id_location: d.id_location,
-            id_type: d.id_type,
+            id_event_domain: d.id_event_domain || null,
+            id_event_type: d.id_event_type,
             description: d.description,
             booking_url: d.booking_url || null,
-            status: d.status || 1
+            credit_photo: d.credit_photo || null,
+            status: d.status || 1,
+            is_active: d.is_active || false
           });
         }
              this.showAnILoader = false;
@@ -398,63 +397,56 @@ loggedUser:any;
       if (this.eventDates.length === 0 || this.eventDates.invalid) {
         this.eventDates.markAllAsTouched();
         this.alertService.showAlert('Validation', 'Please add at least one date', 'warning');
+        this.showAnILoader = false;
         return;
       }
       try {
         const rows = (this.eventDates.value as Array<any>).map(x => ({
-          date: x.date,
-          time: x.time?.length === 5 ? `${x.time}:00` : x.time
+          start_date: x.start_date,
+          end_date: x.end_date || null,
+          time: x.time?.length === 5 ? `${x.time}:00` : x.time,
+          id_location: x.id_location || null,
+          flag: x.flag || null
         }));
         if (!this.createdEventId) {
           this.alertService.showAlert('Error', 'Event id missing. Complete details first.', 'error');
+          this.showAnILoader = false;
           return;
         }
         await this.eventService.replaceEventDates(this.createdEventId, rows);
         this.showAnILoader = false;
-        this.step = 3;
+        this.step = 4; // Skip step 3 (no event_shows table)
       } catch (err: any) {
         this.alertService.showAlert('Error', err.message || 'Failed to save dates', 'error');
-      }
-    } else if (this.step === 3) {
-        this.showAnILoader = true;
-      // Shows optional but if present must be valid
-      if (this.eventShows.length > 0 && this.eventShows.invalid) {
-        this.eventShows.markAllAsTouched();
-        this.alertService.showAlert('Validation', 'Please fix show entries', 'warning');
-        return;
-      }
-      try {
-        if (!this.createdEventId) {
-          this.alertService.showAlert('Error', 'Event id missing. Complete details first.', 'error');
-          return;
-        }
-        const shows = (this.eventShows.value as Array<any>).map(s => ({
-          title: s.title,
-          description: s.description,
-          time_manage: s.time_manage || null
-        }));
-        await this.eventService.replaceEventShows(this.createdEventId, shows);
-          this.showAnILoader = false;
-        this.step = 4;
-      } catch (err: any) {
-        this.alertService.showAlert('Error', err.message || 'Failed to save shows', 'error');
+        this.showAnILoader = false;
       }
     } else if (this.step === 4) {
-        this.showAnILoader = true;
+      this.showAnILoader = true;
       try {
         if (!this.createdEventId) {
           this.alertService.showAlert('Error', 'Event id missing. Complete details first.', 'error');
+          this.showAnILoader = false;
           return;
         }
         // Save main image only
         if (this.mainImageFile) {
+          console.log('Uploading image...');
           const photoUrl = await this.eventService.uploadEventImage(this.mainImageFile);
+          console.log('Image uploaded successfully:', photoUrl);
+          
+          console.log('Updating event with photo URL...');
           await this.eventService.updateEventRow(this.createdEventId, { photo: photoUrl });
+          console.log('Event photo updated successfully');
+          
+          this.uploadPreviewUrl = photoUrl; // Update preview
+          this.alertService.showAlert('Success', 'Image uploaded successfully', 'success');
         }
-          this.showAnILoader = false;
+        this.showAnILoader = false;
         this.step = 5;
       } catch (err: any) {
-        this.alertService.showAlert('Error', err.message || 'Failed to save media', 'error');
+        console.error('Image upload error:', err);
+        this.showAnILoader = false;
+        this.alertService.showAlert('Error', err.message || 'Failed to save image', 'error');
       }
     } else if (this.step === 5) {
       // Save media items
@@ -464,7 +456,7 @@ loggedUser:any;
           this.alertService.showAlert('Error', 'Event id missing. Complete details first.', 'error');
           return;
         }
-        const payload: Array<{ id_media: number; title: string; image: string | null; description: string | null; url: string | null }> = [];
+        const payload: Array<{ id_media_type: number; title: string; image: string | null; description: string | null; url: string | null }> = [];
         for (let i = 0; i < this.mediaItems.length; i++) {
           const row = this.mediaItems.at(i) as FormGroup;
           const val = row.value as any;
@@ -476,7 +468,7 @@ loggedUser:any;
             imgUrl = val.existingImageUrl || null;
           }
           payload.push({
-            id_media: Number(val.id_media),
+            id_media_type: Number(val.id_media_type),
             title: val.title,
             image: imgUrl,
             description: val.description || null,
@@ -497,7 +489,12 @@ loggedUser:any;
       this.mediaStep = 1;
       return;
     }
-    if (this.step > 1) this.step = ((this.step as number) - 1) as any;
+    // Handle back navigation, skipping step 3 (no event_shows table)
+    if (this.step === 4) {
+      this.step = 2; // Skip step 3
+    } else if (this.step > 1) {
+      this.step = ((this.step as number) - 1) as any;
+    }
   }
 
   private async prefillForEdit(id_event: number): Promise<void> {
@@ -506,30 +503,31 @@ loggedUser:any;
       const base = await this.eventService.getEventBase(id_event);
       if (base?.photo) this.uploadPreviewUrl = base.photo;
 
-      // Resolve programme and event chain from edition
+      // Resolve edition and edition type chain
       const edition = base?.id_edition ? await this.eventService.getEditionById(base.id_edition) : null;
-      const programme = edition?.id_programme ? await this.eventService.getProgrammeById(edition.id_programme) : null;
-
-      // Populate dependent dropdowns
-      if (programme?.id_event) {
-        this.detailsForm.patchValue({ id_event: programme.id_event });
-        this.programmes = await this.eventService.listProgrammesByEvent(programme.id_event) || [];
-      }
-      if (edition?.id_programme) {
-        this.detailsForm.patchValue({ id_programme: edition.id_programme });
-        this.editions = await this.eventService.listEditionsByProgramme(edition.id_programme) || [];
+      
+      // Load all editions for the dropdown (filtered by edition type if available)
+      if (edition?.id_edition_type) {
+        this.detailsForm.patchValue({ id_edition_type: edition.id_edition_type });
+        this.editions = await this.eventService.listEditionsByType(edition.id_edition_type) || [];
+      } else {
+        this.editions = await this.eventService.listEditionsByType(null) || [];
       }
 
       // Patch base fields
       this.detailsForm.patchValue({
+        id_event_domain: base?.id_event_domain ?? null,
+        id_edition_type: edition?.id_edition_type ?? null,
         id_edition: base?.id_edition ?? null,
-        id_type: base?.id_type ?? null,
-        id_location: base?.id_location ?? null,
+        id_event_type: base?.id_event_type ?? null,
         title: base?.title ?? '',
         teaser: base?.teaser ?? '',
+        long_teaser: base?.long_teaser ?? '',
         description: base?.description ?? '',
         booking_url: base?.booking_url ?? '',
-        status: base?.status ?? 1
+        credit_photo: base?.credit_photo ?? '',
+        status: base?.status ?? 1,
+        is_active: base?.is_active ?? false
       });
 
       // Dates
@@ -537,23 +535,14 @@ loggedUser:any;
       this.eventDates.clear();
       (dates || []).forEach((d: any) => {
         this.eventDates.push(this.fb.group({
-          date: [d.date || ''],
-          time: [d.time || '']
+          start_date: [d.start_date || '', Validators.required],
+          end_date: [d.end_date || ''],
+          time: [d.time || '', Validators.required],
+          id_location: [d.id_location || null],
+          flag: [d.flag || '', Validators.required]
         }));
       });
       if (this.eventDates.length === 0) this.addDate();
-
-      // Shows
-      const shows = await this.eventService.getEventShows(id_event);
-      this.eventShows.clear();
-      (shows || []).forEach((s: any) => {
-        this.eventShows.push(this.fb.group({
-          title: [s.title || ''],
-          description: [s.description || ''],
-          time_manage: [s.time_manage || '']
-        }));
-      });
-      if (this.eventShows.length === 0) this.addShow();
 
       // Media
       const media = await this.eventService.getEventMedia(id_event);
@@ -571,22 +560,45 @@ loggedUser:any;
 
       // Artists & Instruments table rows
       const pairs = await this.eventService.getEventArtistInstrumentPairs(id_event);
-      const instrumentMap = new Map<number, string>((this.instruments || []).map((r: any) => [r.id, r.instrument]));
-      const artistMap = new Map<string, { name: string; photo: string | null }>((this.availableArtists || []).map((a: any) => [a.id, { name: a.name, photo: a.photo || null }]));
+      console.log('Artist-Instrument pairs from service:', pairs);
+      console.log('Total pairs found:', pairs?.length || 0);
+      
       this.tableAnIARow = (pairs || []).map((p: any) => {
-        const a = artistMap.get((p.id_artist || '').toString()) || { name: '', photo: null };
-        const instName = instrumentMap.get(Number(p.id_instrument)) || '';
+        const artistIdStr = (p.id_artist || '').toString();
+        // Use data from the joined query first, fallback to maps
+        const artistName = p.artist_fname && p.artist_lname 
+          ? `${p.artist_fname} ${p.artist_lname}`.trim()
+          : this.availableArtists.find((a: any) => a.id === artistIdStr)?.name || `Artist ${artistIdStr}`;
+        
+        const artistPhoto = p.artist_photo 
+          || this.availableArtists.find((a: any) => a.id === artistIdStr)?.photo 
+          || null;
+        
+        const instrumentName = p.instrument_name 
+          || this.instruments.find((i: any) => i.id === Number(p.id_instrument))?.instrument 
+          || 'Unknown Instrument';
+        
+        console.log(`✓ Loaded - Artist: ${artistName} (ID: ${artistIdStr}) plays ${instrumentName} (ID: ${p.id_instrument})`);
+        
         return {
+          id: p.id,
           id_event,
-          id_artist: (p.id_artist || '').toString(),
-          name: a.name,
-          photo: a.photo,
+          id_artist: artistIdStr,
+          name: artistName,
+          photo: artistPhoto,
           id_inst: Number(p.id_instrument),
-          instrument: instName
+          instrument: instrumentName
         };
       });
+      
+      console.log('✓✓ Final tableAnIARow:', this.tableAnIARow);
+      console.log('✓✓ Total artists displayed:', this.tableAnIARow.length);
+      
     } catch (err: any) {
+      console.error('Prefill error:', err);
       this.alertService.showAlert('Error', err.message || 'Failed to prefill event for edit', 'error');
+    } finally {
+      this.isLoadingEvent = false;
     }
   }
 
@@ -594,6 +606,33 @@ loggedUser:any;
     // Final screen confirmation only; all data has been persisted step-by-step.
     this.alertService.showAlert('Success', 'Event saved successfully', 'success');
     this.router.navigate(['/hosts/console/events']);
+  }
+
+  async deleteEvent(): Promise<void> {
+    if (!this.createdEventId) {
+      this.alertService.showAlert('Error', 'No event to delete', 'error');
+      return;
+    }
+
+    // Confirm deletion with SweetAlert
+    const confirmed = await this.alertService.confirmDelete(
+      'Delete Event?',
+      'Are you sure you want to delete this event? This action cannot be undone and will remove all related data (dates, media, artists).',
+      'Yes, delete it!'
+    );
+    
+    if (!confirmed) return;
+
+    this.isDeleting = true;
+    try {
+      await this.eventService.deleteEvent(this.createdEventId);
+      this.alertService.showAlert('Success', 'Event deleted successfully', 'success');
+      this.router.navigate(['/hosts/console/events']);
+    } catch (err: any) {
+      this.alertService.showAlert('Error', err.message || 'Failed to delete event', 'error');
+    } finally {
+      this.isDeleting = false;
+    }
   }
 
   selectedArtist6:any;

@@ -16,11 +16,11 @@ export class EventDetailComponent implements OnInit {
   errorMessage: string = '';
   event: any = null;
   currentYear: number = new Date().getFullYear();
-  // Mirror create-event steps: 1 Detail, 2 Dates, 3 Shows, 4 Image, 5 Media, 6 Artists
-  step: 1 | 2 | 3 | 4 | 5 | 6 = 1;
+  // Mirror create-event steps: 1 Detail, 2 Dates, 4 Image, 5 Media, 6 Artists (Step 3 removed - no event_shows table)
+  step: 1 | 2 | 4 | 5 | 6 = 1;
 
   showAllDates: boolean = false;
-  media: Array<{ id: number; id_media: number; title: string; image: string | null; description: string | null; url: string | null }> = [];
+  media: Array<{ id: number; id_media_type: number; title: string; image: string | null; description: string | null; url: string | null }> = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -39,13 +39,23 @@ export class EventDetailComponent implements OnInit {
   }
 
   get displayedDates(): any[] {
-    const dates = Array.isArray(this.event?.dates) ? this.event.dates : [];
-    return this.showAllDates ? dates : dates.slice(0, 2);
+    if (this.event?.isPeriod) {
+      const periods = Array.isArray(this.event?.period) ? this.event.period : [];
+      return this.showAllDates ? periods : periods.slice(0, 2);
+    } else {
+      const dates = Array.isArray(this.event?.dates) ? this.event.dates : [];
+      return this.showAllDates ? dates : dates.slice(0, 2);
+    }
   }
 
   get hasMoreDates(): boolean {
-    const dates = Array.isArray(this.event?.dates) ? this.event.dates : [];
-    return dates.length > 2;
+    if (this.event?.isPeriod) {
+      const periods = Array.isArray(this.event?.period) ? this.event.period : [];
+      return periods.length > 2;
+    } else {
+      const dates = Array.isArray(this.event?.dates) ? this.event.dates : [];
+      return dates.length > 2;
+    }
   }
 
   toggleDates(): void {
@@ -56,7 +66,7 @@ export class EventDetailComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     try {
-      const data = await this.eventService.getEventDetail(id as any);
+      const data = await this.eventService.getEventDetailHost(id as any);
       console.log('data--->', data);
       const raw = Array.isArray(data) ? (data[0] || null) : (data || null);
       if (!raw) {
@@ -78,7 +88,7 @@ export class EventDetailComponent implements OnInit {
       const data = await this.eventService.getEventMedia(id);
       this.media = (data || []).map((m: any) => ({
         id: m.id,
-        id_media: m.id_media,
+        id_media_type: m.id_media_type,
         title: m.title,
         image: m.image,
         description: m.description,
@@ -94,11 +104,10 @@ export class EventDetailComponent implements OnInit {
     const eventDates = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
     const shows = Array.isArray(raw?.event_shows) ? raw.event_shows : [];
     const artists = Array.isArray(raw?.event_artists) ? raw.event_artists : [];
-    const instruments = Array.isArray(raw?.instruments) ? raw.instruments : [];
+    const instruments = Array.isArray(raw?.event_instruments) ? raw.event_instruments : [];
+    const period = Array.isArray(raw?.period) ? raw.period : [];
 
-    const editionDisplay = [raw?.edition_name, raw?.edition_year]
-      .filter((v: any) => !!v)
-      .join(' ');
+    const editionDisplay = raw?.edition || '';
 
     return {
       id: raw?.id ?? raw?.id_event ?? null,
@@ -112,8 +121,22 @@ export class EventDetailComponent implements OnInit {
       eventType: raw?.event_type || '',
       description: raw?.description || '',
       bookingUrl: raw?.booking_url || '',
+      isPeriod: raw?.is_period || false,
       editionDisplay,
-      dates: eventDates.map((d: any) => ({ id: d?.id, date: d?.date, time: d?.time })),
+      dates: eventDates.map((d: any) => ({ 
+        id: d?.id, 
+        date: d?.date, 
+        time: d?.time,
+        location: d?.location,
+        id_location: d?.id_location
+      })),
+      period: period.map((p: any) => ({
+        start_date: p?.start_date,
+        end_date: p?.end_date,
+        time: p?.time,
+        location: p?.location,
+        id_location: p?.id_location
+      })),
       shows: shows.map((s: any) => ({ id: s?.id, composer: s?.title, piece: s?.description, duration: s?.time_manage })),
       instruments: instruments.map((i: any) => i?.instrument).filter((v: any) => !!v),
       location: {
@@ -129,9 +152,9 @@ export class EventDetailComponent implements OnInit {
         description: raw?.location?.description || ''
       },
       artists: artists.map((a: any) => ({
-        name: `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim(),
+        name: a?.artist || `${(a?.fname || '').trim()} ${(a?.lname || '').trim()}`.trim(),
         photo: a?.photo || '',
-        tagline: a?.tagline || '',
+        tagline: a?.teaser || a?.tagline || '',
         shortBio: a?.short_bio || ''
       }))
     };
@@ -149,5 +172,9 @@ export class EventDetailComponent implements OnInit {
     const d = new Date(`1970-01-01T${timeString}`);
     if (isNaN(d.getTime())) return '';
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  formatPeriodDate(startDate: string, endDate: string): string {
+    return `From ${this.formatDate(startDate)} to ${this.formatDate(endDate)}`;
   }
 }

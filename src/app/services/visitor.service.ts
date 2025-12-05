@@ -49,7 +49,7 @@ async getLocationList(){
 
 
 async getUpcomingEvents(){
-  const { data, error } = await supabase.rpc('get_upcoming_events');
+  const { data, error } = await supabase.rpc('get_upcoming_events_v1');
     if (error) throw error;
     return data;
 

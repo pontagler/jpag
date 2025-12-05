@@ -167,17 +167,29 @@
 								@for(d of (e?.shows || []); track d; let i = $index){
 								@if(i < 2){ <div class="flex items-center min-w-0">
 									<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+									@if(d?.isPeriod && d?.end_date){
+									<span class="text-xs"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+										<span class="font-semibold">From:</span> {{d?.date | date:'dd-MMM-yyyy'}} 
+										<span class="font-semibold ml-2">To:</span> {{d?.end_date | date:'dd-MMM-yyyy'}}
+									</span>
+									<span class="text-xs ml-8"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
+									slice:0:5}}</span>
+									} @else {
 									<span class="text-xs"
 										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
 										date:'dd-MMM-yyyy'}}</span>
-									<span class="mx-2">•</span>
-									<span class="text-xs"
-										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
-										slice:0:5}}</span>
-									<span class="mx-2">•</span>
-									<span class="text-xs truncate max-w-[10rem]"
-										[ngClass]="{'line-through text-gray-400': isShowPast(d)}"> <i
-											class="fa-solid fa-location-dot mr-1"></i> {{d?.location}}</span>
+											<span class="mx-2">•</span>
+											<span class="text-xs"
+												[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
+												slice:0:5}}</span>
+											<span class="mx-2">•</span>
+											<span  class="text-xs truncate max-w-[10rem]"
+												[ngClass]="{'line-through text-gray-400': isShowPast(d)}"> <i
+													class="fa-solid fa-location-dot mr-1"></i> {{d?.location}}</span>
+									}
+								
 							</div>
 							}
 							}
@@ -189,21 +201,32 @@
 								@if(i >= 2){
 								<div class="flex items-center text-gray-700 min-w-0">
 									<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+									@if(d?.isPeriod && d?.end_date){
+									<span class="text-xs"
+										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+										<span class="font-semibold">From:</span> {{d?.date | date:'dd-MMM-yyyy'}} 
+										<span class="font-semibold ml-2">To:</span> {{d?.end_date | date:'dd-MMM-yyyy'}}
+									</span>
+									} @else {
 									<span class="text-xs"
 										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
 										date:'dd-MMM-yyyy'}}</span>
+									}
 									<span class="mx-2">•</span>
 									<span class="text-xs"
 										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
 										slice:0:5}}</span>
-									<span class="mx-2">•</span>
+									<span class="mx-2"></span><br/>
 									<span class="text-xs truncate max-w-[10rem]"
-										[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
-										<i class="fa-solid fa-location-dot mr-1"></i>
-										{{d?.location}}</span>
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+									<i class="fa-solid fa-location-dot mr-1"></i>
+									{{d?.location}}</span>
 								</div>
+								
 								}
+							
 								}
+								
 							</div>
 							}
 							<button class="text-pont-green underline text-xs mt-1" (click)="toggleDatesExpanded(e.id)">
@@ -276,9 +299,17 @@
 							@for(d of (e?.shows || []); track d; let i = $index){
 							@if(i < 2){ <div class="flex items-center min-w-0 ">
 								<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+								@if(d?.isPeriod && d?.end_date){
+								<span class="text-xs"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+									<span class="font-semibold">From:</span> {{d?.date | date:'dd-MMM-yyyy'}} 
+									<span class="font-semibold ml-2">To:</span> {{d?.end_date | date:'dd-MMM-yyyy'}}
+								</span>
+								} @else {
 								<span class="text-xs"
 									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
 									date:'dd-MMM-yyyy'}}</span>
+								}
 								<span class="mx-2">•</span>
 								<span class="text-xs"
 									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |
@@ -297,9 +328,17 @@
 							@if(i >= 2){
 							<div class="flex items-center text-gray-700 min-w-0">
 								<i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+								@if(d?.isPeriod && d?.end_date){
+								<span class="text-xs"
+									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+									<span class="font-semibold">From:</span> {{d?.date | date:'dd-MMM-yyyy'}} 
+									<span class="font-semibold ml-2">To:</span> {{d?.end_date | date:'dd-MMM-yyyy'}}
+								</span>
+								} @else {
 								<span class="text-xs"
 									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.date |
 									date:'dd-MMM-yyyy'}}</span>
+								}
 								<span class="mx-2">•</span>
 								<span class="text-xs"
 									[ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{d?.time |

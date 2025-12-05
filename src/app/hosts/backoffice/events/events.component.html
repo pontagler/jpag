@@ -13,7 +13,7 @@
       <div class="hidden md:block">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-          <input [(ngModel)]="searchQuery" type="text" placeholder="Search by name, artist, instrument" class="w-64 md:w-80 pl-10 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+          <input [(ngModel)]="searchQuery" type="text" placeholder="Search by ID, title, edition type, domain" class="w-64 md:w-80 pl-10 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
       </div>
       <div class="md:hidden">
@@ -41,68 +41,57 @@
         <span>Clear filters</span>
       </button>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-  </div>
-
-    <div class="flex flex-col">
-      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Programme</label>
-      <div class="relative mt-1">
-        <i class="fa-solid fa-list absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <select [(ngModel)]="programmeFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
-          <option value="All">All</option>
-          <option *ngFor="let p of uniqueProgrammes" [value]="p">{{ p }}</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Edition Type</label>
+        <div class="relative mt-1">
+          <i class="fa-solid fa-tag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <select [(ngModel)]="editionTypeFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+            <option value="All">All</option>
+            <option *ngFor="let et of uniqueEditionTypes" [value]="et">{{ et }}</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
       </div>
-    </div>
 
-    <div class="flex flex-col">
-      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event</label>
-      <div class="relative mt-1">
-        <i class="fa-regular fa-circle absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <select [(ngModel)]="eventFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
-          <option value="All">All</option>
-          <option *ngFor="let e of uniqueEvents" [value]="e">{{ e }}</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event Domain</label>
+        <div class="relative mt-1">
+          <i class="fa-solid fa-globe absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <select [(ngModel)]="eventDomainFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+            <option value="All">All</option>
+            <option *ngFor="let ed of uniqueEventDomains" [value]="ed">{{ ed }}</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
       </div>
-    </div>
 
-    <div class="flex flex-col">
-      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event Type</label>
-      <div class="relative mt-1">
-        <i class="fa-solid fa-music absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <select [(ngModel)]="eventTypeFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
-          <option value="All">All</option>
-          <option *ngFor="let t of uniqueEventTypes" [value]="t">{{ t }}</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Status</label>
+        <div class="relative mt-1">
+          <i class="fa-regular fa-flag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <select [(ngModel)]="statusFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+            <option value="All">All</option>
+            <option [ngValue]="0">Live</option>
+            <option [ngValue]="1">Artists Suggest</option>
+            <option [ngValue]="2">Draft</option>
+            <option [ngValue]="3">Pending</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
       </div>
-    </div>
 
-    <div class="flex flex-col">
-      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Status</label>
-      <div class="relative mt-1">
-        <i class="fa-regular fa-flag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <select [(ngModel)]="statusFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
-          <option value="All">All</option>
-          <option [ngValue]="1">Active</option>
-          <option [ngValue]="2">Inactive</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-      </div>
-    </div>
-
-    <div class="flex flex-col">
-      <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Timeline</label>
-      <div class="relative mt-1">
-        <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <select [(ngModel)]="timelineFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
-          <option value="All">All</option>
-          <option value="Upcoming">Upcoming</option>
-          <option value="Past">Past</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Is Completed</label>
+        <div class="relative mt-1">
+          <i class="fa-regular fa-clock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <select [(ngModel)]="completedFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+            <option value="All">All</option>
+            <option value="Upcoming">Upcoming</option>
+            <option value="Past">Past</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
       </div>
     </div>
   </div>
@@ -115,33 +104,11 @@
           <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('id')">
             <span class="inline-flex items-center gap-2">
               <i class="fa-regular fa-hashtag text-gray-400"></i>
-              <span>ID</span>
+              <span>Event ID</span>
               <i class="fas text-gray-400" [ngClass]="{
                 'fa-sort-up': sortKey==='id' && sortDirection==='asc',
                 'fa-sort-down': sortKey==='id' && sortDirection==='desc',
                 'fa-sort': sortKey!=='id'
-              }"></i>
-            </span>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('event')">
-            <span class="inline-flex items-center gap-2">
-              <i class="fa-regular fa-circle text-gray-400"></i>
-              <span>Event</span>
-              <i class="fas text-gray-400" [ngClass]="{
-                'fa-sort-up': sortKey==='event' && sortDirection==='asc',
-                'fa-sort-down': sortKey==='event' && sortDirection==='desc',
-                'fa-sort': sortKey!=='event'
-              }"></i>
-            </span>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('programme')">
-            <span class="inline-flex items-center gap-2">
-              <i class="fa-solid fa-list text-gray-400"></i>
-              <span>Programme</span>
-              <i class="fas text-gray-400" [ngClass]="{
-                'fa-sort-up': sortKey==='programme' && sortDirection==='asc',
-                'fa-sort-down': sortKey==='programme' && sortDirection==='desc',
-                'fa-sort': sortKey!=='programme'
               }"></i>
             </span>
           </th>
@@ -156,31 +123,31 @@
               }"></i>
             </span>
           </th>
-          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('location')">
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('editionType')">
             <span class="inline-flex items-center gap-2">
-              <i class="fa-solid fa-location-dot text-gray-400"></i>
-              <span>Location</span>
+              <i class="fa-solid fa-tag text-gray-400"></i>
+              <span>Edition Type</span>
               <i class="fas text-gray-400" [ngClass]="{
-                'fa-sort-up': sortKey==='location' && sortDirection==='asc',
-                'fa-sort-down': sortKey==='location' && sortDirection==='desc',
-                'fa-sort': sortKey!=='location'
+                'fa-sort-up': sortKey==='editionType' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='editionType' && sortDirection==='desc',
+                'fa-sort': sortKey!=='editionType'
               }"></i>
             </span>
           </th>
-          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('earliestDate')">
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('eventDomain')">
             <span class="inline-flex items-center gap-2">
-              <i class="fa-regular fa-calendar-days text-gray-400"></i>
-              <span>Events Date</span>
+              <i class="fa-solid fa-globe text-gray-400"></i>
+              <span>Event Domain</span>
               <i class="fas text-gray-400" [ngClass]="{
-                'fa-sort-up': sortKey==='earliestDate' && sortDirection==='asc',
-                'fa-sort-down': sortKey==='earliestDate' && sortDirection==='desc',
-                'fa-sort': sortKey!=='earliestDate'
+                'fa-sort-up': sortKey==='eventDomain' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='eventDomain' && sortDirection==='desc',
+                'fa-sort': sortKey!=='eventDomain'
               }"></i>
             </span>
           </th>
           <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('status')">
             <span class="inline-flex items-center gap-2">
-              <i class="fa-regular fa-circle text-gray-400"></i>
+              <i class="fa-regular fa-flag text-gray-400"></i>
               <span>Status</span>
               <i class="fas text-gray-400" [ngClass]="{
                 'fa-sort-up': sortKey==='status' && sortDirection==='asc',
@@ -189,30 +156,40 @@
               }"></i>
             </span>
           </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('isCompleted')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-clock text-gray-400"></i>
+              <span>Is Completed</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='isCompleted' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='isCompleted' && sortDirection==='desc',
+                'fa-sort': sortKey!=='isCompleted'
+              }"></i>
+            </span>
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
         <tr *ngFor="let e of displayedEvents" class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="navigateTo(e.id)">
-          <td class="px-4 py-3 font-mono  text-gray-800 text-sm">{{ e.id }}</td>
-          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.event | stripHtml | titlecase }}</td>
-          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.programme | stripHtml | titlecase}}</td>
+          <td class="px-4 py-3 font-mono text-gray-800 text-sm">{{ e.id }}</td>
           <td class="px-4 py-3 text-gray-900 text-sm">{{ e.title | stripHtml | titlecase }}</td>
-          <td class="px-4 py-3 text-gray-700 text-sm">{{ e.location | stripHtml | titlecase }}</td>
-          <td class="px-4 py-3 text-gray-700 text-sm">
-            <div class="flex flex-wrap items-center gap-1">
-              <span *ngIf="e.eventDates.length > 0" class="px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs">{{ e.eventDates[0] | date:'yyyy-MM-dd' }} </span>
-              <span *ngIf="e.eventDates.length > 1" class="text-xs text-gray-500">+{{ e.eventDates.length - 1 }}</span>
-            </div>
+          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.editionType | stripHtml | titlecase }}</td>
+          <td class="px-4 py-3 text-gray-900 text-sm">{{ e.eventDomain | stripHtml | titlecase }}</td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusClass(e.status)">
+              <i class="fa-solid" [ngClass]="getStatusIcon(e.status)"></i>
+              {{ getStatusLabel(e.status) }}
+            </span>
           </td>
           <td class="px-4 py-3">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="e.status === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-              <i class="fa-solid" [ngClass]="e.status === 1 ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
-              {{ e.status === 1 ? 'Active' : 'Inactive' }}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="e.isCompleted === 'Upcoming' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'">
+              <i class="fa-solid" [ngClass]="e.isCompleted === 'Upcoming' ? 'fa-clock' : 'fa-check'"></i>
+              {{ e.isCompleted }}
             </span>
           </td>
         </tr>
         <tr *ngIf="displayedEvents.length === 0">
-          <td colspan="7" class="px-6 py-12 text-center">
+          <td colspan="6" class="px-6 py-12 text-center">
             <div class="flex flex-col items-center gap-2 text-gray-500">
               <i class="fa-regular fa-folder-open text-3xl"></i>
               <p class="text-sm">No events found</p>

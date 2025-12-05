@@ -52,7 +52,7 @@ export class EventsComponent implements OnInit {
 	private async loadEvents(): Promise<void> {
 		this.isLoading = true;
 		try {
-			const data = await this.eventService.getEventsList();
+			const data = await this.eventService.getEventsList_v1();
 			console.log('data', data)
 			const arr = Array.isArray(data) ? data : [];
 			this.allEvents = arr.map((raw: any) => this.normalizeEvent(raw));
@@ -71,9 +71,32 @@ export class EventsComponent implements OnInit {
 	}
 
 	private normalizeEvent(raw: any): any {
-		const showsRaw = Array.isArray(raw?.event_dates)
-			? raw.event_dates.map((d: any) => ({ date: d?.date, time: d?.time, location: d?.location }))
-			: [];
+		// Handle both period and event_dates arrays
+		const isPeriod = Array.isArray(raw?.period) && raw.period.length > 0;
+		const periodArray = Array.isArray(raw?.period) ? raw.period : [];
+		const eventDatesArray = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
+		
+		// Convert to shows format
+		let showsRaw: any[] = [];
+		if (isPeriod) {
+			// Handle period events
+			showsRaw = periodArray.map((p: any) => ({
+				date: p?.start_date,
+				end_date: p?.end_date,
+				time: p?.time,
+				location: p?.location,
+				isPeriod: true
+			}));
+		} else {
+			// Handle discrete date events
+			showsRaw = eventDatesArray.map((d: any) => ({
+				date: d?.date,
+				time: d?.time,
+				location: d?.location,
+				isPeriod: false
+			}));
+		}
+		
 		const shows = showsRaw.sort((a: any, b: any) => {
 			const toMs = (s: any): number => {
 				const dt = new Date(s?.date);
@@ -137,6 +160,7 @@ export class EventsComponent implements OnInit {
 			eventDomain: raw?.event_domain || '',
 			status: isCompleted ? 'completed' : statusNormalized,
 			shows,
+			isPeriod,
 			imageUrl: raw?.photo || raw?.cover_image || '',
 			artistDisplay,
 			editionDisplay,
@@ -269,7 +293,8 @@ export class EventsComponent implements OnInit {
 
 	isShowPast(show: any): boolean {
 		if (!show) return false;
-		const dateInput = show?.date;
+		// For period events, check the end_date; for discrete events, check the date
+		const dateInput = show?.isPeriod && show?.end_date ? show.end_date : show?.date;
 		if (!dateInput) return false;
 		const dt = new Date(dateInput);
 		if (isNaN(dt.getTime())) return false;

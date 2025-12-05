@@ -1,4 +1,19 @@
 <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoadingEvent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 flex flex-col items-center gap-4">
+      <div class="animate-spin text-indigo-600">
+        <svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <style>.spinner_ajPY{transform-origin:center;animation:spinner_AtaB .75s infinite linear}@keyframes spinner_AtaB{100%{transform:rotate(360deg)}}</style>
+          <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+          <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_ajPY"/>
+        </svg>
+      </div>
+      <p class="text-lg font-medium text-gray-900">Loading Event...</p>
+      <p class="text-sm text-gray-500">Please wait while we fetch the event details</p>
+    </div>
+  </div>
+
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-3">
       <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
@@ -9,16 +24,21 @@
         <p class="text-sm text-gray-500">{{ isEditMode ? 'Update event details across the steps' : 'Add a new event using the guided steps' }}</p>
       </div>
     </div>
-    <a routerLink="/hosts/console/events" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
-      <i class="fa-solid fa-arrow-left"></i>
-      Back to Events
-    </a>
+    <div class="flex items-center gap-2">
+      <button *ngIf="isEditMode" (click)="deleteEvent()" [disabled]="isDeleting" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-trash"></i>
+        {{ isDeleting ? 'Deleting...' : 'Delete Event' }}
+      </button>
+      <a routerLink="/hosts/console/events" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Events
+      </a>
+    </div>
   </div>
 
-  <div class="grid grid-cols-6 w-full bg-gray-100 rounded-md p-1 select-none">
+  <div class="grid grid-cols-5 w-full bg-gray-100 rounded-md p-1 select-none">
     <button disabled class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===1, 'text-gray-600': step!==1 }">Detail</button>
     <button disabled class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===2, 'text-gray-600': step!==2 }">Dates</button>
-    <button disabled class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===3, 'text-gray-600': step!==3 }">Shows</button>
     <button disabled class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===4, 'text-gray-600': step!==4 }">Image</button>
     <button disabled class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===5, 'text-gray-600': step!==5 }">Media</button>
     <button disabled class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===6, 'text-gray-600': step!==6 }">Artists</button>
@@ -29,21 +49,21 @@
     <form *ngSwitchCase="1" [formGroup]="detailsForm" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="flex flex-col">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event</label>
-          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_event" (change)="onEventChange()">
-            <option [ngValue]="null">Select event</option>
-            <option *ngFor="let e of sysEvents" [ngValue]="e.id">{{ e.name | titlecase }}</option>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event Domain (Optional)</label>
+          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_event_domain" (change)="onEventDomainChange()">
+            <option [ngValue]="null">Select event domain</option>
+            <option *ngFor="let e of eventDomains" [ngValue]="e.id">{{ e.name | titlecase }}</option>
           </select>
         </div>
         <div class="flex flex-col">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Programme</label>
-          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_programme" (change)="onProgrammeChange()">
-            <option [ngValue]="null">Select programme</option>
-            <option *ngFor="let p of programmes" [ngValue]="p.id">{{ p.name | titlecase }}</option>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Edition Type (Optional)</label>
+          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_edition_type" (change)="onEditionTypeChange()">
+            <option [ngValue]="null">Select edition type</option>
+            <option *ngFor="let p of editionTypes" [ngValue]="p.id">{{ p.name | titlecase }}</option>
           </select>
         </div>
         <div class="flex flex-col">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Edition</label>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Edition *</label>
           <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_edition">
             <option [ngValue]="null">Select edition</option>
             <option *ngFor="let ed of editions" [ngValue]="ed.id">{{ ed.name }} {{ ed.year }}</option>
@@ -53,25 +73,26 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="flex flex-col">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event Type</label>
-          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_type">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event Type *</label>
+          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_event_type">
             <option [ngValue]="null">Select type</option>
             <option *ngFor="let t of eventTypes" [ngValue]="t.id">{{ t.name | titlecase }}</option>
           </select>
         </div>
         <div class="flex flex-col">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Location</label>
-          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_location">
-            <option [ngValue]="null">Select location</option>
-            <option *ngFor="let l of locations" [ngValue]="l.id">{{ l.name | titlecase }}</option>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Status *</label>
+          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="status">
+            <option [ngValue]="1">Draft</option>
+            <option [ngValue]="2">Published</option>
+            <option [ngValue]="3">Archived</option>
           </select>
         </div>
         <div class="flex flex-col">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Status</label>
-          <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="status">
-            <option [ngValue]="1">Active</option>
-            <option [ngValue]="2">Inactive</option>
-          </select>
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide flex items-center gap-2">
+            <input type="checkbox" formControlName="is_active" class="rounded border-gray-300">
+            Active
+          </label>
+          <p class="text-xs text-gray-500 mt-1">Check to make event visible to public</p>
         </div>
       </div>
 
@@ -87,15 +108,26 @@
       </div>
 
       <div class="flex flex-col">
-        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Teaser</label>
-        <textarea rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="teaser"></textarea>
-        <div class="text-xs text-gray-500 mt-1">{{ teaserLength }}/100</div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Teaser (Short)</label>
+        <textarea rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="teaser" maxlength="200"></textarea>
+        <div class="text-xs text-gray-500 mt-1">{{ teaserLength }}/200</div>
       </div>
 
       <div class="flex flex-col">
-        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description</label>
-        <textarea rows="5" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="description"></textarea>
-        <div class="text-xs text-gray-500 mt-1">{{ descriptionLength }}/500</div>
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Long Teaser (Optional)</label>
+        <textarea rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="long_teaser"></textarea>
+        <div class="text-xs text-gray-500 mt-1">Extended preview text for event listing</div>
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Description *</label>
+        <textarea rows="6" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="description" maxlength="2000"></textarea>
+        <div class="text-xs text-gray-500 mt-1">{{ descriptionLength }}/2000</div>
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Photo Credit (Optional)</label>
+        <input type="text" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="credit_photo" placeholder="Photographer name or source" />
       </div>
       <div class="flex justify-end">
         <button type="button" (click)="next()" class="px-4 py-2 rounded bg-black text-white">
@@ -122,16 +154,37 @@
             <button type="button" (click)="addDate()" class="px-3 py-1.5 rounded bg-gray-900 text-white">Add Date</button>
           </div>
           <p class="text-xs text-gray-500">Add one or more date/time slots for your event. Use 24h time format.</p>
-          <div class="space-y-2" formArrayName="dates">
-            <div *ngFor="let d of eventDates.controls; let i = index" [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-center">
-              <label class="md:col-span-2 text-xs text-gray-600">Date
-                <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="date" />
-              </label>
-              <label class="md:col-span-2 text-xs text-gray-600">Time
-                <input type="time" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="time" />
-              </label>
-              <div class="md:col-span-2 flex justify-end">
-                <button type="button" (click)="removeDate(i)" class="px-3 py-2 rounded border">Remove</button>
+          <div class="space-y-4" formArrayName="dates">
+            <div *ngFor="let d of eventDates.controls; let i = index" [formGroupName]="i" class="border rounded-lg p-4 space-y-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <label class="text-xs text-gray-600">Start Date *
+                  <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="start_date" />
+                </label>
+                <label class="text-xs text-gray-600">End Date (Optional)
+                  <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="end_date" />
+                  <span class="text-xs text-gray-500">Leave empty for single day events</span>
+                </label>
+                <label class="text-xs text-gray-600">Time *
+                  <input type="time" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="time" />
+                </label>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="text-xs text-gray-600">Location (Optional)
+                  <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_location">
+                    <option [ngValue]="null">Use event default location</option>
+                    <option *ngFor="let l of locations" [ngValue]="l.id">{{ l.name | titlecase }}</option>
+                  </select>
+                </label>
+                <label class="text-xs text-gray-600">Flag *
+                  <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="flag">
+                    <option value="">Select flag</option>
+                    <option value="p">Period</option>
+                    <option value="d">Date</option>
+                  </select>
+                </label>
+              </div>
+              <div class="flex justify-end">
+                <button type="button" (click)="removeDate(i)" class="px-3 py-2 rounded border border-red-300 text-red-600 hover:bg-red-50">Remove Date</button>
               </div>
             </div>
           </div>
@@ -144,13 +197,20 @@
             Preview
           </div>
           <div class="space-y-2" *ngIf="eventDates.controls.length; else noDates">
-            <div *ngFor="let d of eventDates.controls" class="flex items-center justify-between p-2 rounded bg-gray-50">
-              <div class="text-sm text-gray-700">
-                <span class="font-medium">{{ d.value.date }}</span>
-                <span class="mx-1">•</span>
+            <div *ngFor="let d of eventDates.controls" class="p-3 rounded bg-gray-50 space-y-1">
+              <div class="text-sm text-gray-900 font-medium">
+                <i class="fa-regular fa-calendar text-pont-green mr-2"></i>
+                <span>{{ d.value.start_date }}</span>
+                <span *ngIf="d.value.end_date"> - {{ d.value.end_date }}</span>
+              </div>
+              <div class="text-sm text-gray-600 ml-6">
+                <i class="fa-regular fa-clock mr-2"></i>
                 <span>{{ d.value.time }}</span>
               </div>
-              <i class="fa-regular fa-clock text-gray-400"></i>
+              <div *ngIf="d.value.flag" class="text-xs text-gray-500 ml-6">
+                <i class="fa-solid fa-flag mr-2"></i>
+                <span>{{ d.value.flag }}</span>
+              </div>
             </div>
           </div>
           <ng-template #noDates>
@@ -171,64 +231,7 @@
       </div>
     </form>
 
-    <!-- Step 3: Shows -->
-    <form *ngSwitchCase="3" [formGroup]="detailsForm" class="space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Editor -->
-        <div class="lg:col-span-2 border rounded-lg p-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="font-semibold flex items-center gap-2">
-              <i class="fa-solid fa-music text-pont-green"></i>
-              Programme (Shows)
-            </div>
-            <button type="button" (click)="addShow()" class="px-3 py-1.5 rounded bg-gray-900 text-white">Add Show</button>
-          </div>
-          <p class="text-xs text-gray-500">Add each piece with composer/title, and an optional duration.</p>
-          <div class="space-y-2" formArrayName="shows">
-            <div *ngFor="let s of eventShows.controls; let i = index" [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-              <label class="md:col-span-4 text-xs text-gray-600">Composer
-                <input type="text" placeholder="e.g., Johannes Brahms" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="title" />
-              </label>
-              <label class="md:col-span-6 text-xs text-gray-600">Piece
-                <input type="text" placeholder="e.g., Violin Sonata No. 1 in G major, Op. 78" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="description" />
-              </label>
-              <label class="md:col-span-2 text-xs text-gray-600">Duration
-                <input type="text" placeholder="25 Minutes" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="time_manage" />
-              </label>
-              <div class="md:col-span-12 flex justify-end">
-                <button type="button" (click)="removeShow(i)" class="px-3 py-2 rounded border">Remove</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Preview -->
-        <div class="border rounded-lg p-4 space-y-3">
-          <div class="font-semibold flex items-center gap-2">
-            <i class="fa-regular fa-eye text-pont-green"></i>
-            Preview
-          </div>
-          <div class="space-y-3" *ngIf="eventShows.controls.length; else noShows">
-            <div *ngFor="let s of eventShows.controls" class="border-l-4 border-green-700 pl-3">
-              <div class="font-semibold text-gray-900 text-sm">{{ s.value.title }}</div>
-              <div class="text-gray-700 text-sm">{{ s.value.description }}</div>
-              <div class="text-gray-500 text-xs" *ngIf="s.value.time_manage">{{ s.value.time_manage }}</div>
-            </div>
-          </div>
-          <ng-template #noShows>
-            <p class="text-sm text-gray-500">No shows added yet.</p>
-          </ng-template>
-        </div>
-      </div>
-      <div class="flex justify-between">
-        <button type="button" (click)="back()" class="px-4 py-2 rounded border">Back</button>
-        <button type="button" (click)="next()" class="px-4 py-2 rounded bg-black text-white">
-             <span  *ngIf="!showAnILoader"  >Save & Next</span>
-        <span *ngIf="showAnILoader" class="animate-spin text-white">
-                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_ajPY{transform-origin:center;animation:spinner_AtaB .75s infinite linear}@keyframes spinner_AtaB{100%{transform:rotate(360deg)}}</style><path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/><path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_ajPY"/></svg>
-                </span>
-        </button>
-      </div>
-    </form>
+    <!-- Step 3: Shows - REMOVED (no event_shows table in schema) -->
 
     <!-- Step 4: Image -->
     <div *ngSwitchCase="4" class="space-y-6">
@@ -349,12 +352,12 @@
           <button type="button" (click)="showAnImodal = true" class="px-3 py-1.5 rounded bg-gray-900 text-white">Add Artist</button>
         </div>
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+          <table class="min-w-full divide-y divide-gray-200" *ngIf="tableAnIARow && tableAnIARow.length > 0; else noArtists">
             <thead class="bg-gray-50 text-left">
               <tr>
-                <th class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase">Artist</th>
-                <th class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase"> Artist</th>
-                <th class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase">Instruments</th>
+                <th class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase">Photo</th>
+                <th class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase">Artist Name</th>
+                <th class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase">Instrument</th>
                 <th class="px-4 py-2"></th>
               </tr>
             </thead>
@@ -362,33 +365,36 @@
               <tr *ngFor="let r of tableAnIARow; let i = index">
                 <td class="px-4 py-2">
                   <div class="flex items-center gap-3">
-                    <img [src]="r.photo || '/assets/images/profile/user-b.png'" class="w-9 h-9 rounded-full object-cover" />
-                  
+                    <img [src]="r.photo || '/assets/images/profile/user-b.png'" class="w-10 h-10 rounded-full object-cover" alt="{{ r.name }}" />
                   </div>
                 </td>
                 <td class="px-4 py-2">
-                     <div class="text-sm text-gray-900">{{ r.name || '—' }}</div>
+                     <div class="text-sm font-medium text-gray-900">{{ r.name || 'Unknown Artist' }}</div>
+                     <div class="text-xs text-gray-500">ID: {{ r.id_artist }}</div>
                 </td>
                 <td class="px-4 py-2">
-                  <div class="flex items-center gap-2">
-                       <div class="text-sm text-gray-900">{{ (r.instrument | titlecase) || '—' }}</div>
-                  
+                  <div class="inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm">
+                    <i class="fa-solid fa-music mr-2"></i>
+                    {{ (r.instrument | titlecase) || 'Unknown Instrument' }}
                   </div>
-                  <!-- <div class="mt-2 flex flex-wrap gap-2">
-                    <span *ngFor="let it of r.instruments" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-800 text-xs">
-                      {{ it.label | titlecase }}
-                      <button type="button" (click)="removeRowInstrument(i, it.id_instrument)">
-                        <i class="fa-solid fa-xmark text-gray-500"></i>
-                      </button>
-                    </span>
-                  </div> -->
                 </td>
                 <td class="px-4 py-2 text-right">
-                  <button type="button" class="px-3 py-1.5 rounded border" (click)="removeArtistRow(i)">Remove</button>
+                  <button type="button" class="px-3 py-1.5 rounded border border-red-300 text-red-600 hover:bg-red-50" (click)="removeArtistRow(i)">
+                    <i class="fa-solid fa-trash mr-1"></i>
+                    Remove
+                  </button>
                 </td>
               </tr>
             </tbody>
           </table>
+          
+          <ng-template #noArtists>
+            <div class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+              <i class="fa-solid fa-users text-4xl text-gray-400 mb-3"></i>
+              <p class="text-gray-600 font-medium mb-1">No Artists Added Yet</p>
+              <p class="text-sm text-gray-500">Click "Add Artist" button above to add artists to this event</p>
+            </div>
+          </ng-template>
         </div>
 
 

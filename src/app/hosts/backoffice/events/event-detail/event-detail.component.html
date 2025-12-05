@@ -33,23 +33,41 @@
           </div>
 
           <div class="space-y-2 text-sm text-gray-700">
-            <div *ngFor="let d of displayedDates" class="flex items-center">
-              <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
-              <span class="font-medium">{{ formatDate(d.date) }}</span>
-              <span class="mx-2">-</span>
-              <span class="font-medium">{{ formatTime(d.time) }}</span>
+            <div *ngIf="event.isPeriod" class="space-y-3">
+              <div *ngFor="let p of displayedDates">
+                <div class="flex items-center text-sm">
+                  <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+                  <span class="text-sm">{{ formatPeriodDate(p.start_date, p.end_date) }}</span>
+                  <span *ngIf="p.time" class="mx-2 text-sm">-</span>
+                  <span *ngIf="p.time" class=" text-sm">{{ formatTime(p.time) }}</span>
+                </div>
+               
+
+                <div  *ngIf="p.location " class="flex space-x-1 text-sm">
+                  <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
+                  <span class="text-gray-600 ">{{ p.location }}</span>
+                </div>
+
+              </div>
             </div>
+            <div *ngIf="!event.isPeriod">
+              <div *ngFor="let d of displayedDates" class="flex items-center">
+                <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+                <span class="font-medium">{{ formatDate(d.date) }}</span>
+                <span class="mx-2">-</span>
+                <span class="font-medium">{{ formatTime(d.time) }}</span> 
+                <i class="ml-4 fa-solid fa-location-dot text-pont-green mt-1"></i>
+                <span class="font-medium">{{ d.location }}</span> 
+              </div>
+          
+           
+          </div>
             <button *ngIf="hasMoreDates" (click)="toggleDates()" class="text-green-700 underline text-xs mt-1">
               {{ showAllDates ? 'Hide dates' : 'View all dates' }}
             </button>
           </div>
 
-          <div class="flex space-x-1 text-lg">
-            <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
-            <p class="text-gray-500">{{event.location.name | titlecase}},</p>
-            <p class="text-gray-500">{{event.location.city | titlecase}}</p>
-            <p class="text-gray-500">{{event.location.zip | uppercase}}</p>
-          </div>
+      
 
           <div class="flex space-x-3">
             <a *ngIf="event.bookingUrl" [href]="event.bookingUrl" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-full px-5 py-3 bg-pont-rust hover:opacity-90 text-white rounded">
@@ -64,10 +82,9 @@
   <section class="bg-white py-6">
     <div class="max-w-7xl mx-auto px-4">
       <div class="mb-6">
-        <div class="grid grid-cols-6 w-full bg-gray-100 rounded-md p-1">
+        <div class="grid grid-cols-5 w-full bg-gray-100 rounded-md p-1">
           <button (click)="step=1" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===1, 'text-gray-600': step!==1 }">Detail</button>
           <button (click)="step=2" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===2, 'text-gray-600': step!==2 }">Dates</button>
-          <button (click)="step=3" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===3, 'text-gray-600': step!==3 }">Shows</button>
           <button (click)="step=4" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===4, 'text-gray-600': step!==4 }">Image</button>
           <button (click)="step=5" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===5, 'text-gray-600': step!==5 }">Media</button>
           <button (click)="step=6" class="px-4 py-2 rounded text-sm font-medium transition" [ngClass]="{ 'bg-white text-gray-900 shadow': step===6, 'text-gray-600': step!==6 }">Artists</button>
@@ -76,27 +93,18 @@
 
       <div [ngSwitch]="step">
         <div *ngSwitchCase="1">
-          <div class="grid lg:grid-cols-2 gap-8">
+          <div class="gap-8">
             <div class="border rounded-lg">
               <div class="p-4 font-semibold flex items-center text-2xl">
                 <i class="fa-solid fa-music text-pont-green mr-2"></i>
-                About This Concert
+                About This {{event.eventType}}
               </div>
               <div class="p-4">
-                <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ event.description | stripHtml }}</p>
+                <p class="text-gray-700 leading-relaxed whitespace-pre-line text-sm">{{ event.description | stripHtml }}</p>
               </div>
             </div>
 
-            <div class="border rounded-lg">
-              <div class="p-4 font-semibold text-2xl">Shows</div>
-              <div class="p-4 space-y-4">
-                <div *ngFor="let piece of event.shows" class="border-l-4 border-green-700 pl-4">
-                  <h4 class="font-semibold text-gray-900">{{ piece.composer | stripHtml }}</h4>
-                  <p class="text-gray-700">{{ piece.piece | stripHtml }}</p>
-                  <p class="text-sm text-gray-500">{{ piece.duration | stripHtml }}</p>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
 
@@ -106,7 +114,24 @@
               <i class="fa-regular fa-calendar-days text-pont-green mr-2"></i>
               Dates
             </div>
-            <div class="p-4 space-y-2 text-sm text-gray-700">
+            <div class="p-4 space-y-3 text-sm text-gray-700" *ngIf="event.isPeriod">
+              <div *ngFor="let p of event.period" class="p-3 rounded bg-gray-50">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+                    <span class="font-medium">{{ formatPeriodDate(p.start_date, p.end_date) }}</span>
+                    <span *ngIf="p.time" class="mx-2">-</span>
+                    <span *ngIf="p.time" class="font-medium">{{ formatTime(p.time) }}</span>
+                  </div>
+                  <i class="fa-regular fa-clock text-gray-400"></i>
+                </div>
+                <div *ngIf="p.location" class="flex items-center ml-8 mt-2">
+                  <i class="fa-solid fa-location-dot text-pont-green mr-3"></i>
+                  <span class="text-gray-600">{{ p.location }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-4 space-y-2 text-sm text-gray-700" *ngIf="!event.isPeriod">
               <div *ngFor="let d of event.dates" class="flex items-center justify-between p-2 rounded bg-gray-50">
                 <div>
                   <span class="font-medium">{{ formatDate(d.date) }}</span>
@@ -119,21 +144,7 @@
           </div>
         </div>
 
-        <div *ngSwitchCase="3">
-          <div class="border rounded-lg">
-            <div class="p-4 font-semibold flex items-center text-2xl">
-              <i class="fa-solid fa-music text-pont-green mr-2"></i>
-              Programme (Shows)
-            </div>
-            <div class="p-4 space-y-3">
-              <div *ngFor="let s of event.shows" class="border-l-4 border-green-700 pl-3">
-                <div class="font-semibold text-gray-900 text-sm">{{ s.composer }}</div>
-                <div class="text-gray-700 text-sm">{{ s.piece }}</div>
-                <div class="text-gray-500 text-xs" *ngIf="s.duration">{{ s.duration }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Step 3: Shows - REMOVED (no event_shows table in schema) -->
 
         <div *ngSwitchCase="4">
           <div class="border rounded-lg p-4 space-y-3">
@@ -159,7 +170,7 @@
                   <div class="flex flex-row space-x-4">
                     <img [src]="m.image || '/assets/images/profile/c1.png'" class="w-16 h-16 object-cover rounded" />
                     <div>
-                    <div class="text-xs text-gray-500">{{ m.id_media===1 ? 'Video' : 'CD' }}</div>
+                    <div class="text-xs text-gray-500">{{ m.id_media_type===1 ? 'Video' : 'CD' }}</div>
                     <div class="font-semibold text-gray-900">{{ m.title }}</div>
                     <div class="text-gray-700 text-sm" *ngIf="m.description">{{ m.description }}</div>
                     <a *ngIf="m.url" [href]="m.url" target="_blank" rel="noopener" class="text-pont-green text-sm underline">Open Link</a>

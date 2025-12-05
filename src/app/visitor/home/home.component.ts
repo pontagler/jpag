@@ -10,6 +10,8 @@ interface EventDateItem {
   date: string | Date | null | undefined;
   time: string | null | undefined;
   location?: string | null | undefined;
+  flag?: string | null | undefined;
+  end_date?: string | Date | null | undefined;
 }
 
 @Component({
@@ -59,10 +61,13 @@ async getUpcomingEvents(){
 
 try{
   this.visitorService.getUpcomingEvents().then((res)=>{
+    console.log('Raw API response:', res);
     const arr = Array.isArray(res) ? res : [];
     this.eventArray = arr.map((raw: any) => this.normalizeHomeEvent(raw));
+    console.log('Normalized eventArray:', this.eventArray);
     this.expandedEvents = new Array(this.eventArray?.length || 0).fill(false);
     this.limitedEvents = this.eventArray.slice(0, 4);
+    console.log('Limited events:', this.limitedEvents);
   })
 }catch(error:any){
 this.alertService.showAlert('Internal Error', error.message, 'error');
@@ -73,10 +78,35 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
     this.expandedEvents[index] = !this.expandedEvents[index];
   }
 
-  getVisibleDates(event: any, index: number): EventDateItem[] {
-    const dates: EventDateItem[] = Array.isArray(event?.event_dates) ? event.event_dates : [];
-    if (!dates.length) return [];
-    return this.expandedEvents[index] ? dates : dates.slice(0, 2);
+  getVisibleDates(event: any, index: number): any[] {
+    console.log('getVisibleDates for event:', event.id, 'isPeriod:', event?.isPeriod);
+    if (event?.isPeriod) {
+      const periods = Array.isArray(event?.period) ? event.period : [];
+      console.log('Periods array:', periods);
+      if (!periods.length) return [];
+      return this.expandedEvents[index] ? periods : periods.slice(0, 2);
+    } else {
+      const dates = Array.isArray(event?.dates) ? event.dates : [];
+      console.log('Dates array:', dates);
+      if (!dates.length) return [];
+      return this.expandedEvents[index] ? dates : dates.slice(0, 2);
+    }
+  }
+
+  getTotalDatesCount(event: any): number {
+    if (event?.isPeriod) {
+      return Array.isArray(event?.period) ? event.period.length : 0;
+    } else {
+      return Array.isArray(event?.dates) ? event.dates.length : 0;
+    }
+  }
+
+  formatPeriodDate(startDate: string | Date | null | undefined, endDate: string | Date | null | undefined): string {
+    if (!startDate) return '';
+    const start = this.formatDate(startDate);
+    if (!endDate) return start;
+    const end = this.formatDate(endDate);
+    return `${start} - ${end}`;
   }
 
    formatDate(dateString: string | Date | null | undefined): string {
@@ -112,9 +142,11 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
     return artist?.id_artist ?? index;
   }
 
-  isShowPast(d: EventDateItem): boolean {
-    if (!d?.date) return false;
-    const datePart = new Date(d.date);
+  isShowPast(d: any): boolean {
+    // Handle both date objects and period objects
+    const dateToCheck = d?.date || d?.start_date;
+    if (!dateToCheck) return false;
+    const datePart = new Date(dateToCheck);
     if (isNaN(datePart.getTime())) return false;
     let combined = new Date(datePart);
     if (d.time) {
@@ -149,8 +181,22 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
   }
 
   private normalizeHomeEvent(raw: any): any {
-    const eventDates: EventDateItem[] = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
-    const location = eventDates.length > 0 ? (eventDates[0] as any)?.location || '' : '';
+    // Handle new event_dates structure: { dates: [], period: [], is_period: boolean }
+    const eventDatesObj = raw?.event_dates || {};
+    console.log('Event dates object:', eventDatesObj);
+    const isPeriod = eventDatesObj.is_period || false;
+    const dates = Array.isArray(eventDatesObj.dates) ? eventDatesObj.dates : [];
+    const period = Array.isArray(eventDatesObj.period) ? eventDatesObj.period : [];
+    console.log('isPeriod:', isPeriod, 'dates:', dates, 'period:', period);
+    
+    // Get location from first date or period entry
+    let location = '';
+    if (isPeriod && period.length > 0) {
+      location = period[0]?.location || '';
+    } else if (dates.length > 0) {
+      location = dates[0]?.location || '';
+    }
+    
     const instruments = Array.isArray(raw?.event_instruments)
       ? raw.event_instruments.map((i: any) => ({ instrument: i?.name || '' })).filter((x: any) => !!x.instrument)
       : [];
@@ -174,7 +220,10 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
       location,
       instruments,
       artistDisplay,
-      editionDisplay
+      editionDisplay,
+      isPeriod,
+      dates,
+      period
     };
   }
 

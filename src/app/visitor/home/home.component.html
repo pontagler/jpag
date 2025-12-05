@@ -111,15 +111,34 @@ Pour leur permettre de roder leur programme et de développer leur répertoire.
                   </div> -->
 
                       <div class="space-y-1 text-sm text-gray-700 min-h-16">
-            <div *ngFor="let d of getVisibleDates(event, i); let idx = index" class="flex items-center min-w-0">
-                <i class="fa-regular fa-calendar text-pont-green mr-3" aria-hidden="true"></i>
-              <span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{ d?.date | date:'dd-MMM' }}</span>
-              <span class="mx-2">•</span>
-              <span class="text-xs" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">{{ (d?.time || '') | slice:0:5 }}</span>
-              <span class="mx-2">•</span>
-              <span class="text-xs truncate max-w-[10rem]" [ngClass]="{'line-through text-gray-400': isShowPast(d)}"><i class="fa-solid fa-location-dot mr-1"></i> {{ d?.location }}</span>
+            <!-- Period display (isPeriod = true) -->
+            <div *ngIf="event.isPeriod">
+              <div *ngFor="let p of getVisibleDates(event, i); let idx = index" class="min-w-0 mb-2" [ngClass]="{'line-through text-gray-400': isShowPast(p)}">
+                <div class="flex items-center">
+                  <i class="fa-regular fa-calendar text-pont-green mr-3" aria-hidden="true"></i>
+                  <span class="text-xs">{{ formatPeriodDate(p?.start_date, p?.end_date) }}</span>
+                  <span class="mx-2">•</span>
+                  <span class="text-xs">{{ (p?.time || '') | slice:0:5 }}</span> 
+                 
+                </div>
+                <div *ngIf="p?.location" class="flex items-center  mt-1">
+                  <i class="fa-solid fa-location-dot text-pont-green mr-2"></i>
+                  <span class="text-xs">{{ p?.location }}</span>
+                </div>
+              </div>
             </div>
-            <button *ngIf="(event.event_dates?.length || 0) > 2" (click)="toggleDates(i)" class="text-pont-green underline text-xs mt-1">
+            <!-- Date display (isPeriod = false) -->
+            <div *ngIf="!event.isPeriod">
+              <div *ngFor="let d of getVisibleDates(event, i); let idx = index" class="flex items-center min-w-0 mb-1" [ngClass]="{'line-through text-gray-400': isShowPast(d)}">
+                <i class="fa-regular fa-calendar text-pont-green mr-3" aria-hidden="true"></i>
+                <span class="text-xs">{{ d?.date | date:'dd-MMM' }}</span>
+                <span class="mx-2">•</span>
+                <span class="text-xs">{{ (d?.time || '') | slice:0:5 }}</span>
+                <span class="mx-2">•</span>
+                <span class="text-xs truncate max-w-[10rem]"><i class="fa-solid fa-location-dot mr-1"></i> {{ d?.location }}</span>
+              </div>
+            </div>
+            <button *ngIf="getTotalDatesCount(event) > 2" (click)="toggleDates(i)" class="text-pont-green underline text-xs mt-1">
               {{ expandedEvents[i] ? 'Hide all dates' : 'View all dates' }}
             </button>
           </div>

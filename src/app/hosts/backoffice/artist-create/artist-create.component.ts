@@ -98,7 +98,7 @@ next2(){
         phone: [''],
         website: [''],
         city: [''],
-        province: [''],
+        address: [''],
         country: [''],
         profilePic: [''],
       }),

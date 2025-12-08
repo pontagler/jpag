@@ -6,7 +6,7 @@
           { id: 'details', label: 'Details' },
           { id: 'portfolio', label: 'Portfolio' },
           { id: 'requirement', label: 'Requirement' },
-          { id: 'timeoff', label: 'Availability' },
+          
           { id: 'education', label: 'Education & Awards' },
           { id: 'system', label: 'System' },
           { id: 'account', label: 'Account' }
@@ -109,17 +109,18 @@
             class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
+       
+        
+        <div class="mb-4">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Address</label>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.proviance || "N/A" }}</div>
+          <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.address" class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
         <div class="mb-4">
           <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">City</label>
           <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.city || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.city"
-            class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-        </div>
-        
-        <div class="mb-4">
-          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Province</label>
-          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.proviance || "N/A" }}</div>
-          <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.proviance"
             class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
@@ -176,9 +177,9 @@
               <img
                 [src]="artistProfile.cover || 'assets/default-profile.jpg'"
                 [alt]="(artistProfile.fname || '') + ' ' + (artistProfile.lname || '')"
-                class="w-24 h-24 object-cover rounded-full border-2 border-gray-300"
+                class="w-24 h-24 object-cover border-2 border-gray-300"
               />
-              <div *ngIf="!updateDetailBtn || isUploadingProfile" class="absolute inset-0 rounded-full bg-black/50 transition-opacity duration-200 flex items-center justify-center" [ngClass]="isUploadingProfile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
+              <div *ngIf="!updateDetailBtn || isUploadingProfile" class="absolute inset-0 bg-black/50 transition-opacity duration-200 flex items-center justify-center" [ngClass]="isUploadingProfile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
                 <ng-container *ngIf="isUploadingProfile; else changeBtn1">
                   <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -250,7 +251,7 @@
         </span>
         <div>
           <h2 class="text-lg font-semibold text-gray-900">Availability </h2>
-          <p class="text-sm text-gray-500">Manage artist unavailability</p>
+          <p class="text-sm text-gray-500">Manage artist Availability</p>
         </div>
       </div>
       <div class="flex flex-wrap gap-2">

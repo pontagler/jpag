@@ -61,12 +61,22 @@ async getEventsList_v1(){
   return data;
 }
 
+
+
   //Get Event details
   async getEventDetail(id:any){
     const { data, error } = await supabase.rpc('get_single_events_with_details', { p_event_id: id });
     if (error) throw error;
     return data;
   }
+
+
+    //Get Event details
+    async getEventDetail_v1(id:any){
+      const { data, error } = await supabase.rpc('get_single_events_with_details_v1', { p_event_id: id });
+      if (error) throw error;
+      return data;
+    }
 
   async getEventDetailHost(id:any){
     const { data, error } = await supabase.rpc('get_single_events_with_details_host_v1', { p_event_id: id });

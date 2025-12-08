@@ -155,32 +155,35 @@
           </div>
           <p class="text-xs text-gray-500">Add one or more date/time slots for your event. Use 24h time format.</p>
           <div class="space-y-4" formArrayName="dates">
-            <div *ngFor="let d of eventDates.controls; let i = index" [formGroupName]="i" class="border rounded-lg p-4 space-y-3">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <label class="text-xs text-gray-600">Start Date *
-                  <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="start_date" />
-                </label>
-                <label class="text-xs text-gray-600">End Date (Optional)
-                  <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="end_date" />
-                  <span class="text-xs text-gray-500">Leave empty for single day events</span>
-                </label>
-                <label class="text-xs text-gray-600">Time *
-                  <input type="time" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="time" />
-                </label>
-              </div>
+            <div *ngFor="let d of eventDates.controls; let i = index" [formGroupName]="i" class="border rounded-lg p-4 space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="text-xs text-gray-600">Date Type *
+                  <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="flag" (change)="onDateTypeChange(i)">
+                    <option value="">Select date type</option>
+                    <option value="p">Period (multi-day)</option>
+                    <option value="d">Date (single day)</option>
+                  </select>
+                  <span class="text-xs text-gray-500">Choose how this event slot should be scheduled</span>
+                </label>
                 <label class="text-xs text-gray-600">Location (Optional)
                   <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="id_location">
                     <option [ngValue]="null">Use event default location</option>
                     <option *ngFor="let l of locations" [ngValue]="l.id">{{ l.name | titlecase }}</option>
                   </select>
+                  <span class="text-xs text-gray-500">Leave empty to fallback to the default event venue</span>
                 </label>
-                <label class="text-xs text-gray-600">Flag *
-                  <select class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="flag">
-                    <option value="">Select flag</option>
-                    <option value="p">Period</option>
-                    <option value="d">Date</option>
-                  </select>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <label class="text-xs text-gray-600">Start Date *
+                  <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="start_date" />
+                </label>
+                <label class="text-xs text-gray-600" *ngIf="isPeriod(i)">End Date *
+                  <input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="end_date" />
+                  <span class="text-xs text-gray-500">Required for date ranges</span>
+                </label>
+                <label class="text-xs text-gray-600" *ngIf="isSingleDate(i)">Time *
+                  <input type="time" class="w-full px-3 py-2 rounded-lg border border-gray-200" formControlName="time" />
+                  <span class="text-xs text-gray-500">24h time (e.g. 18:30)</span>
                 </label>
               </div>
               <div class="flex justify-end">
@@ -203,13 +206,13 @@
                 <span>{{ d.value.start_date }}</span>
                 <span *ngIf="d.value.end_date"> - {{ d.value.end_date }}</span>
               </div>
-              <div class="text-sm text-gray-600 ml-6">
+              <div class="text-sm text-gray-600 ml-6" *ngIf="d.value.flag === 'd' && d.value.time">
                 <i class="fa-regular fa-clock mr-2"></i>
                 <span>{{ d.value.time }}</span>
               </div>
               <div *ngIf="d.value.flag" class="text-xs text-gray-500 ml-6">
                 <i class="fa-solid fa-flag mr-2"></i>
-                <span>{{ d.value.flag }}</span>
+                <span>{{ d.value.flag === 'p' ? 'Period' : 'Date' }}</span>
               </div>
             </div>
           </div>

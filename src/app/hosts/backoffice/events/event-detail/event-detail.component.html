@@ -34,34 +34,31 @@
 
           <div class="space-y-2 text-sm text-gray-700">
             <div *ngIf="event.isPeriod" class="space-y-3">
-              <div *ngFor="let p of displayedDates">
-                <div class="flex items-center text-sm">
-                  <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
-                  <span class="text-sm">{{ formatPeriodDate(p.start_date, p.end_date) }}</span>
-                  <span *ngIf="p.time" class="mx-2 text-sm">-</span>
-                  <span *ngIf="p.time" class=" text-sm">{{ formatTime(p.time) }}</span>
-                </div>
-               
-
-                <div  *ngIf="p.location " class="flex space-x-1 text-sm">
-                  <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
-                  <span class="text-gray-600 ">{{ p.location }}</span>
-                </div>
-
+              <div *ngFor="let p of displayedDates" class="flex flex-wrap items-center gap-2">
+                <i class="fa-regular fa-calendar text-pont-green"></i>
+                <span class="font-medium">{{ formatPeriodDate(p.start_date, p.end_date) }}</span>
+                <ng-container *ngIf="p.location">
+                  <span class="text-gray-500">:</span>
+                  <i class="fa-solid fa-location-dot text-pont-green"></i>
+                  <span class="text-gray-700">{{ p.location }}</span>
+                </ng-container>
               </div>
             </div>
-            <div *ngIf="!event.isPeriod">
-              <div *ngFor="let d of displayedDates" class="flex items-center">
-                <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+            <div *ngIf="!event.isPeriod" class="space-y-2">
+              <div *ngFor="let d of displayedDates" class="flex flex-wrap items-center gap-2">
+                <i class="fa-regular fa-calendar text-pont-green"></i>
                 <span class="font-medium">{{ formatDate(d.date) }}</span>
-                <span class="mx-2">-</span>
-                <span class="font-medium">{{ formatTime(d.time) }}</span> 
-                <i class="ml-4 fa-solid fa-location-dot text-pont-green mt-1"></i>
-                <span class="font-medium">{{ d.location }}</span> 
+                <ng-container *ngIf="d.time">
+                  <span class="text-gray-500">:</span>
+                  <span class="font-medium">{{ formatTime(d.time) }}</span>
+                </ng-container>
+                <ng-container *ngIf="d.location">
+                  <span class="text-gray-500">-</span>
+                  <i class="fa-solid fa-location-dot text-pont-green"></i>
+                  <span class="font-medium">{{ d.location }}</span>
+                </ng-container>
               </div>
-          
-           
-          </div>
+            </div>
             <button *ngIf="hasMoreDates" (click)="toggleDates()" class="text-green-700 underline text-xs mt-1">
               {{ showAllDates ? 'Hide dates' : 'View all dates' }}
             </button>
@@ -116,27 +113,34 @@
             </div>
             <div class="p-4 space-y-3 text-sm text-gray-700" *ngIf="event.isPeriod">
               <div *ngFor="let p of event.period" class="p-3 rounded bg-gray-50">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center">
-                    <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <i class="fa-regular fa-calendar text-pont-green"></i>
                     <span class="font-medium">{{ formatPeriodDate(p.start_date, p.end_date) }}</span>
-                    <span *ngIf="p.time" class="mx-2">-</span>
-                    <span *ngIf="p.time" class="font-medium">{{ formatTime(p.time) }}</span>
+                    <ng-container *ngIf="p.location">
+                      <span class="text-gray-500">:</span>
+                      <i class="fa-solid fa-location-dot text-pont-green"></i>
+                      <span class="text-gray-700">{{ p.location }}</span>
+                    </ng-container>
                   </div>
                   <i class="fa-regular fa-clock text-gray-400"></i>
-                </div>
-                <div *ngIf="p.location" class="flex items-center ml-8 mt-2">
-                  <i class="fa-solid fa-location-dot text-pont-green mr-3"></i>
-                  <span class="text-gray-600">{{ p.location }}</span>
                 </div>
               </div>
             </div>
             <div class="p-4 space-y-2 text-sm text-gray-700" *ngIf="!event.isPeriod">
-              <div *ngFor="let d of event.dates" class="flex items-center justify-between p-2 rounded bg-gray-50">
-                <div>
+              <div *ngFor="let d of event.dates" class="flex items-center justify-between p-2 rounded bg-gray-50 flex-wrap gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <i class="fa-regular fa-calendar text-pont-green"></i>
                   <span class="font-medium">{{ formatDate(d.date) }}</span>
-                  <span class="mx-1">•</span>
-                  <span>{{ formatTime(d.time) }}</span>
+                  <ng-container *ngIf="d.time">
+                    <span class="text-gray-500">:</span>
+                    <span class="font-medium">{{ formatTime(d.time) }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="d.location">
+                    <span class="text-gray-500">-</span>
+                    <i class="fa-solid fa-location-dot text-pont-green"></i>
+                    <span class="text-gray-700">{{ d.location }}</span>
+                  </ng-container>
                 </div>
                 <i class="fa-regular fa-clock text-gray-400"></i>
               </div>

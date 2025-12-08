@@ -247,7 +247,7 @@ export class EventsComponent implements OnInit {
 					if (isNaN(da) && isNaN(db)) return 0;
 					if (isNaN(da)) return 1;
 					if (isNaN(db)) return -1;
-					return this.sortBy === 'date-asc' ? (db - da) : (da - db);
+					return this.sortBy === 'date-asc' ? (da - db) : (db - da);
 				}
 				const getStr = (ev: any): string => {
 					switch (this.sortBy) {

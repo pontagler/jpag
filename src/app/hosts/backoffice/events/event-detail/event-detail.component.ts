@@ -174,7 +174,15 @@ export class EventDetailComponent implements OnInit {
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
 
-  formatPeriodDate(startDate: string, endDate: string): string {
-    return `From ${this.formatDate(startDate)} to ${this.formatDate(endDate)}`;
+  formatPeriodDate(
+    startDate: string | Date | null | undefined,
+    endDate: string | Date | null | undefined
+  ): string {
+    const start = this.formatDate(startDate);
+    const end = this.formatDate(endDate);
+    if (start && end) {
+      return `${start} - ${end}`;
+    }
+    return start || end || '';
   }
 }

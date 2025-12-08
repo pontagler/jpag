@@ -40,7 +40,7 @@ export class DetailComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     try {
-      const data = await this.eventService.getEventDetail(id as any);
+      const data = await this.eventService.getEventDetail_v1(id as any);
       const raw = Array.isArray(data) ? (data[0] || null) : (data || null);
       if (!raw) {
         this.errorMessage = 'Event not found.';
@@ -100,7 +100,35 @@ export class DetailComponent implements OnInit {
   }
 
   private normalizeEvent(raw: any): any {
-    const eventDates = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
+    const isPeriod = Boolean(raw?.is_period);
+    const periodArray = Array.isArray(raw?.period) ? raw.period : [];
+    const eventDatesArray = Array.isArray(raw?.event_dates) ? raw.event_dates : [];
+    
+    // Convert to dates format based on is_period flag
+    let dates: any[] = [];
+    if (isPeriod && periodArray.length > 0) {
+      // Handle period events - convert period array to dates format
+      dates = periodArray.map((p: any) => ({
+        id: p?.id,
+        date: p?.start_date,
+        end_date: p?.end_date,
+        time: p?.time,
+        location: p?.location || '',
+        id_location: p?.id_location ?? p?.location_id ?? null,
+        isPeriod: true
+      }));
+    } else {
+      // Handle discrete date events
+      dates = eventDatesArray.map((d: any) => ({
+        id: d?.id,
+        date: d?.start_date || d?.date,
+        time: d?.time,
+        location: d?.location || '',
+        id_location: d?.id_location ?? d?.location_id ?? null,
+        isPeriod: false
+      }));
+    }
+
     const shows = Array.isArray(raw?.event_shows) ? raw.event_shows : [];
     const artists = Array.isArray(raw?.event_artists) ? raw.event_artists : [];
     const media = Array.isArray(raw?.event_media) ? raw.event_media : [];
@@ -141,13 +169,7 @@ export class DetailComponent implements OnInit {
       description: raw?.description || '',
       bookingUrl: raw?.booking_url || '',
       editionDisplay,
-      dates: eventDates.map((d: any) => ({
-        id: d?.id,
-        date: d?.date,
-        time: d?.time,
-        location: d?.location || '',
-        id_location: d?.id_location ?? d?.location_id ?? null
-      })),
+      dates,
       shows: shows.map((s: any) => ({
         id: s?.id,
         composer: s?.title,
@@ -158,7 +180,7 @@ export class DetailComponent implements OnInit {
         .map((i: any) => (i?.instrument || i?.name))
         .filter((v: any) => !!v),
       location: {
-        name: raw?.location?.name || (Array.isArray(eventDates) && eventDates[0]?.location) || '',
+        name: raw?.location?.name || (Array.isArray(dates) && dates[0]?.location) || '',
         address: raw?.location?.address || '',
         city: raw?.location?.city || '',
         country: raw?.location?.country || '',

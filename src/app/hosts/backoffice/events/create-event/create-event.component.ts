@@ -132,6 +132,62 @@ loggedUser:any;
   get teaserLength(): number { return (this.detailsForm.get('teaser')?.value || '').length; }
   get descriptionLength(): number { return (this.detailsForm.get('description')?.value || '').length; }
 
+  private buildDateGroup(data?: Partial<{ start_date: string; end_date: string; time: string; id_location: number | null; flag: string }>): FormGroup {
+    const group = this.fb.group({
+      start_date: [data?.start_date || '', Validators.required],
+      end_date: [data?.end_date || ''],
+      time: [data?.time || ''],
+      id_location: [data?.id_location ?? null],
+      flag: [data?.flag || '', Validators.required]
+    });
+    this.applyDateTypeRules(group);
+    return group;
+  }
+
+  private applyDateTypeRules(group: FormGroup): void {
+    const flag = (group.get('flag')?.value || '') as string;
+    const timeCtrl = group.get('time');
+    const endCtrl = group.get('end_date');
+
+    if (flag === 'p') {
+      endCtrl?.setValidators([Validators.required]);
+      timeCtrl?.clearValidators();
+      if (timeCtrl?.value) timeCtrl.setValue('', { emitEvent: false });
+    } else if (flag === 'd') {
+      timeCtrl?.setValidators([Validators.required]);
+      endCtrl?.clearValidators();
+      if (endCtrl?.value) endCtrl.setValue('', { emitEvent: false });
+    } else {
+      timeCtrl?.clearValidators();
+      endCtrl?.clearValidators();
+    }
+
+    timeCtrl?.updateValueAndValidity({ emitEvent: false });
+    endCtrl?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  onDateTypeChange(index: number): void {
+    const group = this.eventDates.at(index) as FormGroup | undefined;
+    if (!group) return;
+    this.applyDateTypeRules(group);
+  }
+
+  isPeriod(index: number): boolean {
+    const group = this.eventDates.at(index) as FormGroup | undefined;
+    return (group?.get('flag')?.value || '') === 'p';
+  }
+
+  isSingleDate(index: number): boolean {
+    const group = this.eventDates.at(index) as FormGroup | undefined;
+    return (group?.get('flag')?.value || '') === 'd';
+  }
+
+  private formatTimeForInput(value?: string | null): string {
+    if (!value) return '';
+    const asString = value.toString();
+    return asString.length >= 5 ? asString.substring(0, 5) : asString;
+  }
+
   onEventDomainChange(): void {
     // Event domain changed - currently doesn't filter anything, but can be used for future filtering
     const id_event_domain = this.detailsForm.get('id_event_domain')?.value as number | null;
@@ -152,13 +208,7 @@ loggedUser:any;
 
   // Dates
   addDate(): void {
-    this.eventDates.push(this.fb.group({
-      start_date: ['', Validators.required],
-      end_date: [''],
-      time: ['', Validators.required],
-      id_location: [null],
-      flag: ['', Validators.required]
-    }));
+    this.eventDates.push(this.buildDateGroup());
   }
 
   removeDate(index: number): void {
@@ -401,13 +451,21 @@ loggedUser:any;
         return;
       }
       try {
-        const rows = (this.eventDates.value as Array<any>).map(x => ({
-          start_date: x.start_date,
-          end_date: x.end_date || null,
-          time: x.time?.length === 5 ? `${x.time}:00` : x.time,
-          id_location: x.id_location || null,
-          flag: x.flag || null
-        }));
+        const rows = (this.eventDates.value as Array<any>).map(x => {
+          const isSingleDate = x.flag === 'd';
+          const isPeriod = x.flag === 'p';
+          const normalizedTime = isSingleDate && x.time
+            ? (x.time.length === 5 ? `${x.time}:00` : x.time)
+            : null;
+
+          return {
+            start_date: x.start_date,
+            end_date: isPeriod ? (x.end_date || null) : (x.start_date || null),
+            time: normalizedTime,
+            id_location: x.id_location || null,
+            flag: x.flag || null
+          };
+        });
         if (!this.createdEventId) {
           this.alertService.showAlert('Error', 'Event id missing. Complete details first.', 'error');
           this.showAnILoader = false;
@@ -534,12 +592,12 @@ loggedUser:any;
       const dates = await this.eventService.getEventDates(id_event);
       this.eventDates.clear();
       (dates || []).forEach((d: any) => {
-        this.eventDates.push(this.fb.group({
-          start_date: [d.start_date || '', Validators.required],
-          end_date: [d.end_date || ''],
-          time: [d.time || '', Validators.required],
-          id_location: [d.id_location || null],
-          flag: [d.flag || '', Validators.required]
+        this.eventDates.push(this.buildDateGroup({
+          start_date: d.start_date || '',
+          end_date: d.end_date || '',
+          time: d.flag === 'd' ? this.formatTimeForInput(d.time) : '',
+          id_location: d.id_location || null,
+          flag: d.flag || ''
         }));
       });
       if (this.eventDates.length === 0) this.addDate();

@@ -61,17 +61,29 @@
           </div>
 
           <div class="space-y-2 text-sm text-gray-700">
-            <div *ngFor="let d of displayedDates" class="flex items-center flex-wrap gap-2" [ngClass]="{ 'line-through opacity-60': isDateTimePast(d) }">
-                <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
-              <span class="font-medium">{{ formatDate(d.date) }}</span>
-              <span class="mx-2">-</span>
-              <span class="font-medium">{{ formatTime(d.time) }}</span>
-              <span class="mx-2">•</span>
-              <span class="text-gray-600">
-                <i class="fa-solid fa-location-dot text-pont-green mt-1"></i>
-                <a *ngIf="d.id_location; else plainLoc" [routerLink]="['/locations', d.id_location]" class="underline hover:opacity-80">{{ d.location }}</a>
-                <ng-template #plainLoc>{{ d.location }}</ng-template>
-              </span>
+            <div *ngFor="let d of displayedDates" class="flex items-center min-w-0" [ngClass]="{ 'line-through opacity-60': isDateTimePast(d) }">
+              <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
+              <ng-container *ngIf="d?.isPeriod && d?.end_date">
+                <span class="text-sm">{{ formatDate(d.date) }} - {{ formatDate(d.end_date) }} : </span>
+                <span class="text-sm text-gray-600 ml-1">
+                  <i class="fa-solid fa-location-dot text-pont-green mr-1"></i>
+                  <a *ngIf="d.id_location; else plainLocPeriod" [routerLink]="['/locations', d.id_location]" class="underline hover:opacity-80">{{ d.location }}</a>
+                  <ng-template #plainLocPeriod>{{ d.location }}</ng-template>
+                </span>
+              </ng-container>
+              <ng-container *ngIf="!d?.isPeriod || !d?.end_date">
+                <span class="text-sm">{{ formatDate(d.date) }}</span>
+                <ng-container *ngIf="formatTime(d.time)">
+                  <span class="mx-1">:</span>
+                  <span class="text-sm">{{ formatTime(d.time) }}</span>
+                </ng-container>
+                <span class="mx-1">:</span>
+                <span class="text-sm text-gray-600">
+                  <i class="fa-solid fa-location-dot text-pont-green mr-1"></i>
+                  <a *ngIf="d.id_location; else plainLoc" [routerLink]="['/locations', d.id_location]" class="underline hover:opacity-80">{{ d.location }}</a>
+                  <ng-template #plainLoc>{{ d.location }}</ng-template>
+                </span>
+              </ng-container>
             </div>
             <button *ngIf="hasMoreDates" (click)="toggleDates()" class="text-green-700 underline text-xs mt-1">
               {{ showAllDates ? 'Hide dates' : 'View all dates' }}

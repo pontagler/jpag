@@ -384,19 +384,6 @@ loggedUser:any;
   async next(): Promise<void> {
     if (this.step === 1) {
       this.showAnILoader = true;
-      // Validate Details (exclude dates/shows)
-      const controlsToCheck = ['id_edition','id_event_type','title','description','status'];
-      let valid = true;
-      for (const key of controlsToCheck) {
-        const c = this.detailsForm.get(key);
-        if (c && c.invalid) valid = false;
-      }
-      if (!valid) {
-        this.detailsForm.markAllAsTouched();
-        this.alertService.showAlert('Validation', 'Please complete required fields in Detail', 'warning');
-        this.showAnILoader = false;
-        return;
-      }
       // Persist details first
       try {
         this.isSavingDetails = true;

@@ -1176,8 +1176,55 @@ async editArtistTimeOff(arr:any, id:any){
   async deleteAuthUser(userId: string): Promise<any> {
     // Using the service role client (supabase1) with admin privileges
     const { data, error } = await supabase1.auth.admin.deleteUser(userId);
-
     if (error) throw error;
     return data;
+  }
+    
+  // Send signup email to new artist
+  async sendArtistSignupEmail(email: string, name: string): Promise<void> {
+    try {
+      // Use Supabase auth to send magic link / invitation
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/artist/signup`,
+          data: {
+            name: name,
+            invited_as: 'artist'
+          }
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error sending signup email:', error);
+      throw new Error('Failed to send signup email: ' + error.message);
+    }
+  }
+
+  // Add pending artist to database
+  async addPendingArtist(name: string, email: string): Promise<string> {
+    try {
+      const nameParts = name.trim().split(' ');
+      const fname = nameParts[0] || '';
+      const lname = nameParts.slice(1).join(' ') || '';
+
+      const { data, error } = await supabase
+        .from('artists')
+        .insert({
+          fname: fname,
+          lname: lname,
+          email: email,
+          created_on: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      return data.id;
+    } catch (error: any) {
+      console.error('Error adding pending artist:', error);
+      throw new Error('Failed to add pending artist: ' + error.message);
+    }
   }
 }

@@ -61,6 +61,54 @@ async getEventsList_v1(){
   return data;
 }
 
+// Get events by artist (for event requests) - all statuses
+// artistId should be the id_profile (auth user ID) from the artists table
+// This matches the created_by column in the events table
+async getEventsByArtist(artistId: string): Promise<any[]> {
+  try {
+    console.log('getEventsByArtist called with id_profile (auth ID):', artistId);
+    
+    const { data, error } = await supabase
+      .from('events')
+      .select(`
+        id,
+        title,
+        teaser,
+        description,
+        status,
+        created_on,
+        photo,
+        comments,
+        created_by,
+        id_event_domain,
+        sys_event_domain!id_event_domain (
+          name
+        )
+      `)
+      .eq('created_by', artistId)
+      .order('created_on', { ascending: false });
+
+    console.log('Query result:', { data, error });
+    
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
+    
+    // Flatten the event_domain name
+    const formattedData = (data || []).map((event: any) => ({
+      ...event,
+      event_domain: event.sys_event_domain?.name || 'N/A'
+    }));
+    
+    console.log('Returning data count:', formattedData?.length || 0);
+    return formattedData;
+  } catch (error: any) {
+    console.error('Error fetching artist events:', error);
+    throw error;
+  }
+}
+
 
 
   //Get Event details
@@ -88,7 +136,7 @@ async getEventsList_v1(){
   async getEventBase(id: number){
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, teaser, long_teaser, id_edition, id_event_domain, id_event_type, id_host, description, booking_url, status, photo, credit_photo, is_active')
+      .select('id, title, teaser, long_teaser, id_edition, id_event_domain, id_event_type, id_host, description, booking_url, status, photo, credit_photo, is_active, comments')
       .eq('id', id)
       .single();
     if (error) throw error;
@@ -377,6 +425,7 @@ async getEventsList_v1(){
     credit_photo: string | null;
     status: number;
     is_active: boolean;
+    comments: string | null;
   }>): Promise<void> {
     const updated_by = await this.getAuthUserId();
     const { data, error } = await supabase
@@ -393,7 +442,7 @@ async getEventsList_v1(){
     console.log('Event updated successfully:', data);
   }
 
-  async insertEventDates(id_event: number, dates: Array<{ start_date: string; end_date?: string | null; time: string; id_location?: number | null; flag?: string | null }>) {
+  async insertEventDates(id_event: number, dates: Array<{ start_date: string; end_date?: string | null; time: string | null; id_location?: number | null; flag?: string | null }>) {
     if (!dates || dates.length === 0) return;
     const created_by = await this.getAuthUserId();
     const rows = dates.map(d => ({ 
@@ -409,7 +458,7 @@ async getEventsList_v1(){
     if (error) throw error;
   }
 
-  async replaceEventDates(id_event: number, dates: Array<{ start_date: string; end_date?: string | null; time: string; id_location?: number | null; flag?: string | null }>) {
+  async replaceEventDates(id_event: number, dates: Array<{ start_date: string; end_date?: string | null; time: string | null; id_location?: number | null; flag?: string | null }>) {
     // remove existing
     const { error: delErr } = await supabase
       .from('event_dates')

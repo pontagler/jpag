@@ -1,560 +1,926 @@
 <div class="w-full max-w-full overflow-hidden">
-  <!-- About Section -->
-
+  <!-- Tab Header -->
   <div class="bg-white rounded-lg p-1 shadow-md mb-4">
     <div class="grid grid-cols-2 gap-2">
       <div
         (click)="isActiveTab(1)"
         class="p-1 m-1 rounded-lg shadow-sm cursor-pointer text-center"
-        black
         [ngClass]="{
-          'bg-gray-100 text-black': activeTab() === 1,
+          'bg-pont-green text-white': activeTab() === 1,
           'text-black': activeTab() !== 1
         }"
       >
-        <p class="font-medium">New Request</p>
+        <p class="font-medium">New Event Request</p>
       </div>
       <div
-        (click)="isActiveTab(4)"
+        (click)="isActiveTab(2)"
         class="p-1 m-1 rounded-lg cursor-pointer text-center"
         [ngClass]="{
-          'bg-gray-100 text-black': activeTab() === 4,
-          'text-black': activeTab() !== 4
+          'bg-pont-green text-white': activeTab() === 2,
+          'text-black': activeTab() !== 2
         }"
       >
-        <p class="font-medium">All Request</p>
+        <p class="font-medium">All Requests</p>
       </div>
     </div>
   </div>
 
-  <div *ngIf="activeTab() === 1" class="bg-white rounded-xl p-4 shadow-md mb-4">
-    <!-- Event Type -->
-    <div>
-      <p class="mb-2 font-medium">Type of the Event</p>
-      <select
-        class="w-full p-2 border border-gray-300 rounded-lg mt-2"
-        [(ngModel)]="selectedRequestType"
-        [ngModelOptions]="{ standalone: true }"
+  <!-- NEW EVENT REQUEST TAB -->
+  <div *ngIf="activeTab() === 1" class="bg-white rounded-xl shadow-md p-6 space-y-6">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoadingData" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-8 flex flex-col items-center gap-4">
+        <div class="animate-spin text-indigo-600">
+          <svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>.spinner_ajPY{transform-origin:center;animation:spinner_AtaB .75s infinite linear}@keyframes spinner_AtaB{100%{transform:rotate(360deg)}}</style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+            <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_ajPY"/>
+          </svg>
+        </div>
+        <p class="text-lg font-medium text-gray-900">Loading Event...</p>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-gray-900">
+        {{ isEditMode ? 'Edit Event Request' : 'New Event Request' }}
+      </h2>
+      <button 
+        *ngIf="isEditMode"
+        (click)="resetForm(); activeTab.set(1);"
+        class="text-sm text-gray-600 hover:text-gray-900"
       >
-        <option [ngValue]="null" disabled selected>Select Event Type</option>
-        <option *ngFor="let x of requestType" [value]="x.id">
-          {{ x.name }}
-        </option>
-      </select>
-    </div>
-
-    <!-- Title -->
-    <div class="mt-4">
-      <p class="mb-2 font-medium">
-        Title of the Event
-        <span class="text-xs text-gray-400">(50 Characters Only)</span>
-      </p>
-      <input
-        type="text"
-        maxlength="50"
-        class="w-full p-2 border border-gray-300 rounded-lg"
-        [value]="eventTitle()"
-        (input)="eventTitle.set($any($event.target).value)"
-      />
-      <div class="text-xs text-gray-500 mt-1 text-right">
-        {{ eventTitle().length }}/50
-      </div>
-    </div>
-
-    <!-- Instruments -->
-    <div class="mt-6">
-      <p class="mb-2 font-medium">Instruments</p>
-
-      <!-- Dropdown and Add Button -->
-      <div class="flex flex-row gap-2">
-        <select
-          [(ngModel)]="selectedInstrument"
-          [ngModelOptions]="{ standalone: true }"
-          class="w-4/5 p-2 border border-gray-300 rounded-lg"
-        >
-          <option value="" disabled selected>Select instrument</option>
-          <option
-            *ngFor="let instrument of sysInstruments"
-            [value]="instrument.name"
-          >
-            {{ instrument.name }}
-          </option>
-        </select>
-
-        <div
-          class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer"
-          (click)="addInstrument()"
-        >
-          Add
-        </div>
-      </div>
-
-      <!-- Display Selected Instruments -->
-      <div class="space-y-4 mt-4">
-        <div class="flex flex-wrap gap-2">
-          <span
-            *ngFor="let ins of selectedInstruments"
-            class="text-sm font-medium py-1 px-3 rounded-full"
-            [ngClass]="[
-              'bg-' + ins.color + '-100',
-              'text-' + ins.color + '-800',
-              'border',
-              'border-' + ins.color + '-200'
-            ]"
-          >
-            {{ ins.name }}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Short Description -->
-    <div class="mt-6">
-      <p class="mb-2 font-medium">
-        Short Description
-        <span class="text-xs text-gray-400">(Max 100 Characters)</span>
-      </p>
-      <textarea
-        maxlength="100"
-        rows="3"
-        class="w-full p-2 border border-gray-300 rounded-lg"
-        [value]="shortDescription()"
-        (input)="shortDescription.set($any($event.target).value)"
-      ></textarea>
-      <div class="text-xs text-gray-500 mt-1 text-right">
-        {{ shortDescription().length }}/100
-      </div>
-    </div>
-
-    <!-- Long Description -->
-    <div class="mt-6">
-      <p class="mb-2 font-medium">
-        Long Description
-        <span class="text-xs text-gray-400">(Max 200 Characters)</span>
-      </p>
-      <textarea
-        maxlength="200"
-        rows="5"
-        class="w-full p-2 border border-gray-300 rounded-lg"
-        [value]="longDescription()"
-        (input)="longDescription.set($any($event.target).value)"
-      ></textarea>
-      <div class="text-xs text-gray-500 mt-1 text-right">
-        {{ longDescription().length }}/200
-      </div>
-    </div>
-
-    <!-- Proposed Dates -->
-    <div class="mt-6">
-      <p class="mb-2 font-medium">Proposed Date</p>
-      <div class="flex flex-row gap-2">
-        <input
-          type="date"
-          class="w-4/5 p-2 border border-gray-300 rounded-lg"
-          [(ngModel)]="selectedDate"
-          [ngModelOptions]="{ standalone: true }"
-        />
-        <div
-          class="w-1/5 bg-pont-green text-white p-2 rounded-lg text-center cursor-pointer"
-          (click)="addProposedDate()"
-        >
-          Add
-        </div>
-      </div>
-
-      <div class="space-y-4 mt-4">
-        <div class="flex flex-wrap gap-2">
-          <span
-            *ngFor="let date of proposedDates"
-            class="border-2 border-gray-100 text-black font-medium py-1 px-3 rounded-full text-sm"
-          >
-            {{ date | date : "dd MMM yyyy" }}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Next Step Button -->
-    <button
-      class="bg-pont-rust w-full text-white font-medium rounded-lg mt-6 p-2 cursor-pointer"
-      (click)="nextStep()"
-    >
-      Next Step
-    </button>
-  </div>
-
-  <div class="" *ngIf="activeTab() === 2">
-    <div class="bg-white rounded-xl p-4 shadow-md mb-4">
-      <p class="font-medium">Video for Event</p>
-      <div class="flex space-x-2 flex-row mt-2">
-        <div class="bg-gray-100 rounded-lg p-4 mt-2 w-3/4">
-          <p class="text-lg font-medium">Add Video</p>
-          <input
-            type="text "
-            [(ngModel)]="videoTitle"
-            class="w-full p-2 border border-gray-300 rounded-lg"
-            placeholder="Enter Name of Video video"
-          />
-
-          <input
-            type="text"
-            [(ngModel)]="videoUrl"
-            class="w-full p-2 mt-4 border border-gray-300 rounded-md"
-            placeholder="Enter video URL or upload video"
-          />
-
-          <input
-            id="fileInput"
-            type="file"
-            (change)="onFileChange($event)"
-            class="w-full p-2 mt-4 border border-gray-300 rounded-md"
-            accept="image/*"
-          />
-          <button
-            (click)="upload(1)"
-            class="bg-gray-300 text-black p-2 rounded-lg mt-4 w-full"
-          >
-            <span *ngIf="!videoUpload">Submit</span>
-            <div
-              *ngIf="videoUpload"
-              class="flex justify-center items-center w-full"
-            >
-              <span class="animate-spin text-black">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <style>
-                    .spinner_ajPY {
-                      transform-origin: center;
-                      animation: spinner_AtaB 0.75s infinite linear;
-                    }
-                    @keyframes spinner_AtaB {
-                      100% {
-                        transform: rotate(360deg);
-                      }
-                    }
-                  </style>
-                  <path
-                    fill="currentColor"
-                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                    opacity=".25"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
-                    class="spinner_ajPY"
-                  />
-                </svg>
-              </span>
-            </div>
-          </button>
-        </div>
-
-        <div class="bg-gray-100 rounded-lg p-4 mt-2 w-1/4">
-          <div class="flex flex-col space-y-2">
-            <p class="text-lg font-medium">Video List</p>
-
-            @for(x of videoList; track x) {
-            <div
-              class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center"
-            >
-              <p class="text-sm">{{ x.title }}</p>
-              <p
-                class="text-red-900 text-xs cursor-pointer"
-                (click)="removeUpload(x.id, 1)"
-              >
-                <span *ngIf="isRemoving !== x.id">Remove</span>
-
-                <svg
-                  width="24"
-                  height="24"
-                  *ngIf="isRemoving == x.id"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <style>
-                    .spinner_d9Sa {
-                      transform-origin: center;
-                    }
-                    .spinner_qQQY {
-                      animation: spinner_ZpfF 9s linear infinite;
-                    }
-                    .spinner_pote {
-                      animation: spinner_ZpfF 0.75s linear infinite;
-                    }
-                    @keyframes spinner_ZpfF {
-                      100% {
-                        transform: rotate(360deg);
-                      }
-                    }
-                  </style>
-                  <path
-                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"
-                  />
-                  <rect
-                    class="spinner_d9Sa spinner_qQQY"
-                    x="11"
-                    y="6"
-                    rx="1"
-                    width="2"
-                    height="7"
-                  />
-                  <rect
-                    class="spinner_d9Sa spinner_pote"
-                    x="11"
-                    y="11"
-                    rx="1"
-                    width="2"
-                    height="9"
-                  />
-                </svg>
-              </p>
-            </div>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-xl p-4 shadow-md mb-4">
-      <p class="font-medium">Event CDs</p>
-      <div class="flex space-x-2 flex-row mt-2">
-        <div class="bg-gray-100 rounded-lg p-4 mt-2 w-3/4">
-          <p class="text-lg font-medium">Add CDs</p>
-          <input
-            [(ngModel)]="cdTitle"
-            type="text"
-            class="w-full p-2 border border-gray-300 rounded-lg"
-            placeholder="Name of Music Albumn"
-          />
-
-          <input
-            [(ngModel)]="cdUrl"
-            type="text"
-            class="w-full p-2 mt-4 border border-gray-300 rounded-md"
-            placeholder="Enter CD URL"
-          />
-
-          <input
-            id="fileInputCD"
-            (change)="onFileChangeCD($event)"
-            type="file"
-            class="w-full p-2 mt-4 border border-gray-300 rounded-md"
-            accept="image/*"
-          />
-
-          <button
-            (click)="uploadCD(2)"
-            class="bg-gray-300 text-black p-2 rounded-lg mt-4 w-full"
-          >
-            <span *ngIf="!cdUpload">Submit</span>
-            <div
-              *ngIf="cdUpload"
-              class="flex justify-center items-center w-full"
-            >
-              <span class="animate-spin text-black">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <style>
-                    .spinner_ajPY {
-                      transform-origin: center;
-                      animation: spinner_AtaB 0.75s infinite linear;
-                    }
-                    @keyframes spinner_AtaB {
-                      100% {
-                        transform: rotate(360deg);
-                      }
-                    }
-                  </style>
-                  <path
-                    fill="currentColor"
-                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                    opacity=".25"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
-                    class="spinner_ajPY"
-                  />
-                </svg>
-              </span>
-            </div>
-          </button>
-        </div>
-
-        <div class="bg-gray-100 rounded-lg p-4 mt-2 w-1/4">
-          <div class="flex flex-col space-y-2">
-            <p class="text-lg font-medium">CD List</p>
-
-            @for(x of cdList; track x) {
-            <div
-              class="bg-white p-2 rounded-lg shadow-sm flex justify-between items-center"
-            >
-              <p class="text-sm">{{ x.title }}</p>
-              <p
-                class="text-red-900 text-xs cursor-pointer"
-                (click)="removeUpload(x.id, 2)"
-              >
-                <span *ngIf="isRemoving1 !== x.id">Remove</span>
-
-                <svg
-                  width="24"
-                  height="24"
-                  *ngIf="isRemoving1 == x.id"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <style>
-                    .spinner_d9Sa {
-                      transform-origin: center;
-                    }
-                    .spinner_qQQY {
-                      animation: spinner_ZpfF 9s linear infinite;
-                    }
-                    .spinner_pote {
-                      animation: spinner_ZpfF 0.75s linear infinite;
-                    }
-                    @keyframes spinner_ZpfF {
-                      100% {
-                        transform: rotate(360deg);
-                      }
-                    }
-                  </style>
-                  <path
-                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"
-                  />
-                  <rect
-                    class="spinner_d9Sa spinner_qQQY"
-                    x="11"
-                    y="6"
-                    rx="1"
-                    width="2"
-                    height="7"
-                  />
-                  <rect
-                    class="spinner_d9Sa spinner_pote"
-                    x="11"
-                    y="11"
-                    rx="1"
-                    width="2"
-                    height="9"
-                  />
-                </svg>
-              </p>
-            </div>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex flex-row justify-end space-x-4 mt-4 w-full">
-      <!-- <button class="w-1/2 bg-pont-rust text-white p-2 rounded-lg">Back</button> -->
-
-      <button
-        (click)="submitRequest()"
-        class="w-full bg-pont-green text-white p-2 rounded-lg"
-      >
-        Submit Request
+        <i class="fas fa-times"></i> Cancel Edit
       </button>
     </div>
+
+    <!-- Step Progress Indicator -->
+    <div class="grid grid-cols-6 w-full bg-gray-100 rounded-md p-1 select-none">
+      <button 
+        disabled 
+        class="px-2 py-2 rounded text-xs font-medium transition" 
+        [ngClass]="{ 'bg-pont-green text-white shadow': currentStep===1, 'text-gray-600': currentStep!==1 }"
+      >
+        Details
+      </button>
+      <button 
+        disabled 
+        class="px-2 py-2 rounded text-xs font-medium transition" 
+        [ngClass]="{ 'bg-pont-green text-white shadow': currentStep===2, 'text-gray-600': currentStep!==2 }"
+      >
+        Dates
+      </button>
+      <button 
+        disabled 
+        class="px-2 py-2 rounded text-xs font-medium transition" 
+        [ngClass]="{ 'bg-pont-green text-white shadow': currentStep===3, 'text-gray-600': currentStep!==3 }"
+      >
+        Image
+      </button>
+      <button 
+        disabled 
+        class="px-2 py-2 rounded text-xs font-medium transition" 
+        [ngClass]="{ 'bg-pont-green text-white shadow': currentStep===4, 'text-gray-600': currentStep!==4 }"
+      >
+        Media
+      </button>
+      <button 
+        disabled 
+        class="px-2 py-2 rounded text-xs font-medium transition" 
+        [ngClass]="{ 'bg-pont-green text-white shadow': currentStep===5, 'text-gray-600': currentStep!==5 }"
+      >
+        Artists
+      </button>
+      <button 
+        disabled 
+        class="px-2 py-2 rounded text-xs font-medium transition" 
+        [ngClass]="{ 'bg-pont-green text-white shadow': currentStep===6, 'text-gray-600': currentStep!==6 }"
+      >
+        Comments
+      </button>
+    </div>
+
+    <div [ngSwitch]="currentStep">
+      <!-- STEP 1: DETAILS -->
+      <form *ngSwitchCase="1" [formGroup]="detailsForm" class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900">Event Details</h3>
+        
+        <div class="flex flex-col">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+            Event Domain (Optional)
+          </label>
+          <select 
+            class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+            formControlName="id_event_domain"
+          >
+            <option [ngValue]="null">Select event domain</option>
+            <option *ngFor="let e of eventDomains" [ngValue]="e.id">{{ e.name | titlecase }}</option>
+          </select>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+            Event Title *
+          </label>
+          <input 
+            type="text" 
+            class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+            formControlName="title"
+            maxlength="200"
+            placeholder="Enter event title"
+          />
+          <div class="text-xs text-gray-500 mt-1">
+            {{ detailsForm.get('title')?.value?.length || 0 }}/200 characters
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+            Teaser (Short Description)
+          </label>
+          <textarea 
+            rows="2" 
+            class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+            formControlName="teaser"
+            maxlength="200"
+            placeholder="Short preview of the event"
+          ></textarea>
+          <div class="text-xs text-gray-500 mt-1">{{ teaserLength }}/200 characters</div>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+            Long Teaser (Extended Preview)
+          </label>
+          <textarea 
+            rows="3" 
+            class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+            formControlName="long_teaser"
+            placeholder="Extended preview text for event listing"
+          ></textarea>
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+            Description *
+          </label>
+          <textarea 
+            rows="6" 
+            class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+            formControlName="description"
+            placeholder="Detailed description of the event"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button 
+            type="button" 
+            (click)="nextStep()" 
+            [disabled]="isSaving"
+            class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {{ isSaving ? 'Saving...' : 'Next: Dates' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- STEP 2: DATES -->
+      <form *ngSwitchCase="2" [formGroup]="datesForm" class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900">Event Dates</h3>
+        
+        <div class="border rounded-lg p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600">Add one or more date/time slots for your event</p>
+            <button 
+              type="button" 
+              (click)="addDate()" 
+              class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm"
+            >
+              Add Date
+            </button>
+          </div>
+
+          <div class="space-y-4" formArrayName="dates">
+            <div 
+              *ngFor="let d of eventDates.controls; let i = index" 
+              [formGroupName]="i" 
+              class="border rounded-lg p-4 space-y-4 bg-gray-50"
+            >
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="flex flex-col">
+                  <label class="text-xs font-medium text-gray-600 mb-1">Date Type *</label>
+                  <select 
+                    class="w-full px-3 py-2 rounded-lg border border-gray-200" 
+                    formControlName="flag" 
+                    (change)="onDateTypeChange(i)"
+                  >
+                    <option value="">Select date type</option>
+                    <option value="d">Single Day</option>
+                    <option value="p">Period (Multi-Days)</option>
+                  </select>
+                </div>
+                
+                <div class="flex flex-col">
+                  <label class="text-xs font-medium text-gray-600 mb-1">Start Date *</label>
+                  <input 
+                    type="date" 
+                    class="w-full px-3 py-2 rounded-lg border border-gray-200" 
+                    formControlName="start_date" 
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="flex flex-col" *ngIf="isPeriod(i)">
+                  <label class="text-xs font-medium text-gray-600 mb-1">End Date *</label>
+                  <input 
+                    type="date" 
+                    class="w-full px-3 py-2 rounded-lg border border-gray-200" 
+                    formControlName="end_date" 
+                  />
+                </div>
+              </div>
+
+              <div class="flex justify-end">
+                <button 
+                  type="button" 
+                  (click)="removeDate(i)" 
+                  class="px-3 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-sm"
+                >
+                  Remove Date
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between">
+          <button 
+            type="button" 
+            (click)="backStep()" 
+            class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+          <button 
+            type="button" 
+            (click)="nextStep()" 
+            [disabled]="isSaving"
+            class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {{ isSaving ? 'Saving...' : 'Next: Image' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- STEP 3: IMAGE -->
+      <form *ngSwitchCase="3" [formGroup]="imageForm" class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900">Event Image</h3>
+        
+        <div class="border rounded-lg p-4 space-y-4">
+          <div>
+            <label class="text-sm font-medium text-gray-700 mb-2 block">Upload Event Image</label>
+            <input 
+              type="file" 
+              (change)="onMainImageSelected($event)" 
+              accept="image/*"
+              class="w-full"
+            />
+            <p class="text-xs text-gray-500 mt-1">PNG/JPG up to 5MB. Recommended: 1200x800px</p>
+          </div>
+
+          <div *ngIf="uploadPreviewUrl" class="mt-4">
+            <img 
+              [src]="uploadPreviewUrl" 
+              class="w-full h-64 object-cover rounded-lg" 
+              alt="Event preview"
+            />
+          </div>
+
+          <div class="flex flex-col mt-4">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+              Photo Credit (Optional)
+            </label>
+            <input 
+              type="text" 
+              class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+              formControlName="credit_photo"
+              placeholder="Photographer name or source"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-between">
+          <button 
+            type="button" 
+            (click)="backStep()" 
+            class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+          <button 
+            type="button" 
+            (click)="nextStep()" 
+            [disabled]="isSaving"
+            class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {{ isSaving ? 'Saving...' : 'Next: Media' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- STEP 4: MEDIA -->
+      <form *ngSwitchCase="4" [formGroup]="mediaForm" class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900">Media (Videos & CDs)</h3>
+        
+        <div class="border rounded-lg p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600">Add videos or CDs related to your event</p>
+            <button 
+              type="button" 
+              (click)="addMediaItem(1)" 
+              class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm"
+            >
+              Add Media
+            </button>
+          </div>
+
+          <div class="space-y-3" formArrayName="media">
+            <div 
+              *ngFor="let m of mediaItems.controls; let i = index" 
+              [formGroupName]="i" 
+              class="border rounded-lg p-4 space-y-3 bg-gray-50"
+            >
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs font-medium text-gray-600 mb-1 block">Type</label>
+                  <div class="inline-flex rounded-md border overflow-hidden">
+                    <button 
+                      type="button" 
+                      (click)="setMediaType(i, 1)" 
+                      [ngClass]="(m.value.id_media_type===1) ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'" 
+                      class="px-4 py-2 text-sm"
+                    >
+                      Video
+                    </button>
+                    <button 
+                      type="button" 
+                      (click)="setMediaType(i, 2)" 
+                      [ngClass]="(m.value.id_media_type===2) ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'" 
+                      class="px-4 py-2 text-sm"
+                    >
+                      CD
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex flex-col">
+                  <label class="text-xs font-medium text-gray-600 mb-1">Title *</label>
+                  <input 
+                    type="text" 
+                    placeholder="Title" 
+                    class="w-full px-3 py-2 rounded-lg border border-gray-200" 
+                    formControlName="title" 
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 mb-1">Description</label>
+                <textarea 
+                  rows="2"
+                  placeholder="Short description (optional)" 
+                  class="w-full px-3 py-2 rounded-lg border border-gray-200" 
+                  formControlName="description"
+                ></textarea>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 mb-1">URL</label>
+                <input 
+                  type="text" 
+                  placeholder="https://... (optional)" 
+                  class="w-full px-3 py-2 rounded-lg border border-gray-200" 
+                  formControlName="url" 
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-xs font-medium text-gray-600 mb-1">Cover Image</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  (change)="onMediaImageSelected($event, i)"
+                />
+              </div>
+
+              <div class="flex justify-end">
+                <button 
+                  type="button" 
+                  (click)="removeMediaItem(i)" 
+                  class="px-3 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between">
+          <button 
+            type="button" 
+            (click)="backStep()" 
+            class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+          <button 
+            type="button" 
+            (click)="nextStep()" 
+            [disabled]="isSaving"
+            class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {{ isSaving ? 'Saving...' : 'Next: Artists' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- STEP 5: ARTISTS -->
+      <div *ngSwitchCase="5" class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900">Select Artists</h3>
+        
+        <div class="border rounded-lg p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600">Add artists and their instruments for this event</p>
+            <button 
+              type="button" 
+              (click)="addArtistRow()" 
+              class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm"
+            >
+              Add Artist
+            </button>
+          </div>
+
+          <!-- Artist Rows -->
+          <div class="space-y-4">
+            <div 
+              *ngFor="let row of artistRows; let i = index" 
+              class="border rounded-lg p-4 space-y-3 bg-gray-50"
+            >
+              <div class="flex items-start gap-3">
+                <img 
+                  [src]="row.photo || '/assets/images/profile/user-b.png'" 
+                  class="w-12 h-12 rounded-full object-cover"
+                  alt="Artist"
+                />
+                <div class="flex-1 space-y-3">
+                  <div>
+                    <label class="text-xs font-medium text-gray-600 mb-1 block">Select Artist</label>
+                    <select 
+                      class="w-full px-3 py-2 rounded-lg border border-gray-200"
+                      (change)="onArtistSelected(i, $any($event.target).value)"
+                      [value]="row.id_artist || ''"
+                    >
+                      <option value="">Select an artist</option>
+                      <option *ngFor="let a of availableArtists" [value]="a.id">
+                        {{ a.name | titlecase }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div *ngIf="row.id_artist && !row.loadingInstruments">
+                    <label class="text-xs font-medium text-gray-600 mb-1 block">Instruments</label>
+                    <div class="flex items-center gap-2">
+                      <select 
+                        #instSelect
+                        class="flex-1 px-3 py-2 rounded-lg border border-gray-200"
+                      >
+                        <option value="">Add instrument</option>
+                        <option 
+                          *ngFor="let inst of row.availableInstruments" 
+                          [value]="inst.id"
+                        >
+                          {{ inst.instrument | titlecase }}
+                        </option>
+                      </select>
+                      <button 
+                        type="button"
+                        (click)="addRowInstrumentFromSelect(i, instSelect)"
+                        class="px-3 py-2 rounded-lg bg-pont-green text-white text-sm"
+                      >
+                        Add
+                      </button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mt-2">
+                      <span 
+                        *ngFor="let inst of row.instruments"
+                        class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-sm"
+                      >
+                        {{ inst.label | titlecase }}
+                        <button 
+                          type="button"
+                          (click)="removeRowInstrument(i, inst.id_instrument)"
+                          class="hover:text-red-600"
+                        >
+                          <i class="fa-solid fa-times"></i>
+                        </button>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div *ngIf="row.loadingInstruments" class="text-sm text-gray-500">
+                    Loading instruments...
+                  </div>
+                </div>
+
+                <button 
+                  type="button"
+                  (click)="removeArtistRow(i)"
+                  class="px-3 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add New Artist Section -->
+          <div class="border-t pt-4 mt-4">
+            <p class="text-sm font-medium text-gray-900 mb-3">Artist Not on List?</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input 
+                type="text" 
+                [(ngModel)]="newArtistName"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Artist name"
+                class="px-3 py-2 rounded-lg border border-gray-300"
+                [disabled]="isAddingNewArtist"
+              />
+              <input 
+                type="email" 
+                [(ngModel)]="newArtistEmail"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="Artist email"
+                class="px-3 py-2 rounded-lg border border-gray-300"
+                [disabled]="isAddingNewArtist"
+              />
+              <button 
+                type="button"
+                (click)="addNewArtist()"
+                [disabled]="isAddingNewArtist"
+                class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                <span *ngIf="!isAddingNewArtist">Send Signup Email</span>
+                <span *ngIf="isAddingNewArtist" class="flex items-center gap-2">
+                  <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Sending...
+                </span>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              A signup link will be sent to the artist's email, and they will be added to your request.
+            </p>
+
+            <!-- New Signup Artists List -->
+            <div *ngIf="newSignupArtists.length > 0" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p class="text-xs font-semibold text-green-800 mb-2">
+                <i class="fas fa-user-plus"></i> New Artists Sent for Signup:
+              </p>
+              <div class="space-y-2">
+                <div 
+                  *ngFor="let artist of newSignupArtists" 
+                  class="flex items-center gap-2 text-sm text-green-900 bg-white p-2 rounded"
+                >
+                  <i class="fas fa-check-circle text-green-600"></i>
+                  <span class="font-medium">{{ artist.name }}</span>
+                  <span class="text-gray-500">({{ artist.email }})</span>
+                  <span class="ml-auto text-xs text-gray-400">Added to artists table</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-between">
+          <button 
+            type="button" 
+            (click)="backStep()" 
+            class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+          <button 
+            type="button" 
+            (click)="nextStep()" 
+            [disabled]="isSaving"
+            class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {{ isSaving ? 'Saving...' : 'Next: Comments' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 6: COMMENTS -->
+      <form *ngSwitchCase="6" [formGroup]="commentsForm" class="space-y-6">
+        <h3 class="text-lg font-semibold text-gray-900">Additional Comments</h3>
+        
+        <div class="border rounded-lg p-4 space-y-4">
+          <div class="flex flex-col">
+            <label class="text-sm font-medium text-gray-700 mb-2">
+              Comments for the Host
+            </label>
+            <textarea 
+              rows="8" 
+              class="w-full px-3 py-2 rounded-lg border border-gray-300" 
+              formControlName="comments"
+              placeholder="Add any additional information, special requests, or notes for the event host..."
+            ></textarea>
+            <p class="text-xs text-gray-500 mt-1">
+              These comments will be visible to the host when reviewing your event request.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-between">
+          <button 
+            type="button" 
+            (click)="backStep()" 
+            class="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+          <button 
+            type="button" 
+            (click)="submitEventRequest()" 
+            [disabled]="isSaving"
+            class="px-6 py-2 rounded-lg bg-pont-rust text-white hover:bg-opacity-90 disabled:opacity-50 font-medium"
+          >
+            {{ isSaving ? (isEditMode ? 'Updating...' : 'Submitting...') : (isEditMode ? 'Update Event Request' : 'Submit Event Request') }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div class="" *ngIf="activeTab() === 3">
-    <div class="bg-white rounded-xl p-12 shadow-md h-64 mb-4">
-      <div class="flex flex-col justify-center items-center mb-4">
-        <h1 class="text-xl font-medium">Thanks, your request is submitted</h1>
-        <p>Request ID</p>
-        <pre>{{ idRequest }}</pre>
-        <button class="bg-pont-green text-white p-2 rounded-lg mt-4">
-          Go to Requests
+  <!-- ALL REQUESTS TAB -->
+  <div *ngIf="activeTab() === 2" class="bg-white rounded-xl p-6 shadow-md mb-4">
+    <!-- Header with Status Filters -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <h2 class="text-xl font-semibold text-gray-900">My Event Requests</h2>
+      <div class="flex flex-row space-x-2">
+        <button 
+          (click)="getDataByStatus(1)"
+          [ngClass]="{
+            'bg-yellow-400 text-yellow-900 ring-2 ring-yellow-500': currentStatusFilter === 1,
+            'bg-yellow-200 text-yellow-800 hover:bg-yellow-300': currentStatusFilter !== 1
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          Draft
+        </button>
+        <button 
+          (click)="getDataByStatus(2)"
+          [ngClass]="{
+            'bg-blue-400 text-blue-900 ring-2 ring-blue-500': currentStatusFilter === 2,
+            'bg-blue-200 text-blue-800 hover:bg-blue-300': currentStatusFilter !== 2
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          Pending
+        </button>
+        <button 
+          (click)="getDataByStatus(0)"
+          [ngClass]="{
+            'bg-green-400 text-green-900 ring-2 ring-green-500': currentStatusFilter === 0,
+            'bg-green-200 text-green-800 hover:bg-green-300': currentStatusFilter !== 0
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          Published
+        </button>
+        <button 
+          (click)="getDataByStatus(4)"
+          [ngClass]="{
+            'bg-gray-400 text-gray-900 ring-2 ring-gray-500': currentStatusFilter === 4,
+            'bg-gray-200 text-gray-800 hover:bg-gray-300': currentStatusFilter !== 4
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          All
         </button>
       </div>
     </div>
-  </div>
 
-  <div class="" *ngIf="activeTab() === 4">
-    <div class="bg-white rounded-xl p-4 shadow-md mb-4">
-      <!-- Status Labels -->
-      <div class="flex flex-row mb-6 space-x-6">
-        <div (click)="getDataByStatus(1)"
-          class="w-auto cursor-pointer bg-yellow-200 text-yellow-800 p-2 rounded-full text-xs"
+    <!-- Search Bar and Results Count -->
+    <div class="mb-4">
+      <div class="relative">
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by title..."
+          class="w-full px-4 py-2 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pont-green focus:border-transparent"
+        />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-search text-gray-400"></i>
+        </div>
+        <button 
+          *ngIf="searchQuery"
+          (click)="clearSearch()"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
         >
-          <p>Pending</p>
-        </div>
-        <div (click)="getDataByStatus(2)"
-          class="w-auto cursor-pointer bg-green-200 text-green-800 p-2 rounded-full text-xs"
-        >
-          <p>Approved</p>
-        </div>
-        <div (click)="getDataByStatus(3)" class="w-auto cursor-pointer  bg-red-200 text-red-800 p-2 rounded-full text-xs">
-          <p>Rejected</p>
-        </div>
-
-         <div (click)="getDataByStatus(4)" class="w-auto cursor-pointer bg-gray-200 text-black p-2 rounded-full text-xs">
-          <p>Clear</p>
-        </div>
-
+          <i class="fas fa-times"></i>
+        </button>
       </div>
+      <div *ngIf="originalData && originalData.length > 0" class="mt-2 text-sm text-gray-600">
+        Showing <span class="font-semibold">{{ ardata?.length || 0 }}</span> of <span class="font-semibold">{{ originalData?.length || 0 }}</span> requests
+      </div>
+    </div>
 
-      <!-- Dynamic Event List -->
-      <div
-        *ngFor="let event of ardata"
-        class="border-2 border-gray-300 rounded-lg mt-4 pb-8"
+    <!-- Table -->
+    <div *ngIf="ardata && ardata.length > 0" class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
+        <thead class="bg-gray-50">
+          <tr>
+            <th 
+              (click)="sortBy('title')"
+              class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition"
+            >
+              <div class="flex items-center gap-1">
+                <span>Title</span>
+                <i 
+                  class="fas"
+                  [ngClass]="{
+                    'fa-sort': sortColumn !== 'title',
+                    'fa-sort-up': sortColumn === 'title' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'title' && sortDirection === 'desc'
+                  }"
+                ></i>
+              </div>
+            </th>
+            <th 
+              (click)="sortBy('event_domain')"
+              class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition"
+            >
+              <div class="flex items-center gap-1">
+                <span>Event Domain</span>
+                <i 
+                  class="fas"
+                  [ngClass]="{
+                    'fa-sort': sortColumn !== 'event_domain',
+                    'fa-sort-up': sortColumn === 'event_domain' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'event_domain' && sortDirection === 'desc'
+                  }"
+                ></i>
+              </div>
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+              Teaser
+            </th>
+            <th 
+              (click)="sortBy('created_on')"
+              class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition"
+            >
+              <div class="flex items-center gap-1">
+                <span>Date Created</span>
+                <i 
+                  class="fas"
+                  [ngClass]="{
+                    'fa-sort': sortColumn !== 'created_on',
+                    'fa-sort-up': sortColumn === 'created_on' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'created_on' && sortDirection === 'desc'
+                  }"
+                ></i>
+              </div>
+            </th>
+            <th 
+              (click)="sortBy('status')"
+              class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition"
+            >
+              <div class="flex items-center gap-1">
+                <span>Status</span>
+                <i 
+                  class="fas"
+                  [ngClass]="{
+                    'fa-sort': sortColumn !== 'status',
+                    'fa-sort-up': sortColumn === 'status' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'status' && sortDirection === 'desc'
+                  }"
+                ></i>
+              </div>
+            </th>
+            <th class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr 
+            *ngFor="let event of ardata" 
+            class="hover:bg-gray-50 transition"
+          >
+            <td class="px-4 py-3 whitespace-normal">
+              <div class="text-sm font-medium text-gray-900">{{ event.title | titlecase }}</div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="text-sm text-gray-600">
+                {{ event.event_domain || 'N/A' }}
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="text-sm text-gray-600 line-clamp-2" [title]="event.teaser">
+                {{ event.teaser || 'No teaser provided' }}
+              </div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="text-sm text-gray-600">
+                {{ event.created_on | date: 'MMM dd, yyyy' }}
+              </div>
+              <div class="text-xs text-gray-400">
+                {{ event.created_on | date: 'HH:mm' }}
+              </div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span
+                [ngClass]="{
+                  'bg-green-100 text-green-800': event.status === 0,
+                  'bg-blue-100 text-blue-800': event.status === 1,
+                  'bg-yellow-100 text-yellow-800': event.status === 2
+                }"
+                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+              >
+                {{ statusReturn(event.status) }}
+              </span>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <div class="flex items-center justify-center space-x-2">
+                <button 
+                  *ngIf="event.status === 2"
+                  (click)="editRequest(event.id)"
+                  class="text-blue-600 hover:text-blue-800 transition"
+                  title="Edit Request"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button 
+                  *ngIf="event.status === 2"
+                  (click)="delArtistRequest(event.id)"
+                  class="text-red-600 hover:text-red-800 transition"
+                  title="Revoke Request"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button 
+                  class="text-gray-600 hover:text-gray-800 transition"
+                  title="View Details"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div 
+      *ngIf="!ardata || ardata.length === 0" 
+      class="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg"
+    >
+      <i 
+        class="text-5xl text-gray-400 mb-4"
+        [ngClass]="{
+          'fas fa-search': searchQuery,
+          'fas fa-calendar-plus': !searchQuery
+        }"
+      ></i>
+      <p class="text-gray-700 font-medium text-lg mb-2">
+        {{ searchQuery ? 'No Matching Requests Found' : 'No Event Requests Found' }}
+      </p>
+      <p class="text-sm text-gray-500 mb-6">
+        {{ searchQuery ? 'Try adjusting your search terms' : 'Create your first event request to get started' }}
+      </p>
+      <button 
+        *ngIf="searchQuery"
+        (click)="clearSearch()"
+        class="px-6 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700 font-medium transition mr-2"
       >
-        <div class="flex flex-row justify-between items-center p-4">
-            <div class="flex flex-col">
- <h1 class="text-xl font-medium">{{ event.title | titlecase }}</h1>
-        <p class="text-sm font-medium">{{ event.short_desc }}</p>
-            </div>
-         
-          <div class="flex flex-col space-y-2">
-            <div
-              [ngClass]="{
-                'bg-yellow-200 text-yellow-800': event.status === 1,
-                'bg-green-200 text-green-800': event.status === 2,
-                'bg-red-200 text-red-800': event.status === 3
-              }"
-              class="p-2 rounded-lg"
-            >
-              <p class="text-sm font-medium">Status: {{ statusReturn(event.status) | titlecase }}</p>
-            </div>
-
-            <div *ngIf="event.status === 1"
-              class="bg-gray-200 text-gray-800 p-2 mt-3 rounded-lg cursor-pointer"
-            >
-              <p (click)="delArtistRequest(event.id)" class="text-sm text-center font-medium" >Revoke</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-row space-x-6 px-4">
-            <div class="flex flex-row space-x-2">
-            <i class="fas fa-clock mt-2 text-lg text-gray-500"></i>
-            <p class="text-lg text-gray-500">
-              Submitted: {{ event.created_on | date: 'dd-MMM-yy HH:mm '}}
-            </p>
-          </div>
-          <div class="flex flex-row space-x-2">
-            <i class="fas fa-calendar-days mt-2 text-lg text-gray-500"></i>
-           <p class="text-lg text-gray-500">Proposed Date:</p>
-            @for (item of event.propose_date; track $index) {
-            <p class="text-sm text-black bg-gray-300 rounded-full p-2">
-               {{ item }}
-            </p>
-        }
-          </div>
-
-          
-        </div>
-      </div>
+        <i class="fas fa-times mr-2"></i> Clear Search
+      </button>
+      <button 
+        *ngIf="!searchQuery"
+        (click)="isActiveTab(1)"
+        class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 font-medium transition"
+      >
+        <i class="fas fa-plus mr-2"></i> Create Event Request
+      </button>
     </div>
   </div>
 </div>

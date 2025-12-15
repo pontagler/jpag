@@ -17,7 +17,7 @@
         <div class="relative">
           <div class="relative"> <img [src]="event.imageUrl || '/assets/images/profile/c1.png'" [alt]="event.title" class="w-full h-96 object-cover rounded-lg shadow" /> 
             <div *ngIf="event.creditPhoto" class="absolute bottom-2 left-2 text-[11px] text-white/90 bg-black/40 px-2 py-1 rounded">
-              ©: {{ event.creditPhoto }}
+              © {{ event.creditPhoto }}
              </div>
           </div>
          

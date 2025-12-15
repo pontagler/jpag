@@ -1,372 +1,903 @@
 import { CommonModule, NgClass, NgFor, NgForOf, NgIf } from '@angular/common';
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, signal, OnInit } from '@angular/core';
 import { ArtistRequest, ArtistService } from '../../../services/artist.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { AlertService } from '../../../services/alert.service';
+import { EventService } from '../../../services/event.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-request',
-  imports: [FormsModule, NgClass, NgForOf, NgFor, CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, NgClass, NgForOf, NgFor, CommonModule],
   templateUrl: './request.component.html',
 })
-export class RequestComponent {
-  // Use signal for activeTab
-  activeTab = signal(4);
+export class RequestComponent implements OnInit {
+  // Tab management
+  activeTab = signal(1); // Start with "New Request"
+  currentStep: 1 | 2 | 3 | 4 | 5 | 6 = 1; // Current step in the form
 
-  // Declare artistID as a signal
-  events = [
-    {
-      title: 'Concert Cloud Nine',
-      status: 'Pending',
-      eventDate: '25 Aug 2025',
-      submittedDate: '25 Aug 2025',
-    },
-    {
-      title: 'Jazz Night Live',
-      status: 'Approved',
-      eventDate: '28 Aug 2025',
-      submittedDate: '26 Aug 2025',
-    },
-  ];
-  requestType = [
-    { id: 1, name: 'Concert' },
-    { id: 2, name: 'Exhibition' },
-  ];
-  eventTitle = signal(''); // Event Title
-  sysInstruments: any[] = []; // System Instruments
-  artistID: any = []; // Artist ID
-  selectedInstrument: string = ''; // Selected Instrument
-  selectedInstruments: { name: string; color: string }[] = [];
-  selectedDate: string = ''; // Selected Date
-  proposedDates: string[] = []; // Proposed Dates
-  shortDescription = signal(''); // Short Description
-  longDescription = signal(''); // Long Description
-  selectedRequestType: number | null = null; // Selected Request Type
-  selectedFile: File | null = null;
-  selectedFileCD: File | null = null;
-  videoTitle: any;
-  videoUrl: any;
-  idRequest: any;
-  createdBy: any;
+  // Loading states
+  isSaving: boolean = false;
+  isLoadingData: boolean = false;
+  isEditMode: boolean = false;
+  
+  // Event Request ID
+  createdRequestId: number | null = null;
+  
+  // Artist info
+  artistID: any;
   authID: any;
-  videoUpload: any = false; // Signal to track upload state
-  cdUpload: any = false;
-  isRemoving: any; // Signal to track removal state
-  isRemoving1: any; // Signal to track removal state
-  videoList: any[] = []; // List to hold uploaded videos
-  cdList: any[] = []; // List to hold uploaded videos
-  cdTitle: any;
-  cdUrl: any;
-  originalData: any;
+  createdBy: any;
 
-  // Selected File for upload
+  // Image preview
+  uploadPreviewUrl: string | null = null;
+  mainImageFile: File | null = null;
+
+  // Dropdowns data
+  eventDomains: Array<{ id: number; name: string }> = [];
+  eventTypes: Array<{ id: number; name: string }> = [];
+  availableArtists: any[] = [];
+  instruments: Array<{ id: number; instrument: string }> = [];
+
+  // Forms for each step
+  detailsForm: FormGroup;
+  datesForm: FormGroup;
+  imageForm: FormGroup;
+  mediaForm: FormGroup;
+  artistsForm: FormGroup;
+  commentsForm: FormGroup;
+
+  // Artist rows for step 5
+  artistRows: Array<{ 
+    id_artist: string | null; 
+    email?: string;
+    name?: string;
+    photo?: string | null; 
+    instruments: Array<{ id_instrument: number; label: string }>; 
+    availableInstruments: Array<{ id: number; instrument: string }>; 
+    loadingInstruments: boolean;
+    isNewArtist?: boolean;
+  }> = [];
+
+  // All requests data
+  ardata: any = [];
+  originalData: any;
+  
+  // Search and sort
+  searchQuery: string = '';
+  sortColumn: string = 'created_on';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   constructor(
+    private fb: FormBuilder,
     private artistService: ArtistService,
-    private alertService: AlertService
+    private eventService: EventService,
+    private alertService: AlertService,
+    private authService: AuthService
   ) {
+    // Initialize forms
+    this.detailsForm = this.fb.group({
+      id_event_domain: [null],
+      title: ['', [Validators.required, Validators.maxLength(200)]],
+      teaser: ['', [Validators.maxLength(200)]],
+      long_teaser: [''],
+      description: ['', [Validators.required]]
+    });
+
+    this.datesForm = this.fb.group({
+      dates: this.fb.array([])
+    });
+
+    this.imageForm = this.fb.group({
+      credit_photo: ['']
+    });
+
+    this.mediaForm = this.fb.group({
+      media: this.fb.array([])
+    });
+
+    this.artistsForm = this.fb.group({
+      artists: this.fb.array([])
+    });
+
+    this.commentsForm = this.fb.group({
+      comments: ['']
+    });
+
     effect(() => {
       this.artistID = this.artistService.getArtistID();
     });
   }
 
-  ngOnInit(): void {
-    this.getInstrumentName();
-    console.log('artist ID', this.artistService.getArtistID());
-    this.artistID = this.artistService.getArtistID()
-    console.log('profile ID', this.artistService.getArtistProfileID());
-    this.authID = this.artistService.getArtistProfileID();
-    this.createdBy = this.authID;
-    this.getRequest();
+  async ngOnInit(): Promise<void> {
+    console.log('Component initializing...');
+    
+    try {
+      // Get the authenticated user's ID directly from auth service
+      const currentUser = await this.authService.getCurrentUser();
+      if (!currentUser || !currentUser.id) {
+        this.alertService.showAlert('Error', 'You must be logged in to access this page', 'error');
+        return;
+      }
+      
+      const authUserId = currentUser.id;
+      console.log('Authenticated user ID:', authUserId);
+      
+      // Set the authID to use for created_by
+      this.authID = authUserId;
+      this.createdBy = authUserId;
+      this.artistService.setArtistProfileID(authUserId);
+      
+      // Try to get the artist record using the auth user ID
+      try {
+        const artistProfile = await this.artistService.getArtistProfile_v2(authUserId);
+        if (artistProfile && artistProfile.artist) {
+          this.artistID = artistProfile.artist.id;
+          this.artistService.setArtistID(this.artistID);
+          console.log('Artist ID from artists table:', this.artistID);
+        }
+      } catch (error) {
+        console.warn('Could not fetch artist record:', error);
+      }
+      
+      console.log('Final IDs - Auth ID:', this.authID, 'Artist ID:', this.artistID);
+
+      // Load dropdown data
+      const [eventDomains, eventTypes, artists, instruments] = await Promise.all([
+        this.eventService.listSysEventDomains(),
+        this.eventService.listSysEventTypes(),
+        this.eventService.getAvailableArtists(),
+        this.eventService.listAllInstruments()
+      ]);
+
+      this.eventDomains = eventDomains || [];
+      this.eventTypes = eventTypes || [];
+      this.instruments = (instruments || []).map((r: any) => ({ 
+        id: r.id, 
+        instrument: r.instrument || r.name || '' 
+      }));
+      this.availableArtists = (artists || []).map((a: any) => ({
+        id: (a.id || a.id_artist || a.artist_id || '').toString(),
+        name: `${(a.fname || a.first_name || '').trim()} ${(a.lname || a.last_name || '').trim()}`.trim(),
+        photo: a.photo || a.image || null,
+        email: a.email || null
+      })).filter((a: any) => a.id && a.id !== '');
+
+    } catch (err: any) {
+      console.error('Initialization error:', err);
+      this.alertService.showAlert('Error', err.message || 'Failed to load data', 'error');
+    }
+
+    // Initialize with one date row
+    if (this.eventDates.length === 0) this.addDate();
+    
+    // Load existing requests
+    console.log('About to load requests...');
+    await this.getRequest();
+    console.log('Requests loaded. Count:', this.ardata?.length || 0);
   }
 
-  userProfileID: any;
+  // Convenience getters
+  get eventDates(): FormArray { return this.datesForm.get('dates') as FormArray; }
+  get mediaItems(): FormArray { return this.mediaForm.get('media') as FormArray; }
+  get teaserLength(): number { return (this.detailsForm.get('teaser')?.value || '').length; }
 
-  // Get Instrument Names
-  // This method fetches the list of instruments from the service
-  async getInstrumentName() {
-    console.log('Fetching instruments...');
-    this.artistService.getInstruments().subscribe({
-      next: (data: any) => {
-        this.sysInstruments = data;
-        console.log('Fetched instruments:', this.sysInstruments);
-      },
-      error: (err) => {
-        console.error('Error fetching instruments:', err);
-      },
+  // Tab navigation
+  isActiveTab(tab: number) {
+    this.activeTab.set(tab);
+    if (tab === 1) {
+      this.currentStep = 1; // Reset to first step when creating new request
+      this.isEditMode = false;
+      this.createdRequestId = null;
+    }
+  }
+
+  // Edit existing request
+  async editRequest(eventId: number): Promise<void> {
+    this.isLoadingData = true;
+    this.isEditMode = true;
+    this.createdRequestId = eventId;
+    
+    try {
+      // Load event data
+      await this.loadEventForEdit(eventId);
+      
+      // Switch to edit tab
+      this.activeTab.set(1);
+      this.currentStep = 1;
+    } catch (error: any) {
+      this.alertService.showAlert('Error', error.message || 'Failed to load event for editing', 'error');
+      this.isEditMode = false;
+      this.createdRequestId = null;
+    } finally {
+      this.isLoadingData = false;
+    }
+  }
+
+  private async loadEventForEdit(eventId: number): Promise<void> {
+    try {
+      // Load base event
+      const base = await this.eventService.getEventBase(eventId);
+      
+      // Patch details form
+      this.detailsForm.patchValue({
+        id_event_domain: base?.id_event_domain ?? null,
+        title: base?.title ?? '',
+        teaser: base?.teaser ?? '',
+        long_teaser: base?.long_teaser ?? '',
+        description: base?.description ?? ''
+      });
+
+      // Load and populate dates
+      const dates = await this.eventService.getEventDates(eventId);
+      this.eventDates.clear();
+      if (dates && dates.length > 0) {
+        dates.forEach((d: any) => {
+          this.eventDates.push(this.buildDateGroup({
+            start_date: d.start_date || '',
+            end_date: d.end_date || '',
+            time: '',
+            flag: d.flag || ''
+          }));
+        });
+      } else {
+        this.addDate();
+      }
+
+      // Load image
+      if (base?.photo) {
+        this.uploadPreviewUrl = base.photo;
+      }
+      this.imageForm.patchValue({
+        credit_photo: base?.credit_photo ?? ''
+      });
+
+      // Load media
+      const media = await this.eventService.getEventMedia(eventId);
+      this.mediaItems.clear();
+      if (media && media.length > 0) {
+        media.forEach((m: any) => {
+          this.mediaItems.push(this.fb.group({
+            id_media_type: [m.id_media_type || 1, Validators.required],
+            title: [m.title || '', Validators.required],
+            description: [m.description || ''],
+            url: [m.url || ''],
+            imageFile: [null],
+            existingImageUrl: [m.image || null]
+          }));
+        });
+      }
+
+      // Load artists and instruments
+      const pairs = await this.eventService.getEventArtistInstrumentPairs(eventId);
+      this.artistRows = [];
+      
+      if (pairs && pairs.length > 0) {
+        // Group by artist
+        const artistMap = new Map<string, any>();
+        
+        for (const p of pairs) {
+          const artistId = p.id_artist.toString();
+          
+          if (!artistMap.has(artistId)) {
+            const artistMeta = this.availableArtists.find(a => a.id === artistId);
+            artistMap.set(artistId, {
+              id_artist: artistId,
+              name: artistMeta?.name || `Artist ${artistId}`,
+              photo: artistMeta?.photo || null,
+              email: artistMeta?.email || '',
+              instruments: [],
+              availableInstruments: [],
+              loadingInstruments: false,
+              isNewArtist: false
+            });
+          }
+          
+          const artist = artistMap.get(artistId);
+          const instrumentName = p.instrument_name || 
+            this.instruments.find((i: any) => i.id === Number(p.id_instrument))?.instrument || 
+            'Unknown';
+          
+          artist.instruments.push({
+            id_instrument: Number(p.id_instrument),
+            label: instrumentName
+          });
+        }
+        
+        // Convert map to array and load available instruments for each
+        for (const [artistId, artist] of artistMap) {
+          try {
+            const data = await this.eventService.getArtistInstruments(artistId);
+            artist.availableInstruments = (data || []).map((r: any) => ({ 
+              id: r.id_instrument || r.id, 
+              instrument: r.instrument || r.name 
+            }));
+          } catch (err) {
+            console.error('Error loading instruments for artist:', artistId, err);
+            artist.availableInstruments = [];
+          }
+          this.artistRows.push(artist);
+        }
+      }
+      
+      if (this.artistRows.length === 0) {
+        this.addArtistRow();
+      }
+
+      // Load comments
+      this.commentsForm.patchValue({
+        comments: base?.comments ?? ''
+      });
+
+    } catch (err: any) {
+      console.error('Error loading event for edit:', err);
+      throw err;
+    }
+  }
+
+  // ===================== DATES SECTION =====================
+  private buildDateGroup(data?: Partial<{ start_date: string; end_date: string; time: string; flag: string }>): FormGroup {
+    const group = this.fb.group({
+      start_date: [data?.start_date || '', Validators.required],
+      end_date: [data?.end_date || ''],
+      time: [data?.time || ''],
+      flag: [data?.flag || '', Validators.required]
+    });
+    this.applyDateTypeRules(group);
+    return group;
+  }
+
+  private applyDateTypeRules(group: FormGroup): void {
+    const flag = (group.get('flag')?.value || '') as string;
+    const timeCtrl = group.get('time');
+    const endCtrl = group.get('end_date');
+
+    if (flag === 'p') {
+      endCtrl?.setValidators([Validators.required]);
+      timeCtrl?.clearValidators();
+      if (timeCtrl?.value) timeCtrl.setValue('', { emitEvent: false });
+    } else if (flag === 'd') {
+      timeCtrl?.clearValidators();
+      endCtrl?.clearValidators();
+      if (endCtrl?.value) endCtrl.setValue('', { emitEvent: false });
+      if (timeCtrl?.value) timeCtrl.setValue('', { emitEvent: false });
+    } else {
+      timeCtrl?.clearValidators();
+      endCtrl?.clearValidators();
+    }
+
+    timeCtrl?.updateValueAndValidity({ emitEvent: false });
+    endCtrl?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  onDateTypeChange(index: number): void {
+    const group = this.eventDates.at(index) as FormGroup | undefined;
+    if (!group) return;
+    this.applyDateTypeRules(group);
+  }
+
+  isPeriod(index: number): boolean {
+    const group = this.eventDates.at(index) as FormGroup | undefined;
+    return (group?.get('flag')?.value || '') === 'p';
+  }
+
+  isSingleDate(index: number): boolean {
+    const group = this.eventDates.at(index) as FormGroup | undefined;
+    return (group?.get('flag')?.value || '') === 'd';
+  }
+
+  addDate(): void {
+    this.eventDates.push(this.buildDateGroup());
+  }
+
+  removeDate(index: number): void {
+    this.eventDates.removeAt(index);
+  }
+
+  // ===================== IMAGE SECTION =====================
+  onMainImageSelected(event: any): void {
+    const file: File | null = event?.target?.files?.[0] || null;
+    this.mainImageFile = file;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => this.uploadPreviewUrl = reader.result as string;
+      reader.readAsDataURL(file);
+    } else {
+      this.uploadPreviewUrl = null;
+    }
+  }
+
+  // ===================== MEDIA SECTION =====================
+  addMediaItem(id_media: 1 | 2 = 1): void {
+    this.mediaItems.push(this.fb.group({
+      id_media_type: [id_media, Validators.required],
+      title: ['', Validators.required],
+      description: [''],
+      url: [''],
+      imageFile: [null],
+      existingImageUrl: [null]
+    }));
+  }
+
+  removeMediaItem(index: number): void {
+    this.mediaItems.removeAt(index);
+  }
+
+  setMediaType(index: number, type: 1 | 2): void {
+    const group = this.mediaItems.at(index) as FormGroup;
+    group.patchValue({ id_media_type: type });
+  }
+
+  onMediaImageSelected(event: any, index: number): void {
+    const file: File | null = event?.target?.files?.[0] || null;
+    if (!file) return;
+    const group = this.mediaItems.at(index) as FormGroup;
+    group.patchValue({ imageFile: file });
+  }
+
+  // ===================== ARTISTS SECTION =====================
+  addArtistRow(): void {
+    this.artistRows.push({ 
+      id_artist: null, 
+      instruments: [], 
+      availableInstruments: [], 
+      loadingInstruments: false,
+      isNewArtist: false
     });
   }
 
-  // Method to add Instrument
-  // This method adds the selected instrument to the list of selected instruments
-  addInstrument() {
-    const instrument = this.sysInstruments.find(
-      (i: any) => i.name === this.selectedInstrument
-    );
+  removeArtistRow(i: number): void {
+    this.artistRows.splice(i, 1);
+  }
 
-    if (
-      instrument &&
-      !this.selectedInstruments.some((i) => i.name === instrument.name)
-    ) {
-      this.selectedInstruments.push({
-        name: instrument.name,
-        color: instrument.color,
-      });
+  async onArtistSelected(i: number, id_artist: string | null): Promise<void> {
+    const row = this.artistRows[i];
+    row.id_artist = (id_artist && id_artist.length > 0) ? id_artist : null;
+    row.instruments = [];
+    row.availableInstruments = [];
+    row.isNewArtist = false;
+    
+    if (!row.id_artist) return;
 
-      this.selectedInstrument = ''; // Reset selection
+    row.loadingInstruments = true;
+    try {
+      const data = await this.eventService.getArtistInstruments(row.id_artist);
+      row.availableInstruments = (data || []).map((r: any) => ({ 
+        id: r.id_instrument || r.id, 
+        instrument: r.instrument || r.name 
+      }));
+      const artistMeta = this.availableArtists.find(a => a.id === row.id_artist);
+      row.photo = artistMeta?.photo || null;
+      row.name = artistMeta?.name || '';
+      row.email = artistMeta?.email || '';
+    } catch (err) {
+      console.error('Error loading instruments:', err);
+    } finally {
+      row.loadingInstruments = false;
     }
   }
 
-  // Method to add proposed date
-  // This method adds the selected date to the list of proposed dates
-  addProposedDate() {
-    if (this.selectedDate && !this.proposedDates.includes(this.selectedDate)) {
-      this.proposedDates.push(this.selectedDate);
-      this.selectedDate = ''; // Clear input after adding
+  addRowInstrument(i: number, id_instrument: number): void {
+    const row = this.artistRows[i];
+    if (!row || !id_instrument) return;
+    
+    const label = (row.availableInstruments.find(ai => ai.id === id_instrument)?.instrument) || '';
+    if (!row.instruments.some(x => x.id_instrument === id_instrument)) {
+      row.instruments.push({ id_instrument, label });
     }
   }
 
-  // Next step method that validates and updates activeTab
-  canProceed() {
-    return (
-      this.selectedRequestType != null &&
-      this.eventTitle().trim().length > 0 &&
-      this.selectedInstruments.length > 0 &&
-      this.shortDescription().length <= 100 &&
-      this.longDescription().length <= 200
-    );
+  addRowInstrumentFromSelect(i: number, selectEl: HTMLSelectElement): void {
+    const raw = selectEl.value;
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) return;
+    this.addRowInstrument(i, value);
+    selectEl.value = '' as any;
   }
 
-  async nextStep() {
-    if (!this.canProceed()) {
-      this.alertService.showAlert(
-        'Validation',
-        'Please fill all required fields and respect max lengths',
-        'error'
-      );
+  removeRowInstrument(i: number, id_instrument: number): void {
+    const row = this.artistRows[i];
+    if (!row) return;
+    row.instruments = row.instruments.filter(x => x.id_instrument !== id_instrument);
+  }
+
+  // New Artist with Email
+  newArtistName: string = '';
+  newArtistEmail: string = '';
+  isAddingNewArtist: boolean = false;
+  newSignupArtists: Array<{ name: string; email: string; id: string }> = [];
+
+  async addNewArtist(): Promise<void> {
+    if (!this.newArtistName || !this.newArtistEmail) {
+      this.alertService.showAlert('Validation', 'Please provide name and email for the new artist', 'warning');
       return;
     }
 
-    const id_artist = this.artistID; // Replace with real user ID from auth
-    const id_host = '1'; // Same
-
-    const request: ArtistRequest = {
-      id_artist,
-      id_req_type: this.selectedRequestType ?? 1,
-      title: this.eventTitle(),
-      instrument: this.selectedInstruments.map((i) => i.name),
-      short_desc: this.shortDescription(),
-      long_desc: this.longDescription(),
-      propose_date: this.proposedDates, // e.g. ['2025-04-05', '2025-04-06']
-      id_host,
-    };
-
+    this.isAddingNewArtist = true;
+    
     try {
-      await this.artistService.createArtistRequest(request).then((response) => {
-        console.log('Request created successfully:', response);
-        this.idRequest = response.id;
+      // Send signup email via Supabase
+      await this.artistService.sendArtistSignupEmail(this.newArtistEmail, this.newArtistName);
+      
+      // Add to artist table
+      const newArtistId = await this.artistService.addPendingArtist(this.newArtistName, this.newArtistEmail);
+      
+      // Add to new signup artists list
+      this.newSignupArtists.push({
+        name: this.newArtistName,
+        email: this.newArtistEmail,
+        id: newArtistId
       });
-
-      this.activeTab.set(2);
+      
+      // Add comment about new artist
+      const currentComments = this.commentsForm.get('comments')?.value || '';
+      const separator = currentComments ? '\n\n' : '';
+      const newComment = `${separator}New artist (${this.newArtistEmail}) and (${this.newArtistName}) is required and sent for signup`;
+      this.commentsForm.patchValue({ comments: currentComments + newComment });
+      
+      // Add to artist rows
+      this.artistRows.push({
+        id_artist: newArtistId,
+        name: this.newArtistName,
+        email: this.newArtistEmail,
+        instruments: [],
+        availableInstruments: this.instruments, // All instruments available for new artist
+        loadingInstruments: false,
+        isNewArtist: true
+      });
+      
+      this.alertService.showAlert('Success', 'Signup email sent and artist added to request', 'success');
+      this.newArtistName = '';
+      this.newArtistEmail = '';
     } catch (error: any) {
-      console.error('Failed to submit request:', error);
-      this.alertService.showAlert(
-        'Error',
-        error.message || 'Submission failed.',
-        'error'
+      this.alertService.showAlert('Error', error.message || 'Failed to add new artist', 'error');
+    } finally {
+      this.isAddingNewArtist = false;
+    }
+  }
+
+  // ===================== NAVIGATION =====================
+  async nextStep(): Promise<void> {
+    if (this.currentStep === 1) {
+      // Validate Details
+      if (this.detailsForm.invalid) {
+        this.detailsForm.markAllAsTouched();
+        this.alertService.showAlert('Validation', 'Please complete all required fields', 'warning');
+        return;
+      }
+      
+      try {
+        this.isSaving = true;
+        const d = this.detailsForm.value;
+        
+        if (this.isEditMode && this.createdRequestId) {
+          // Update existing event
+          await this.eventService.updateEventRow(this.createdRequestId, {
+            title: d.title,
+            teaser: d.teaser || null,
+            long_teaser: d.long_teaser || null,
+            id_event_domain: d.id_event_domain || null,
+            description: d.description
+          });
+        } else {
+          // Create new event request with status 2
+          this.createdRequestId = await this.eventService.createEventRow({
+            title: d.title,
+            teaser: d.teaser || null,
+            long_teaser: d.long_teaser || null,
+            id_event_domain: d.id_event_domain || null,
+            id_event_type: 1, // Default type for requests
+            description: d.description,
+            booking_url: null,
+            photo: null,
+            credit_photo: null,
+            status: 2, // Status 2 for all event requests
+            is_active: false,
+            id_edition: null
+          });
+        }
+        
+        this.currentStep = 2;
+      } catch (err: any) {
+        this.alertService.showAlert('Error', err.message || 'Failed to save request', 'error');
+        return;
+      } finally {
+        this.isSaving = false;
+      }
+    } else if (this.currentStep === 2) {
+      // Validate and save Dates
+      if (this.eventDates.length === 0 || this.eventDates.invalid) {
+        this.eventDates.markAllAsTouched();
+        this.alertService.showAlert('Validation', 'Please add at least one date', 'warning');
+        return;
+      }
+      
+      try {
+        this.isSaving = true;
+        const rows = (this.eventDates.value as Array<any>).map(x => {
+          const isPeriod = x.flag === 'p';
+
+          return {
+            start_date: x.start_date,
+            end_date: isPeriod ? (x.end_date || null) : (x.start_date || null),
+            time: null,
+            id_location: null,
+            flag: x.flag || null
+          };
+        });
+        await this.eventService.replaceEventDates(this.createdRequestId!, rows);
+        this.currentStep = 3;
+      } catch (err: any) {
+        this.alertService.showAlert('Error', err.message || 'Failed to save dates', 'error');
+        return;
+      } finally {
+        this.isSaving = false;
+      }
+    } else if (this.currentStep === 3) {
+      // Save Image
+      try {
+        this.isSaving = true;
+        if (this.mainImageFile) {
+          const photoUrl = await this.eventService.uploadEventImage(this.mainImageFile);
+          const creditPhoto = this.imageForm.get('credit_photo')?.value || null;
+          await this.eventService.updateEventRow(this.createdRequestId!, { 
+            photo: photoUrl,
+            credit_photo: creditPhoto
+          });
+          this.uploadPreviewUrl = photoUrl;
+        }
+        this.currentStep = 4;
+      } catch (err: any) {
+        this.alertService.showAlert('Error', err.message || 'Failed to save image', 'error');
+      } finally {
+        this.isSaving = false;
+      }
+    } else if (this.currentStep === 4) {
+      // Save Media
+      try {
+        this.isSaving = true;
+        const payload: Array<{ id_media_type: number; title: string; image: string | null; description: string | null; url: string | null }> = [];
+        for (let i = 0; i < this.mediaItems.length; i++) {
+          const row = this.mediaItems.at(i) as FormGroup;
+          const val = row.value as any;
+          let imgUrl: string | null = null;
+          const file: File | null = val.imageFile || null;
+          if (file) {
+            imgUrl = await this.eventService.uploadEventImage(file);
+          } else {
+            imgUrl = val.existingImageUrl || null;
+          }
+          payload.push({
+            id_media_type: Number(val.id_media_type),
+            title: val.title,
+            image: imgUrl,
+            description: val.description || null,
+            url: val.url || null
+          });
+        }
+        await this.eventService.replaceEventMedia(this.createdRequestId!, payload);
+        this.currentStep = 5;
+      } catch (err: any) {
+        this.alertService.showAlert('Error', err.message || 'Failed to save media', 'error');
+      } finally {
+        this.isSaving = false;
+      }
+    } else if (this.currentStep === 5) {
+      // Save Artists
+      try {
+        this.isSaving = true;
+        for (const row of this.artistRows) {
+          if (row.id_artist) {
+            await this.eventService.ensureEventArtist(this.createdRequestId!, row.id_artist);
+            for (const inst of row.instruments) {
+              await this.eventService.addEventInstrument(this.createdRequestId!, row.id_artist, inst.id_instrument);
+            }
+          }
+        }
+        this.currentStep = 6;
+      } catch (err: any) {
+        this.alertService.showAlert('Error', err.message || 'Failed to save artists', 'error');
+      } finally {
+        this.isSaving = false;
+      }
+    }
+  }
+
+  backStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep = (this.currentStep - 1) as any;
+    }
+  }
+
+  async submitEventRequest(): Promise<void> {
+    try {
+      this.isSaving = true;
+      
+      // Save comments to the events table
+      const comments = this.commentsForm.get('comments')?.value || '';
+      if (this.createdRequestId) {
+        await this.eventService.updateEventRow(this.createdRequestId, { 
+          comments: comments || null
+        });
+      }
+      
+      const message = this.isEditMode 
+        ? 'Event request updated successfully!' 
+        : 'Event request submitted successfully!';
+      this.alertService.showAlert('Success', message, 'success');
+      
+      // Reset form and go to "All Requests" tab
+      this.resetForm();
+      this.activeTab.set(2);
+      await this.getRequest();
+    } catch (err: any) {
+      this.alertService.showAlert('Error', err.message || 'Failed to submit request', 'error');
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  resetForm(): void {
+    this.currentStep = 1;
+    this.createdRequestId = null;
+    this.isEditMode = false;
+    this.detailsForm.reset();
+    this.datesForm.reset();
+    this.imageForm.reset();
+    this.mediaForm.reset();
+    this.artistsForm.reset();
+    this.commentsForm.reset();
+    this.eventDates.clear();
+    this.mediaItems.clear();
+    this.artistRows = [];
+    this.newSignupArtists = [];
+    this.uploadPreviewUrl = null;
+    this.mainImageFile = null;
+    this.addDate();
+  }
+
+  // ===================== ALL REQUESTS =====================
+  async getRequest(): Promise<void> {
+    try {
+      console.log('Loading requests for auth ID:', this.authID);
+      
+      if (!this.authID) {
+        console.warn('Auth ID is not set, cannot load requests');
+        this.alertService.showAlert('Info', 'Unable to load requests. Please log in again.', 'info');
+        this.ardata = [];
+        this.originalData = [];
+        return;
+      }
+      
+      // Get all event requests created by this user (all statuses)
+      // Use authID because events.created_by is the auth user ID
+      const data = await this.eventService.getEventsByArtist(this.authID);
+      console.log('Loaded requests count:', data?.length || 0);
+      console.log('Requests data:', data);
+      this.originalData = data;
+      this.ardata = [...data];
+      
+      // Apply initial search and sort
+      this.applySearchAndSort();
+    } catch (error: any) {
+      console.error('Error loading requests:', error);
+      this.alertService.showAlert('Error', 'Failed to load event requests: ' + error.message, 'error');
+      this.ardata = [];
+      this.originalData = [];
+    }
+  }
+
+  statusReturn(id: any): string {
+    switch(id) {
+      case 0: return 'Published';
+      case 1: return 'Approved';
+      case 2: return 'Pending';
+      default: return 'Unknown';
+    }
+  }
+
+  // Status filter - tracks current status filter
+  currentStatusFilter: number = 4; // 4 means "All"
+  
+  getDataByStatus(status: number): void {
+    this.currentStatusFilter = status;
+    this.applySearchAndSort();
+  }
+
+  // Search functionality
+  onSearchChange(): void {
+    this.applySearchAndSort();
+  }
+
+  // Sort functionality
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      // Toggle direction if clicking the same column
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Default to ascending for new column
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applySearchAndSort();
+  }
+
+  // Apply search and sort
+  private applySearchAndSort(): void {
+    let filtered = [...this.originalData];
+
+    // Apply status filter first
+    if (this.currentStatusFilter !== 4) {
+      filtered = filtered.filter((item: any) => item.status === this.currentStatusFilter);
+    }
+
+    // Apply search filter
+    if (this.searchQuery && this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((event: any) => 
+        event.title?.toLowerCase().includes(query)
       );
     }
+
+    // Apply sorting
+    filtered.sort((a: any, b: any) => {
+      let valueA: any;
+      let valueB: any;
+
+      switch (this.sortColumn) {
+        case 'title':
+          valueA = a.title?.toLowerCase() || '';
+          valueB = b.title?.toLowerCase() || '';
+          break;
+        case 'event_domain':
+          valueA = a.event_domain?.toLowerCase() || '';
+          valueB = b.event_domain?.toLowerCase() || '';
+          break;
+        case 'created_on':
+          valueA = new Date(a.created_on).getTime();
+          valueB = new Date(b.created_on).getTime();
+          break;
+        case 'status':
+          valueA = a.status;
+          valueB = b.status;
+          break;
+        default:
+          return 0;
+      }
+
+      if (valueA < valueB) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    this.ardata = filtered;
   }
 
-  // Method to switch New Request and All Requests tabs
-
-  isActiveTab(tab: number) {
-    this.activeTab.set(tab);
+  // Clear search
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.applySearchAndSort();
   }
 
-  //Method to upload the image and save data
-  onFileChange(event: any) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-    } else {
-      this.selectedFile = null;
-    }
-  }
-
-  //Method to upload the image and save data
-  onFileChangeCD(event: any) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFileCD = input.files[0];
-    } else {
-      this.selectedFileCD = null;
-    }
-  }
-
-  async upload(id: any) {
-    this.videoUpload = true;
-
-    const result = await this.artistService.uploadImageAndSaveData(
-      this.selectedFile ?? null, // allow null file
-      this.videoTitle,
-      this.videoUrl,
-      this.idRequest,
-      this.createdBy,
-      this.authID,
-      id
+  async delArtistRequest(id: any): Promise<void> {
+    const confirmed = await this.alertService.confirmDelete(
+      'Delete Request?',
+      'Are you sure you want to revoke this event request?',
+      'Yes, revoke it!'
     );
+    
+    if (!confirmed) return;
 
-    this.videoUpload = false;
-
-    if (result.success) {
-      console.log('Upload successful:', result.imageUrl);
-
-      if (id == 1) {
-        // Add to video list
-        this.videoList.push({
-          title: this.videoTitle,
-          id: result.id,
-        });
-      } else {
-        this.cdList.push({
-          title: this.videoTitle,
-          id: result.id,
-        });
-      }
-
-      // ✅ Clear the input fields
-      this.videoTitle = '';
-      this.videoUrl = '';
-      this.selectedFile = null;
-
-      // ✅ Reset file input
-      const fileInput = document.getElementById(
-        'fileInput'
-      ) as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
-    } else {
-      console.error('Upload error:', result.error);
+    try {
+      await this.eventService.deleteEvent(id);
+      this.alertService.showAlert('Success', 'Request revoked successfully', 'success');
+      this.ardata = this.ardata.filter((data: { id: any; }) => data.id !== id);
+    } catch (error: any) {
+      this.alertService.showAlert('Error', error.message || 'Failed to revoke request', 'error');
     }
   }
-
-  async removeUpload(id: number, idType: any) {
-    if (idType == 1) {
-      this.isRemoving = id; // Set removing state to true
-    } else {
-      this.isRemoving1 = id; // Set removing state to true
-    }
-    const result = await this.artistService.deleteMedia(id);
-    if (result.success) {
-      console.log('Video deleted successfully!');
-      if (idType == 1) {
-        // this.isRemoving = false; // Reset removing state
-
-        this.videoList = this.videoList.filter((video) => video.id !== id);
-      } else {
-        //   this.isRemoving1 = false; // Reset removing state
-
-        this.cdList = this.cdList.filter((cd) => cd.id !== id);
-      }
-    } else {
-      console.error('Delete failed:', result.error);
-    }
-  }
-
-  async uploadCD(id: any) {
-    this.cdUpload = true;
-
-    const result = await this.artistService.uploadImageAndSaveData(
-      this.selectedFileCD ?? null, // allow null file
-      this.cdTitle,
-      this.cdUrl,
-      this.idRequest,
-      this.createdBy,
-      this.authID,
-      id
-    );
-
-    if (result.success) {
-      console.log('Upload successful:', result.imageUrl);
-
-      this.cdUpload = false;
-      this.cdList.push({
-        title: this.cdTitle,
-        id: result.id,
-      });
-
-      // ✅ Clear the input fields
-      this.cdTitle = '';
-      this.cdUrl = '';
-      this.selectedFileCD = null;
-
-      // ✅ Reset file input
-      const fileInputCD = document.getElementById(
-        'fileInputCD'
-      ) as HTMLInputElement;
-      if (fileInputCD) {
-        fileInputCD.value = '';
-      }
-    } else {
-      console.error('Upload error:', result.error);
-    }
-  }
-
-  submitRequest() {
-    this.activeTab.set(3);
-  }
-ardata:any = [];
-
-  async getRequest(){
-    // console.log('This is artist ID',this.artistID);
-this.ardata = await this.artistService.getArtistRequests(this.artistID);
-this.originalData = this.ardata;
-    console.log('This is artist request',this.ardata);
-  }
-
-statusReturn(id:any){
-  switch(id){
-    case 1:
-      return 'Pending';
-      break;
-    case 2:
-      return 'Approved';
-      break;
-    case 3: 
-      return 'Rejected';
-      break;
-    default:
-        return '';
-
-  }
-
-
-
-}
-
-
-getDataByStatus(status: number) {
-  console.log('Status:', status);
-
-  if (status === 4) {
-    // Reload original data from backup if needed
-    this.ardata = [...this.originalData]; // assuming you stored the original
-  } else {
-    this.ardata = this.originalData.filter((item: { status: number }) => item.status === status);
-  }
-
-  console.log('Updated ardata:', this.ardata);
-}
-
-async delArtistRequest(id:any){
-await this.artistService.delArtistRequest(id).then(()=>{
-  this.alertService.showAlert('Request Deleted', 'request has been removed', 'success');
-  this.ardata = this.ardata.filter((data: { id: any; }) => data.id !== id);
-  
-}).catch(error=>{
-  this.alertService.showAlert('Internal Error', error, 'error');
-})
-}
 }

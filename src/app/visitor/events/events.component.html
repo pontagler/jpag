@@ -265,6 +265,7 @@
 					<img [src]="(e?.imageUrl || '/assets/images/venues/v1.png')" [alt]="e?.title || 'Event'"
 						class="w-full h-56 md:h-64 lg:h-72 object-cover" />
 					<div class="absolute top-3 left-3">
+					
 						<span
 							class="bg-pont-green/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-white">{{(e?.event_domain
 							|| e?.edition_type || 'Event') | titlecase}}</span>
@@ -275,6 +276,7 @@
 						<span
 							class="bg-gray-50  backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-gray-600">{{x.instrument
 							| titlecase}}</span>
+							
 						}
 					</div>
 				</div>
@@ -337,7 +339,8 @@
 									<span class="truncate max-w-[10rem]">{{d?.location}}</span>
 								</div>
 							}
-						</div>
+						</div> 
+				
 						}
 						}
 						@if((e?.shows?.length || 0) > 2){

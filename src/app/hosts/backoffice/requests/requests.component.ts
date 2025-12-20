@@ -15,10 +15,12 @@ constructor(private artistService: ArtistService, private router:Router) {}
 
   requests: any[] = [];
   filteredRequests: any[] = [];
+  eventDomains: string[] = [];
+  commentCounts: Map<number, number> = new Map();
 
   // filters
   filterType: string = '';
-  filterStatus: string = '';
+  searchTitle: string = '';
   dateOrder: 'nearest' | 'oldest' = 'nearest';
 
   // sorting
@@ -32,13 +34,50 @@ constructor(private artistService: ArtistService, private router:Router) {}
   async loadRequests() {
     try {
       const data = await this.artistService.getAllArtistsRequests();
-      this.requests = Array.isArray(data) ? data : [];
+      // Filter to show requests with status 2 (Pending) and 3 (On Hold)
+      this.requests = Array.isArray(data) ? data.filter(r => r.status === 2 || r.status === 3) : [];
+      
+      // Extract unique event domains for the filter dropdown
+      const domains = this.requests
+        .map(r => r.request_type)
+        .filter((v, i, a) => v && a.indexOf(v) === i)
+        .sort();
+      this.eventDomains = domains;
+      
+      // Load comment counts for all requests
+      await this.loadCommentCounts();
+      
       this.applyFiltersAndSorting();
     } catch (err) {
       console.error('Failed to load requests', err);
       this.requests = [];
       this.filteredRequests = [];
+      this.eventDomains = [];
     }
+  }
+
+  async loadCommentCounts() {
+    try {
+      // Fetch comment counts for all requests
+      const countPromises = this.requests.map(async (request) => {
+        const count = await this.artistService.getEventCommentCount(request.id_request);
+        return { id: request.id_request, count };
+      });
+      
+      const counts = await Promise.all(countPromises);
+      
+      // Store counts in the map
+      this.commentCounts.clear();
+      counts.forEach(({ id, count }) => {
+        this.commentCounts.set(id, count);
+      });
+    } catch (err) {
+      console.error('Failed to load comment counts', err);
+    }
+  }
+
+  getCommentCount(requestId: number): number {
+    return this.commentCounts.get(requestId) || 0;
   }
 
   onFilterChange() {
@@ -46,10 +85,9 @@ constructor(private artistService: ArtistService, private router:Router) {}
   }
 
   onDateOrderChange() {
-    // If currently sorting by propose_date, adjust direction to match selected order
-    if (this.sortColumn === 'propose_date') {
-      this.sortDirection = this.dateOrder === 'nearest' ? 'asc' : 'desc';
-    }
+    // Always switch to sorting by propose_date when date order is changed
+    this.sortColumn = 'propose_date';
+    this.sortDirection = this.dateOrder === 'nearest' ? 'asc' : 'desc';
     this.applyFiltersAndSorting();
   }
 
@@ -64,19 +102,19 @@ constructor(private artistService: ArtistService, private router:Router) {}
   }
 
   private applyFiltersAndSorting() {
-    const type = this.filterType.trim().toLowerCase();
-    const status = this.filterStatus.trim();
+    const type = this.filterType.trim();
+    const titleSearch = this.searchTitle.trim().toLowerCase();
 
     let rows = this.requests.slice();
 
-    // filter by request_type
+    // filter by request_type (event domain) - exact match
     if (type) {
-      rows = rows.filter(r => String(r.request_type || '').toLowerCase() === type);
+      rows = rows.filter(r => String(r.request_type || '') === type);
     }
 
-    // filter by status
-    if (status) {
-      rows = rows.filter(r => String(r.status) === status);
+    // filter by title search
+    if (titleSearch) {
+      rows = rows.filter(r => String(r.title || '').toLowerCase().includes(titleSearch));
     }
 
     // propose date nearest/oldest selector changes default sort hint
@@ -95,8 +133,26 @@ constructor(private artistService: ArtistService, private router:Router) {}
 
     // special handling for propose_date (array) and created_on (timestamp)
     if (column === 'propose_date') {
-      const aDate = this.getNearestProposeDate(a?.propose_date);
-      const bDate = this.getNearestProposeDate(b?.propose_date);
+      // Handle both propose_date array and min field from view
+      let aDate: number;
+      let bDate: number;
+      
+      if (a?.propose_date && Array.isArray(a.propose_date) && a.propose_date.length > 0) {
+        aDate = this.getNearestProposeDate(a.propose_date);
+      } else if (a?.min) {
+        aDate = new Date(a.min).getTime();
+      } else {
+        aDate = Number.MAX_SAFE_INTEGER;
+      }
+      
+      if (b?.propose_date && Array.isArray(b.propose_date) && b.propose_date.length > 0) {
+        bDate = this.getNearestProposeDate(b.propose_date);
+      } else if (b?.min) {
+        bDate = new Date(b.min).getTime();
+      } else {
+        bDate = Number.MAX_SAFE_INTEGER;
+      }
+      
       return (aDate - bDate) * factor;
     }
 
@@ -129,9 +185,11 @@ constructor(private artistService: ArtistService, private router:Router) {}
 
   getStatusLabel(status: number): string {
     switch (status) {
-      case 1: return 'New';
-      case 2: return 'Approved';
-      case 3: return 'Rejected';
+      case 0: return 'Published';
+      case 1: return 'Approved Request';
+      case 2: return 'Pending';
+      case 3: return 'On Hold';
+      case 6: return 'Rejected';
       default: return String(status ?? '');
     }
   }

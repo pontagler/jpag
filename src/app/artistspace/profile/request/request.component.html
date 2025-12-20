@@ -10,7 +10,7 @@
           'text-black': activeTab() !== 1
         }"
       >
-        <p class="font-medium">New Event Request</p>
+        <p class="font-medium">All Requests</p>
       </div>
       <div
         (click)="isActiveTab(2)"
@@ -20,13 +20,13 @@
           'text-black': activeTab() !== 2
         }"
       >
-        <p class="font-medium">All Requests</p>
+        <p class="font-medium">New Event Request</p>
       </div>
     </div>
   </div>
 
   <!-- NEW EVENT REQUEST TAB -->
-  <div *ngIf="activeTab() === 1" class="bg-white rounded-xl shadow-md p-6 space-y-6">
+  <div *ngIf="activeTab() === 2" class="bg-white rounded-xl shadow-md p-6 space-y-6">
     <!-- Loading Overlay -->
     <div *ngIf="isLoadingData" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-8 flex flex-col items-center gap-4">
@@ -48,10 +48,10 @@
       </h2>
       <button 
         *ngIf="isEditMode"
-        (click)="resetForm(); activeTab.set(1);"
-        class="text-sm text-gray-600 hover:text-gray-900"
+        (click)="cancelEdit()"
+        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
       >
-        <i class="fas fa-times"></i> Cancel Edit
+        <i class="fas fa-times mr-2"></i>Cancel Edit
       </button>
     </div>
 
@@ -408,10 +408,22 @@
 
               <div class="flex flex-col">
                 <label class="text-xs font-medium text-gray-600 mb-1">Cover Image</label>
+                
+                <!-- Show existing image if available -->
+                <div *ngIf="m.value.existingImageUrl" class="mb-2">
+                  <img 
+                    [src]="m.value.existingImageUrl" 
+                    alt="Media cover" 
+                    class="w-full h-40 object-cover rounded-lg border border-gray-200"
+                  />
+                  <p class="text-xs text-gray-500 mt-1">Current image (upload a new file to replace)</p>
+                </div>
+                
                 <input 
                   type="file" 
                   accept="image/*" 
                   (change)="onMediaImageSelected($event, i)"
+                  class="text-sm"
                 />
               </div>
 
@@ -467,18 +479,37 @@
           <div class="space-y-4">
             <div 
               *ngFor="let row of artistRows; let i = index" 
-              class="border rounded-lg p-4 space-y-3 bg-gray-50"
+              class="border rounded-lg p-4 space-y-3"
+              [ngClass]="row.isNewArtist ? 'bg-amber-50 border-amber-300' : 'bg-gray-50'"
             >
               <div class="flex items-start gap-3">
-                <img 
-                  [src]="row.photo || '/assets/images/profile/user-b.png'" 
-                  class="w-12 h-12 rounded-full object-cover"
-                  alt="Artist"
-                />
+                <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  <img 
+                    *ngIf="row.photo" 
+                    [src]="row.photo" 
+                    class="w-full h-full object-cover"
+                    alt="Artist"
+                  />
+                  <i *ngIf="!row.photo" class="fas fa-user text-gray-400 text-xl"></i>
+                </div>
                 <div class="flex-1 space-y-3">
                   <div>
                     <label class="text-xs font-medium text-gray-600 mb-1 block">Select Artist</label>
+                    
+                    <!-- Show artist name if they are new/pending (not in availableArtists) -->
+                    <div *ngIf="row.isNewArtist || (row.id_artist && row.name && !isArtistInAvailableList(row.id_artist))" 
+                      class="w-full px-3 py-2 rounded-lg border border-amber-300 bg-amber-50">
+                      <div class="flex items-center gap-2">
+                        <i class="fas fa-clock text-amber-600"></i>
+                        <span class="text-sm text-amber-900 font-medium">{{ row.name }}</span>
+                        <span class="text-xs text-amber-700">({{ row.email }})</span>
+                        <span class="ml-auto text-xs text-amber-600">Pending Activation</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Show regular dropdown if not a new artist -->
                     <select 
+                      *ngIf="!row.isNewArtist && (!row.id_artist || isArtistInAvailableList(row.id_artist))"
                       class="w-full px-3 py-2 rounded-lg border border-gray-200"
                       (change)="onArtistSelected(i, $any($event.target).value)"
                       [value]="row.id_artist || ''"
@@ -491,7 +522,10 @@
                   </div>
 
                   <div *ngIf="row.id_artist && !row.loadingInstruments">
-                    <label class="text-xs font-medium text-gray-600 mb-1 block">Instruments</label>
+                    <label class="text-xs font-medium text-gray-600 mb-1 block">
+                      Instruments
+                      <span *ngIf="row.isNewArtist" class="text-amber-600 text-xs ml-2">(Optional - Artist is pending)</span>
+                    </label>
                     <div class="flex items-center gap-2">
                       <select 
                         #instSelect
@@ -499,7 +533,7 @@
                       >
                         <option value="">Add instrument</option>
                         <option 
-                          *ngFor="let inst of row.availableInstruments" 
+                          *ngFor="let inst of (row.availableInstruments && row.availableInstruments.length > 0 ? row.availableInstruments : instruments)" 
                           [value]="inst.id"
                         >
                           {{ inst.instrument | titlecase }}
@@ -529,6 +563,11 @@
                         </button>
                       </span>
                     </div>
+                    
+                    <p *ngIf="row.isNewArtist" class="text-xs text-amber-600 mt-2">
+                      <i class="fas fa-info-circle"></i>
+                      This artist hasn't activated their account yet. Instruments are optional.
+                    </p>
                   </div>
 
                   <div *ngIf="row.loadingInstruments" class="text-sm text-gray-500">
@@ -627,21 +666,23 @@
       </div>
 
       <!-- STEP 6: COMMENTS -->
-      <form *ngSwitchCase="6" [formGroup]="commentsForm" class="space-y-6">
+      <div *ngSwitchCase="6" class="space-y-6">
         <h3 class="text-lg font-semibold text-gray-900">Additional Comments</h3>
-        
+
         <div class="border rounded-lg p-4 space-y-4">
           <div class="flex flex-col">
             <label class="text-sm font-medium text-gray-700 mb-2">
               Comments for the Host
             </label>
-            <textarea 
-              rows="8" 
-              class="w-full px-3 py-2 rounded-lg border border-gray-300" 
-              formControlName="comments"
+            <textarea
+              rows="8"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300"
+              [(ngModel)]="commentsForm.value.comments"
+              (ngModelChange)="commentsForm.patchValue({comments: $event})"
               placeholder="Add any additional information, special requests, or notes for the event host..."
             ></textarea>
             <p class="text-xs text-gray-500 mt-1">
+              <i class="fas fa-info-circle mr-1"></i>
               These comments will be visible to the host when reviewing your event request.
             </p>
           </div>
@@ -664,45 +705,81 @@
             {{ isSaving ? (isEditMode ? 'Updating...' : 'Submitting...') : (isEditMode ? 'Update Event Request' : 'Submit Event Request') }}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 
   <!-- ALL REQUESTS TAB -->
-  <div *ngIf="activeTab() === 2" class="bg-white rounded-xl p-6 shadow-md mb-4">
+  <div *ngIf="activeTab() === 1" class="bg-white rounded-xl p-6 shadow-md mb-4">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoadingRequests" class="flex items-center justify-center py-16">
+      <div class="flex flex-col items-center gap-4">
+        <div class="animate-spin text-pont-green">
+          <svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <style>.spinner_ajPY{transform-origin:center;animation:spinner_AtaB .75s infinite linear}@keyframes spinner_AtaB{100%{transform:rotate(360deg)}}</style>
+            <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+            <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_ajPY"/>
+          </svg>
+        </div>
+        <p class="text-lg font-medium text-gray-900">Loading Requests...</p>
+      </div>
+    </div>
+
+    <!-- Content (hidden while loading) -->
+    <div *ngIf="!isLoadingRequests">
     <!-- Header with Status Filters -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <h2 class="text-xl font-semibold text-gray-900">My Event Requests</h2>
       <div class="flex flex-row space-x-2">
         <button 
-          (click)="getDataByStatus(1)"
-          [ngClass]="{
-            'bg-yellow-400 text-yellow-900 ring-2 ring-yellow-500': currentStatusFilter === 1,
-            'bg-yellow-200 text-yellow-800 hover:bg-yellow-300': currentStatusFilter !== 1
-          }"
-          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
-        >
-          Draft
-        </button>
-        <button 
           (click)="getDataByStatus(2)"
           [ngClass]="{
-            'bg-blue-400 text-blue-900 ring-2 ring-blue-500': currentStatusFilter === 2,
-            'bg-blue-200 text-blue-800 hover:bg-blue-300': currentStatusFilter !== 2
+            'bg-gray-400 text-gray-900 ring-2 ring-gray-500': currentStatusFilter === 2,
+            'bg-gray-200 text-gray-800 hover:bg-gray-300': currentStatusFilter !== 2
           }"
           class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
         >
-          Pending
+          New
+        </button>
+        <button 
+          (click)="getDataByStatus(1)"
+          [ngClass]="{
+            'bg-green-400 text-green-900 ring-2 ring-green-500': currentStatusFilter === 1,
+            'bg-green-200 text-green-800 hover:bg-green-300': currentStatusFilter !== 1
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          Approved
         </button>
         <button 
           (click)="getDataByStatus(0)"
           [ngClass]="{
-            'bg-green-400 text-green-900 ring-2 ring-green-500': currentStatusFilter === 0,
-            'bg-green-200 text-green-800 hover:bg-green-300': currentStatusFilter !== 0
+            'bg-blue-400 text-blue-900 ring-2 ring-blue-500': currentStatusFilter === 0,
+            'bg-blue-200 text-blue-800 hover:bg-blue-300': currentStatusFilter !== 0
           }"
           class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
         >
           Published
+        </button>
+        <button 
+          (click)="getDataByStatus(3)"
+          [ngClass]="{
+            'bg-yellow-400 text-yellow-900 ring-2 ring-yellow-500': currentStatusFilter === 3,
+            'bg-yellow-200 text-yellow-800 hover:bg-yellow-300': currentStatusFilter !== 3
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          On Hold
+        </button>
+        <button 
+          (click)="getDataByStatus(5)"
+          [ngClass]="{
+            'bg-red-400 text-red-900 ring-2 ring-red-500': currentStatusFilter === 5,
+            'bg-red-200 text-red-800 hover:bg-red-300': currentStatusFilter !== 5
+          }"
+          class="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition"
+        >
+          Rejected
         </button>
         <button 
           (click)="getDataByStatus(4)"
@@ -847,36 +924,57 @@
               </div>
             </td>
             <td class="px-4 py-3 whitespace-nowrap">
-              <span
-                [ngClass]="{
-                  'bg-green-100 text-green-800': event.status === 0,
-                  'bg-blue-100 text-blue-800': event.status === 1,
-                  'bg-yellow-100 text-yellow-800': event.status === 2
-                }"
-                class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-              >
-                {{ statusReturn(event.status) }}
-              </span>
+              <div class="flex items-center gap-2">
+                <span
+                  [ngClass]="{
+                    'bg-blue-100 text-blue-800': event.status === 0,
+                    'bg-green-100 text-green-800': event.status === 1,
+                    'bg-gray-100 text-gray-800': event.status === 2,
+                    'bg-yellow-100 text-yellow-800': event.status === 3,
+                    'bg-indigo-100 text-indigo-800': event.status === 4 || event.status === 5,
+                    'bg-red-100 text-red-800': event.status === 6
+                  }"
+                  class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                >
+                  {{ statusReturn(event.status) }}
+                </span>
+                <span 
+                  *ngIf="event.status === 4 || event.status === 5"
+                  class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold"
+                  title="1 new message"
+                >
+                  01
+                </span>
+                <span 
+                  *ngIf="hasMultipleComments(event.id)"
+                  class="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-pont-green text-white text-xs font-semibold"
+                  [title]="'Comments: ' + getCommentCount(event.id)"
+                >
+                  <i class="fas fa-comments"></i>
+                  {{ getCommentCount(event.id) }}
+                </span>
+              </div>
             </td>
             <td class="px-4 py-3 whitespace-nowrap text-center">
               <div class="flex items-center justify-center space-x-2">
                 <button 
-                  *ngIf="event.status === 2"
+                  *ngIf="event.status === 2 || event.status === 3"
                   (click)="editRequest(event.id)"
                   class="text-blue-600 hover:text-blue-800 transition"
-                  title="Edit Request"
+                  [title]="event.status === 3 ? 'Edit On Hold Request' : 'Edit Request'"
                 >
                   <i class="fas fa-edit"></i>
                 </button>
                 <button 
-                  *ngIf="event.status === 2"
+                  *ngIf="event.status === 2 || event.status === 3"
                   (click)="delArtistRequest(event.id)"
                   class="text-red-600 hover:text-red-800 transition"
-                  title="Revoke Request"
+                  [title]="event.status === 3 ? 'Delete On Hold Request' : 'Revoke Request'"
                 >
                   <i class="fas fa-trash"></i>
                 </button>
                 <button 
+                  [routerLink]="['/artistspace/profile/requests', event.id]"
                   class="text-gray-600 hover:text-gray-800 transition"
                   title="View Details"
                 >
@@ -916,11 +1014,198 @@
       </button>
       <button 
         *ngIf="!searchQuery"
-        (click)="isActiveTab(1)"
+        (click)="isActiveTab(2)"
         class="px-6 py-2 rounded-lg bg-pont-green text-white hover:bg-opacity-90 font-medium transition"
       >
         <i class="fas fa-plus mr-2"></i> Create Event Request
       </button>
+    </div>
+    </div>
+  </div>
+
+  <!-- VIEW REQUEST DETAILS MODAL -->
+  <div *ngIf="isViewingRequest && viewingRequest" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-pont-green bg-opacity-10 text-pont-green">
+            <i class="fas fa-clipboard-list"></i>
+          </span>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">{{viewingRequest?.title}}</h2>
+            <p class="text-sm text-gray-500">{{viewingRequest?.event_type}} - {{viewingRequest?.event_domain}}</p>
+          </div>
+        </div>
+        <button 
+          (click)="closeRequestView()"
+          class="text-gray-400 hover:text-gray-600 transition"
+        >
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="p-6 space-y-6">
+        <!-- Request Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Event ID</span>
+            <span class="font-mono text-gray-900">{{viewingRequest?.id}}</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Status</span>
+            <div class="flex items-center gap-2">
+              <span
+                class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-blue-100 text-blue-800': viewingRequest?.status === 0,
+                  'bg-green-100 text-green-800': viewingRequest?.status === 1,
+                  'bg-gray-100 text-gray-700': viewingRequest?.status === 2,
+                  'bg-yellow-100 text-yellow-800': viewingRequest?.status === 3,
+                  'bg-indigo-100 text-indigo-800': viewingRequest?.status === 4 || viewingRequest?.status === 5,
+                  'bg-red-100 text-red-800': viewingRequest?.status === 6
+                }"
+              >
+                <i class="fas"
+                  [ngClass]="{
+                    'fa-globe': viewingRequest?.status === 0,
+                    'fa-circle-check': viewingRequest?.status === 1,
+                    'fa-circle-dot': viewingRequest?.status === 2,
+                    'fa-pause-circle': viewingRequest?.status === 3,
+                    'fa-envelope': viewingRequest?.status === 4 || viewingRequest?.status === 5,
+                    'fa-circle-xmark': viewingRequest?.status === 6
+                  }"
+                ></i>
+                {{ getStatusLabel(viewingRequest?.status) }}
+              </span>
+              <span 
+                *ngIf="viewingRequest?.status === 4 || viewingRequest?.status === 5"
+                class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold"
+                title="1 new message"
+              >
+                01
+              </span>
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Description</span>
+            <p class="text-gray-900 mt-1 bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{viewingRequest?.description || 'N/A'}}</p>
+          </div>
+          <div class="md:col-span-2" *ngIf="viewingRequest?.teaser">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Teaser</span>
+            <p class="text-gray-900 mt-1 bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{viewingRequest?.teaser}}</p>
+          </div>
+        </div>
+
+        <!-- Event Dates -->
+        <div *ngIf="viewingRequest?.event_dates?.length" class="border-t pt-4">
+          <span class="text-sm font-semibold text-gray-900 block mb-3">Event Dates</span>
+          <div class="space-y-2">
+            <div *ngFor="let eventDate of viewingRequest.event_dates" class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-4">
+                <i class="fas fa-calendar text-pont-green"></i>
+                <span class="text-sm text-gray-900">{{eventDate.date | date:'fullDate'}}</span>
+                <span *ngIf="eventDate.time" class="text-sm text-gray-600">• {{eventDate.time}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Artists -->
+        <div *ngIf="viewingRequest?.event_artists?.length" class="border-t pt-4">
+          <span class="text-sm font-semibold text-gray-900 block mb-3">Artists</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div *ngFor="let artist of viewingRequest.event_artists" class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-3">
+                <img *ngIf="artist.photo" [src]="artist.photo" alt="Artist Photo" class="w-12 h-12 object-cover rounded-full ring-1 ring-gray-200" />
+                <div *ngIf="!artist.photo" class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                  <i class="fas fa-user text-gray-400"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-gray-900 text-sm">{{artist.artist}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="border-t pt-4">
+          <span class="text-sm font-semibold text-gray-900 block mb-3">
+            <i class="fas fa-comments mr-2"></i>Comments & Messages
+          </span>
+          
+          <!-- Comments Thread -->
+          <div class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4 max-h-80 overflow-y-auto mb-4">
+            <div *ngIf="viewingRequest?.comments?.length; else noComments" class="space-y-3">
+              <div *ngFor="let comment of viewingRequest.comments" 
+                class="flex gap-3"
+                [ngClass]="comment.who === 2 ? 'flex-row-reverse' : 'flex-row'">
+                
+                <!-- Avatar -->
+                <div class="flex-shrink-0">
+                  <div class="h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                    [ngClass]="comment.who === 2 ? 'bg-pont-green' : 'bg-indigo-600'">
+                    {{comment.who === 2 ? 'A' : 'H'}}
+                  </div>
+                </div>
+                
+                <!-- Message Bubble -->
+                <div class="flex-1 max-w-xs">
+                  <div class="rounded-lg p-3"
+                    [ngClass]="comment.who === 2 ? 'bg-pont-green bg-opacity-10 text-right' : 'bg-white ring-1 ring-gray-200'">
+                    <div class="text-xs font-semibold mb-1"
+                      [ngClass]="comment.who === 2 ? 'text-pont-green' : 'text-gray-900'">
+                      {{comment.who === 2 ? comment.artist : comment.host}}
+                    </div>
+                    <div class="text-sm"
+                      [ngClass]="comment.who === 2 ? 'text-gray-800' : 'text-gray-700'">
+                      {{comment.comment}}
+                    </div>
+                    <div class="text-xs mt-1"
+                      [ngClass]="comment.who === 2 ? 'text-gray-600' : 'text-gray-500'">
+                      {{comment.dated | date:'short'}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <ng-template #noComments>
+              <div class="text-center py-8 text-gray-500">
+                <i class="far fa-comments text-4xl mb-3"></i>
+                <p>No comments yet. Start the conversation!</p>
+              </div>
+            </ng-template>
+          </div>
+          
+          <!-- Add Comment Form -->
+          <div class="bg-white ring-1 ring-gray-200 rounded-lg p-4">
+            <label class="block text-sm font-semibold text-gray-900 mb-2">
+              <i class="fas fa-pen mr-2"></i>Add Comment
+            </label>
+            <div class="flex gap-2">
+              <textarea 
+                [(ngModel)]="newComment" 
+                rows="3" 
+                class="flex-1 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pont-green focus:border-transparent resize-none" 
+                placeholder="Write your message..."
+                [disabled]="isAddingComment"></textarea>
+              <button 
+                (click)="addCommentToRequest()"
+                [disabled]="!newComment.trim() || isAddingComment"
+                class="px-4 py-2 bg-pont-green text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end">
+                <i class="fas" [ngClass]="isAddingComment ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              <i class="fas fa-info-circle mr-1"></i>
+              Your comment will be visible to the host.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

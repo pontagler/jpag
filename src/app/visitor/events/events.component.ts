@@ -52,7 +52,7 @@ export class EventsComponent implements OnInit {
 	private async loadEvents(): Promise<void> {
 		this.isLoading = true;
 		try {
-			const data = await this.eventService.getEventsList_v1();
+			const data = await this.eventService.getEventsList_vistor();
 			console.log('data', data)
 			const arr = Array.isArray(data) ? data : [];
 			this.allEvents = arr.map((raw: any) => this.normalizeEvent(raw));

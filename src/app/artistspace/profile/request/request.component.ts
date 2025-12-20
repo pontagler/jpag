@@ -5,20 +5,22 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Va
 import { AlertService } from '../../../services/alert.service';
 import { EventService } from '../../../services/event.service';
 import { AuthService } from '../../../services/auth.service';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-request',
-  imports: [FormsModule, ReactiveFormsModule, NgClass, NgForOf, NgFor, CommonModule],
+  imports: [FormsModule, ReactiveFormsModule, NgClass, NgForOf, NgFor, CommonModule, RouterLink],
   templateUrl: './request.component.html',
 })
 export class RequestComponent implements OnInit {
   // Tab management
-  activeTab = signal(1); // Start with "New Request"
+  activeTab = signal(1); // Start with "All Requests"
   currentStep: 1 | 2 | 3 | 4 | 5 | 6 = 1; // Current step in the form
 
   // Loading states
   isSaving: boolean = false;
   isLoadingData: boolean = false;
+  isLoadingRequests: boolean = false;
   isEditMode: boolean = false;
   
   // Event Request ID
@@ -61,19 +63,29 @@ export class RequestComponent implements OnInit {
 
   // All requests data
   ardata: any = [];
-  originalData: any;
+  originalData: any = [];
+  
+  // Comment counts for events
+  eventCommentCounts: Map<number, number> = new Map();
   
   // Search and sort
   searchQuery: string = '';
   sortColumn: string = 'created_on';
   sortDirection: 'asc' | 'desc' = 'desc';
 
+  // View request details
+  viewingRequest: any = null;
+  isViewingRequest: boolean = false;
+  newComment: string = '';
+  isAddingComment: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private artistService: ArtistService,
     private eventService: EventService,
     private alertService: AlertService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     // Initialize forms
     this.detailsForm = this.fb.group({
@@ -175,6 +187,13 @@ export class RequestComponent implements OnInit {
     console.log('About to load requests...');
     await this.getRequest();
     console.log('Requests loaded. Count:', this.ardata?.length || 0);
+    
+    // Check if we need to edit a request (from navigation state)
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras?.state || (history.state);
+    if (state && state['editRequestId']) {
+      await this.editRequest(state['editRequestId']);
+    }
   }
 
   // Convenience getters
@@ -185,7 +204,7 @@ export class RequestComponent implements OnInit {
   // Tab navigation
   isActiveTab(tab: number) {
     this.activeTab.set(tab);
-    if (tab === 1) {
+    if (tab === 2) {
       this.currentStep = 1; // Reset to first step when creating new request
       this.isEditMode = false;
       this.createdRequestId = null;
@@ -202,8 +221,8 @@ export class RequestComponent implements OnInit {
       // Load event data
       await this.loadEventForEdit(eventId);
       
-      // Switch to edit tab
-      this.activeTab.set(1);
+      // Switch to edit tab (New Request form)
+      this.activeTab.set(2);
       this.currentStep = 1;
     } catch (error: any) {
       this.alertService.showAlert('Error', error.message || 'Failed to load event for editing', 'error');
@@ -280,7 +299,7 @@ export class RequestComponent implements OnInit {
           const artistId = p.id_artist.toString();
           
           if (!artistMap.has(artistId)) {
-            const artistMeta = this.availableArtists.find(a => a.id === artistId);
+            const artistMeta = this.availableArtists.find(a => a.id == artistId || a.id === artistId);
             artistMap.set(artistId, {
               id_artist: artistId,
               name: artistMeta?.name || `Artist ${artistId}`,
@@ -289,7 +308,7 @@ export class RequestComponent implements OnInit {
               instruments: [],
               availableInstruments: [],
               loadingInstruments: false,
-              isNewArtist: false
+              isNewArtist: !artistMeta
             });
           }
           
@@ -312,6 +331,7 @@ export class RequestComponent implements OnInit {
               id: r.id_instrument || r.id, 
               instrument: r.instrument || r.name 
             }));
+            console.log('Loaded instruments for artist', artistId, ':', artist.instruments, 'Available:', artist.availableInstruments);
           } catch (err) {
             console.error('Error loading instruments for artist:', artistId, err);
             artist.availableInstruments = [];
@@ -491,7 +511,21 @@ export class RequestComponent implements OnInit {
     const raw = selectEl.value;
     const value = Number(raw);
     if (!Number.isFinite(value) || value <= 0) return;
-    this.addRowInstrument(i, value);
+    
+    const row = this.artistRows[i];
+    if (!row) return;
+    
+    // For new artists or those with empty availableInstruments, use global instruments list
+    const instrumentsList = (row.availableInstruments && row.availableInstruments.length > 0) 
+      ? row.availableInstruments 
+      : this.instruments;
+    
+    const instrumentName = instrumentsList.find(inst => inst.id === value)?.instrument || '';
+    
+    if (!row.instruments.some(x => x.id_instrument === value)) {
+      row.instruments.push({ id_instrument: value, label: instrumentName });
+    }
+    
     selectEl.value = '' as any;
   }
 
@@ -499,6 +533,11 @@ export class RequestComponent implements OnInit {
     const row = this.artistRows[i];
     if (!row) return;
     row.instruments = row.instruments.filter(x => x.id_instrument !== id_instrument);
+  }
+
+  // Check if artist is in available list
+  isArtistInAvailableList(artistId: string): boolean {
+    return this.availableArtists.some(a => a.id == artistId || a.id === artistId);
   }
 
   // New Artist with Email
@@ -683,20 +722,45 @@ export class RequestComponent implements OnInit {
         this.isSaving = false;
       }
     } else if (this.currentStep === 5) {
-      // Save Artists
+      // Save Artists - Allow skipping if no valid artists or if artists are pending activation
       try {
         this.isSaving = true;
-        for (const row of this.artistRows) {
-          if (row.id_artist) {
-            await this.eventService.ensureEventArtist(this.createdRequestId!, row.id_artist);
-            for (const inst of row.instruments) {
-              await this.eventService.addEventInstrument(this.createdRequestId!, row.id_artist, inst.id_instrument);
+        
+        // Filter out artists that have valid IDs (not new/pending artists)
+        const validArtistRows = this.artistRows.filter(row => 
+          row.id_artist && !row.isNewArtist
+        );
+        
+        // Only process if there are valid artists
+        if (validArtistRows.length > 0) {
+          for (const row of validArtistRows) {
+            // Ensure id_artist is not null before using it
+            if (!row.id_artist) continue;
+            
+            const artistId = row.id_artist; // Type guard
+            
+            try {
+              await this.eventService.ensureEventArtist(this.createdRequestId!, artistId);
+              
+              // Add instruments if any are selected
+              if (row.instruments && row.instruments.length > 0) {
+                for (const inst of row.instruments) {
+                  await this.eventService.addEventInstrument(this.createdRequestId!, artistId, inst.id_instrument);
+                }
+              }
+            } catch (instErr) {
+              // Log but don't fail - artist might not have instruments yet
+              console.warn(`Could not add instruments for artist ${artistId}:`, instErr);
             }
           }
         }
+        
+        // Always proceed to next step, even if no artists were processed
         this.currentStep = 6;
       } catch (err: any) {
-        this.alertService.showAlert('Error', err.message || 'Failed to save artists', 'error');
+        console.error('Error in artists step:', err);
+        // Still proceed to next step to allow completion
+        this.currentStep = 6;
       } finally {
         this.isSaving = false;
       }
@@ -713,12 +777,15 @@ export class RequestComponent implements OnInit {
     try {
       this.isSaving = true;
       
-      // Save comments to the events table
+      // Save comments to the event_comments table with who = 2 (artist)
       const comments = this.commentsForm.get('comments')?.value || '';
-      if (this.createdRequestId) {
-        await this.eventService.updateEventRow(this.createdRequestId, { 
-          comments: comments || null
-        });
+      if (this.createdRequestId && comments && comments.trim()) {
+        await this.artistService.addEventComment(
+          this.createdRequestId,
+          null, // no host ID for artist comments
+          comments.trim(),
+          this.artistID
+        );
       }
       
       const message = this.isEditMode 
@@ -728,7 +795,7 @@ export class RequestComponent implements OnInit {
       
       // Reset form and go to "All Requests" tab
       this.resetForm();
-      this.activeTab.set(2);
+      this.activeTab.set(1);
       await this.getRequest();
     } catch (err: any) {
       this.alertService.showAlert('Error', err.message || 'Failed to submit request', 'error');
@@ -756,8 +823,14 @@ export class RequestComponent implements OnInit {
     this.addDate();
   }
 
+  cancelEdit(): void {
+    this.resetForm();
+    this.activeTab.set(1); // Go back to "All Requests" tab
+  }
+
   // ===================== ALL REQUESTS =====================
   async getRequest(): Promise<void> {
+    this.isLoadingRequests = true;
     try {
       console.log('Loading requests for auth ID:', this.authID);
       
@@ -777,6 +850,9 @@ export class RequestComponent implements OnInit {
       this.originalData = data;
       this.ardata = [...data];
       
+      // Fetch comment counts for all events
+      await this.loadCommentCounts();
+      
       // Apply initial search and sort
       this.applySearchAndSort();
     } catch (error: any) {
@@ -784,15 +860,77 @@ export class RequestComponent implements OnInit {
       this.alertService.showAlert('Error', 'Failed to load event requests: ' + error.message, 'error');
       this.ardata = [];
       this.originalData = [];
+    } finally {
+      this.isLoadingRequests = false;
     }
+  }
+
+  // Load comment counts for all events
+  async loadCommentCounts(): Promise<void> {
+    this.eventCommentCounts.clear();
+    
+    if (!this.originalData || this.originalData.length === 0) {
+      return;
+    }
+    
+    try {
+      // Fetch comment counts for all events in parallel
+      const countPromises = this.originalData.map((event: any) => 
+        this.artistService.getEventCommentCount(event.id)
+          .then(count => ({ eventId: event.id, count }))
+          .catch(err => {
+            console.error(`Failed to get comment count for event ${event.id}:`, err);
+            return { eventId: event.id, count: 0 };
+          })
+      );
+      
+      const results = await Promise.all(countPromises);
+      
+      // Store counts in map
+      results.forEach(result => {
+        this.eventCommentCounts.set(result.eventId, result.count);
+      });
+      
+      console.log('Loaded comment counts:', this.eventCommentCounts);
+    } catch (error) {
+      console.error('Error loading comment counts:', error);
+    }
+  }
+
+  // Check if event has more than 2 comments
+  hasMultipleComments(eventId: number): boolean {
+    const count = this.eventCommentCounts.get(eventId) || 0;
+    return count > 2;
+  }
+
+  // Get comment count for event
+  getCommentCount(eventId: number): number {
+    return this.eventCommentCounts.get(eventId) || 0;
   }
 
   statusReturn(id: any): string {
     switch(id) {
-      case 0: return 'Published';
-      case 1: return 'Approved';
+      case 0: return 'Published as Event';
+      case 1: return 'Approved Request';
       case 2: return 'Pending';
+      case 3: return 'On Hold';
+      case 4: return 'New Message';
+      case 5: return 'New Message';
+      case 6: return 'Rejected';
       default: return 'Unknown';
+    }
+  }
+
+  getStatusLabel(status: number | undefined | null): string {
+    switch (status) {
+      case 0: return 'Published as Event';
+      case 1: return 'Approved Request';
+      case 2: return 'Pending';
+      case 3: return 'On Hold';
+      case 4: return 'New Message';
+      case 5: return 'New Message';
+      case 6: return 'Rejected';
+      default: return String(status ?? '');
     }
   }
 
@@ -824,11 +962,19 @@ export class RequestComponent implements OnInit {
 
   // Apply search and sort
   private applySearchAndSort(): void {
+    if (!this.originalData || !Array.isArray(this.originalData)) {
+      console.warn('originalData is not an array:', this.originalData);
+      this.ardata = [];
+      return;
+    }
+
     let filtered = [...this.originalData];
+    console.log('Applying filters. Original count:', filtered.length, 'Status filter:', this.currentStatusFilter);
 
     // Apply status filter first
     if (this.currentStatusFilter !== 4) {
       filtered = filtered.filter((item: any) => item.status === this.currentStatusFilter);
+      console.log('After status filter:', filtered.length);
     }
 
     // Apply search filter
@@ -837,6 +983,7 @@ export class RequestComponent implements OnInit {
       filtered = filtered.filter((event: any) => 
         event.title?.toLowerCase().includes(query)
       );
+      console.log('After search filter:', filtered.length);
     }
 
     // Apply sorting
@@ -875,6 +1022,7 @@ export class RequestComponent implements OnInit {
     });
 
     this.ardata = filtered;
+    console.log('Final ardata count:', this.ardata.length);
   }
 
   // Clear search
@@ -898,6 +1046,55 @@ export class RequestComponent implements OnInit {
       this.ardata = this.ardata.filter((data: { id: any; }) => data.id !== id);
     } catch (error: any) {
       this.alertService.showAlert('Error', error.message || 'Failed to revoke request', 'error');
+    }
+  }
+
+  // View request details with comments
+  async viewRequestDetails(eventId: number): Promise<void> {
+    try {
+      this.isViewingRequest = true;
+      const details = await this.artistService.get_single_request_with_details_v1(eventId);
+      this.viewingRequest = Array.isArray(details) && details.length > 0 ? details[0] : details;
+      console.log('Viewing Request:', this.viewingRequest);
+    } catch (error: any) {
+      console.error('Error loading request details:', error);
+      this.alertService.showAlert('Error', 'Failed to load request details', 'error');
+    }
+  }
+
+  closeRequestView(): void {
+    this.isViewingRequest = false;
+    this.viewingRequest = null;
+    this.newComment = '';
+  }
+
+  // Add comment to request
+  async addCommentToRequest(): Promise<void> {
+    if (!this.newComment.trim() || !this.viewingRequest?.id) return;
+    
+    try {
+      this.isAddingComment = true;
+      
+      // Add comment with who = 1 for artist
+      await this.artistService.addEventComment(
+        this.viewingRequest.id,
+        null, // no host ID for artist comments
+        this.newComment.trim(),
+        this.artistID
+      );
+      
+      // Reload request details to get updated comments
+      await this.viewRequestDetails(this.viewingRequest.id);
+      
+      // Clear the input
+      this.newComment = '';
+      
+      this.alertService.showAlert('Success', 'Comment added successfully', 'success');
+    } catch (error: any) {
+      console.error('Error adding comment:', error);
+      this.alertService.showAlert('Error', 'Failed to add comment', 'error');
+    } finally {
+      this.isAddingComment = false;
     }
   }
 }

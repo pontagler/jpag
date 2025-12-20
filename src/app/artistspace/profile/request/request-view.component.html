@@ -1,0 +1,495 @@
+<div class="w-full max-w-full overflow-hidden">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-20">
+    <div class="text-center">
+      <div class="animate-spin text-pont-green mb-4">
+        <svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <style>.spinner_ajPY{transform-origin:center;animation:spinner_AtaB .75s infinite linear}@keyframes spinner_AtaB{100%{transform:rotate(360deg)}}</style>
+          <path fill="currentColor" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+          <path fill="currentColor" d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" class="spinner_ajPY"/>
+        </svg>
+      </div>
+      <p class="text-lg font-medium text-gray-900">Loading Request...</p>
+    </div>
+  </div>
+
+  <!-- Request Content -->
+  <div *ngIf="!isLoading && requestDetails" class="bg-white rounded-xl shadow-md">
+    <!-- Header -->
+    <div class="border-b px-6 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <button 
+          (click)="goBack()"
+          class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+        >
+          <i class="fas fa-arrow-left"></i>
+          <span>Back to Requests</span>
+        </button>
+        
+        <div class="flex items-center gap-3">
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
+            [ngClass]="{
+              'bg-blue-100 text-blue-800': requestDetails?.status === 0,
+              'bg-green-100 text-green-800': requestDetails?.status === 1,
+              'bg-gray-100 text-gray-700': requestDetails?.status === 2,
+              'bg-yellow-100 text-yellow-800': requestDetails?.status === 3,
+              'bg-red-100 text-red-800': requestDetails?.status === 6
+            }"
+          >
+            <i class="fas"
+              [ngClass]="{
+                'fa-globe': requestDetails?.status === 0,
+                'fa-circle-check': requestDetails?.status === 1,
+                'fa-circle-dot': requestDetails?.status === 2,
+                'fa-pause-circle': requestDetails?.status === 3,
+                'fa-circle-xmark': requestDetails?.status === 6
+              }"
+            ></i>
+            {{ getStatusLabel(requestDetails?.status) }}
+          </span>
+          
+          <button 
+            *ngIf="canEdit()"
+            (click)="editRequest()"
+            class="px-4 py-2 bg-pont-green text-white rounded-lg hover:bg-opacity-90 transition font-medium"
+          >
+            <i class="fas fa-edit mr-2"></i>Edit Request
+          </button>
+          
+          <button 
+            *ngIf="requestDetails?.status === 2"
+            (click)="deleteRequest()"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+          >
+            <i class="fas fa-trash mr-2"></i>Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-pont-green bg-opacity-10 text-pont-green">
+          <i class="fas fa-clipboard-list text-xl"></i>
+        </span>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">{{requestDetails?.title}}</h1>
+          <p class="text-sm text-gray-500">{{requestDetails?.event_type}} • {{requestDetails?.event_domain}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="border-b px-6">
+      <div class="flex gap-1 overflow-x-auto">
+        <button 
+          class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition"
+          [ngClass]="{ 
+            'border-pont-green text-pont-green': activeTab === 'details',
+            'border-transparent text-gray-600 hover:text-gray-900': activeTab !== 'details'
+          }"
+          (click)="activeTab = 'details'"
+        >
+          <i class="fas fa-info-circle mr-2"></i>Details
+        </button>
+        <button 
+          class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition"
+          [ngClass]="{ 
+            'border-pont-green text-pont-green': activeTab === 'dates',
+            'border-transparent text-gray-600 hover:text-gray-900': activeTab !== 'dates'
+          }"
+          (click)="activeTab = 'dates'"
+        >
+          <i class="fas fa-calendar mr-2"></i>Dates
+        </button>
+        <button 
+          class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition"
+          [ngClass]="{ 
+            'border-pont-green text-pont-green': activeTab === 'image',
+            'border-transparent text-gray-600 hover:text-gray-900': activeTab !== 'image'
+          }"
+          (click)="activeTab = 'image'"
+        >
+          <i class="fas fa-image mr-2"></i>Image
+        </button>
+        <button 
+          class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition"
+          [ngClass]="{ 
+            'border-pont-green text-pont-green': activeTab === 'media',
+            'border-transparent text-gray-600 hover:text-gray-900': activeTab !== 'media'
+          }"
+          (click)="activeTab = 'media'"
+        >
+          <i class="fas fa-photo-film mr-2"></i>Media
+        </button>
+        <button 
+          class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition"
+          [ngClass]="{ 
+            'border-pont-green text-pont-green': activeTab === 'artists',
+            'border-transparent text-gray-600 hover:text-gray-900': activeTab !== 'artists'
+          }"
+          (click)="activeTab = 'artists'"
+        >
+          <i class="fas fa-users mr-2"></i>Artists
+        </button>
+        <button 
+          class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition"
+          [ngClass]="{ 
+            'border-pont-green text-pont-green': activeTab === 'comments',
+            'border-transparent text-gray-600 hover:text-gray-900': activeTab !== 'comments'
+          }"
+          (click)="activeTab = 'comments'"
+        >
+          <i class="fas fa-comments mr-2"></i>Comments
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-6">
+      <!-- DETAILS TAB -->
+      <div *ngIf="activeTab === 'details'" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1">Event ID</span>
+            <span class="font-mono text-gray-900">{{requestDetails?.id}}</span>
+          </div>
+          
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1">Event Type</span>
+            <span class="text-gray-900">{{requestDetails?.event_type || 'N/A'}}</span>
+          </div>
+          
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1">Event Domain</span>
+            <span class="text-gray-900">{{requestDetails?.event_domain || 'N/A'}}</span>
+          </div>
+          
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1">Edition</span>
+            <span class="text-gray-900">{{requestDetails?.edition || 'N/A'}}</span>
+          </div>
+          
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1">Active Status</span>
+            <span class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+              [ngClass]="requestDetails?.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'">
+              <i class="fas" [ngClass]="requestDetails?.is_active ? 'fa-check-circle' : 'fa-times-circle'"></i>
+              {{requestDetails?.is_active ? 'Active' : 'Inactive'}}
+            </span>
+          </div>
+          
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1">Completed Status</span>
+            <span class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+              [ngClass]="requestDetails?.is_completed ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'">
+              <i class="fas" [ngClass]="requestDetails?.is_completed ? 'fa-check-circle' : 'fa-clock'"></i>
+              {{requestDetails?.is_completed ? 'Completed' : 'In Progress'}}
+            </span>
+          </div>
+          
+          <div class="md:col-span-2" *ngIf="requestDetails?.teaser">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1 block">Teaser</span>
+            <p class="text-gray-900 bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4">{{requestDetails?.teaser}}</p>
+          </div>
+          
+          <div class="md:col-span-2" *ngIf="requestDetails?.long_teaser">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1 block">Long Teaser</span>
+            <p class="text-gray-900 whitespace-pre-line bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4">{{requestDetails?.long_teaser}}</p>
+          </div>
+          
+          <div class="md:col-span-2">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1 block">Description</span>
+            <p class="text-gray-900 whitespace-pre-line bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4">{{requestDetails?.description || 'N/A'}}</p>
+          </div>
+          
+          <div class="md:col-span-2" *ngIf="requestDetails?.booking_url">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-1 block">Booking URL</span>
+            <a [href]="requestDetails.booking_url" target="_blank" class="text-pont-green hover:underline break-all">
+              {{requestDetails.booking_url}}
+            </a>
+          </div>
+          
+          <div class="md:col-span-2" *ngIf="requestDetails?.event_instruments?.length">
+            <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-2 block">Instruments</span>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let instrument of requestDetails.event_instruments" 
+                class="px-3 py-1.5 bg-pont-green bg-opacity-10 ring-1 ring-pont-green ring-opacity-20 text-pont-green rounded-full text-sm font-medium capitalize">
+                {{instrument.name}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATES TAB -->
+      <div *ngIf="activeTab === 'dates'" class="space-y-4">
+        <!-- Period Dates (when is_period is true) -->
+        <div *ngIf="requestDetails?.is_period && requestDetails?.period?.length; else showEventDates">
+          <div class="space-y-3">
+            <div *ngFor="let periodDate of requestDetails.period; let i = index" 
+              class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-5 hover:ring-pont-green hover:ring-2 transition">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                  <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-pont-green text-white font-semibold">
+                    <i class="fas fa-calendar-week"></i>
+                  </span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Period {{i + 1}}</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex flex-col">
+                      <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Start Date</span>
+                      <span class="text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-calendar-plus text-pont-green"></i>
+                        {{periodDate.start_date | date:'fullDate'}}
+                      </span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">End Date</span>
+                      <span class="text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-calendar-check text-pont-green"></i>
+                        {{periodDate.end_date | date:'fullDate'}}
+                      </span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Location</span>
+                      <span class="text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-map-marker-alt text-pont-green"></i>
+                        {{periodDate.location || 'Not specified'}}
+                      </span>
+                    </div>
+                  </div>
+                  <div *ngIf="periodDate.time" class="mt-3">
+                    <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1 block">Time</span>
+                    <span class="text-gray-900 flex items-center gap-2">
+                      <i class="fas fa-clock text-pont-green"></i>
+                      {{periodDate.time}}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Individual Event Dates (when is_period is false) -->
+        <ng-template #showEventDates>
+          <div *ngIf="requestDetails?.event_dates?.length; else noDates">
+            <div class="space-y-3">
+              <div *ngFor="let eventDate of requestDetails.event_dates; let i = index" 
+                class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-5 hover:ring-pont-green hover:ring-2 transition">
+                <div class="flex items-start gap-4">
+                  <div class="flex-shrink-0">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-pont-green text-white font-semibold">
+                      {{i + 1}}
+                    </span>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-3">Event Date {{i + 1}}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div class="flex flex-col">
+                        <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Date</span>
+                        <span class="text-gray-900 flex items-center gap-2">
+                          <i class="fas fa-calendar text-pont-green"></i>
+                          {{eventDate.date | date:'fullDate'}}
+                        </span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Time</span>
+                        <span class="text-gray-900 flex items-center gap-2">
+                          <i class="fas fa-clock text-pont-green"></i>
+                          {{eventDate.time || 'Not specified'}}
+                        </span>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Location</span>
+                        <span class="text-gray-900 flex items-center gap-2">
+                          <i class="fas fa-map-marker-alt text-pont-green"></i>
+                          {{eventDate.location || 'Not specified'}}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        
+        <ng-template #noDates>
+          <div class="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
+            <i class="fas fa-calendar text-5xl text-gray-400 mb-4"></i>
+            <p class="text-gray-700 font-medium text-lg">No event dates available</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- IMAGE TAB -->
+      <div *ngIf="activeTab === 'image'" class="space-y-4">
+        <div *ngIf="requestDetails?.photo; else noImage">
+          <div class="flex flex-col items-center">
+            <img [src]="requestDetails.photo" alt="Event Photo" 
+              class="max-w-full max-h-[600px] object-contain rounded-lg ring-1 ring-gray-200 shadow-lg" />
+            <div class="mt-4 text-sm text-gray-600" *ngIf="requestDetails?.credit_photo">
+              <span class="font-semibold">Photo Credit:</span> {{requestDetails.credit_photo}}
+            </div>
+          </div>
+        </div>
+        <ng-template #noImage>
+          <div class="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
+            <i class="fas fa-image text-6xl text-gray-400 mb-4"></i>
+            <p class="text-gray-700 font-medium text-lg">No event photo available</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- MEDIA TAB -->
+      <div *ngIf="activeTab === 'media'" class="space-y-4">
+        <div *ngIf="requestDetails?.event_media?.length; else noMediaContent">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div *ngFor="let media of requestDetails.event_media" 
+              class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4 hover:ring-pont-green hover:ring-2 transition">
+              <img *ngIf="media.image" [src]="media.image" alt="Event Media" 
+                class="w-full h-56 object-cover rounded-lg mb-3" />
+              <div *ngIf="!media.image" class="w-full h-56 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
+                <i class="fas fa-image text-gray-400 text-4xl"></i>
+              </div>
+              <div class="text-sm font-semibold text-gray-900" *ngIf="media.title">{{media.title}}</div>
+              <div class="text-xs text-gray-600 mt-1" *ngIf="media.description">{{media.description}}</div>
+              <div class="text-xs text-gray-500 mt-1" *ngIf="media.url">
+                <a [href]="media.url" target="_blank" class="text-pont-green hover:underline flex items-center gap-1">
+                  <i class="fas fa-external-link-alt"></i>
+                  <span>View Media Link</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noMediaContent>
+          <div class="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
+            <i class="fas fa-photo-film text-6xl text-gray-400 mb-4"></i>
+            <p class="text-gray-700 font-medium text-lg">No media files available</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- ARTISTS TAB -->
+      <div *ngIf="activeTab === 'artists'" class="space-y-4">
+        <div *ngIf="requestDetails?.event_artists?.length; else noArtists">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let artist of requestDetails.event_artists" 
+              class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-5 hover:ring-pont-green hover:ring-2 transition">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                  <img *ngIf="artist.photo" [src]="artist.photo" alt="Artist Photo" 
+                    class="w-20 h-20 object-cover rounded-full ring-2 ring-gray-200" />
+                  <div *ngIf="!artist.photo" 
+                    class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-gray-400 text-3xl"></i>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 text-lg mb-2">{{artist.artist}}</h3>
+                  <div class="text-sm text-gray-600 mb-2" *ngIf="artist.teaser">{{artist.teaser}}</div>
+                  <div class="text-sm text-gray-600 mb-2" *ngIf="artist.short_bio">{{artist.short_bio}}</div>
+                  <div class="text-xs text-gray-500" *ngIf="artist.credit_photo">
+                    <span class="font-semibold">Photo credit:</span> {{artist.credit_photo}}
+                  </div>
+                  <div *ngIf="artist.artist_media?.length" class="mt-3">
+                    <div class="flex flex-wrap gap-2">
+                      <img *ngFor="let media of artist.artist_media" [src]="media.url" alt="Artist Media" 
+                        class="w-16 h-16 object-cover rounded ring-1 ring-gray-200" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noArtists>
+          <div class="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
+            <i class="fas fa-users text-6xl text-gray-400 mb-4"></i>
+            <p class="text-gray-700 font-medium text-lg">No artists assigned</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- COMMENTS TAB -->
+      <div *ngIf="activeTab === 'comments'" class="space-y-4">
+        <!-- Comments Thread -->
+        <div class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto">
+          <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-comments"></i>
+            Comments & Messages
+          </h3>
+          
+          <div *ngIf="requestDetails?.comments?.length; else noComments" class="space-y-3">
+            <div *ngFor="let comment of requestDetails.comments" 
+              class="flex gap-3"
+              [ngClass]="comment.who === 2 ? 'flex-row-reverse' : 'flex-row'">
+              
+              <!-- Avatar -->
+              <div class="flex-shrink-0">
+                <div class="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                  [ngClass]="comment.who === 2 ? 'bg-pont-green' : 'bg-indigo-600'">
+                  {{comment.who === 2 ? (comment.artist?.charAt(0)?.toUpperCase() || 'A') : 'H'}}
+                </div>
+              </div>
+              
+              <!-- Message Bubble -->
+              <div class="flex-1 max-w-sm">
+                <div class="rounded-lg p-3"
+                  [ngClass]="comment.who === 2 ? 'bg-pont-green bg-opacity-10 text-right' : 'bg-white ring-1 ring-gray-200'">
+                  <div class="text-xs font-semibold mb-1"
+                    [ngClass]="comment.who === 2 ? 'text-pont-green' : 'text-gray-900'">
+                    {{comment.who === 2 ? comment.artist : comment.host}}
+                  </div>
+                  <div class="text-sm"
+                    [ngClass]="comment.who === 2 ? 'text-gray-800' : 'text-gray-700'">
+                    {{comment.comment}}
+                  </div>
+                  <div class="text-xs mt-1"
+                    [ngClass]="comment.who === 2 ? 'text-gray-600' : 'text-gray-500'">
+                    {{comment.dated | date:'short'}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <ng-template #noComments>
+            <div class="text-center py-8 text-gray-500">
+              <i class="far fa-comments text-4xl mb-3"></i>
+              <p>No comments yet. Start the conversation!</p>
+            </div>
+          </ng-template>
+        </div>
+        
+        <!-- Add Comment Form -->
+        <div class="bg-white ring-1 ring-gray-200 rounded-lg p-4">
+          <label class="block text-sm font-semibold text-gray-900 mb-2">
+            <i class="fas fa-pen mr-2"></i>Add Comment
+          </label>
+          <div class="flex gap-2">
+            <textarea 
+              [(ngModel)]="newComment" 
+              rows="3" 
+              class="flex-1 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pont-green focus:border-transparent resize-none" 
+              placeholder="Write your message..."
+              [disabled]="isAddingComment"></textarea>
+            <button 
+              (click)="addComment()"
+              [disabled]="!newComment.trim() || isAddingComment"
+              class="px-4 py-2 bg-pont-green text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end">
+              <i class="fas" [ngClass]="isAddingComment ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">
+            <i class="fas fa-info-circle mr-1"></i>
+            Your comment will be visible to the host.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

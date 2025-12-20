@@ -61,6 +61,18 @@ async getEventsList_v1(){
   return data;
 }
 
+async getEventsList_v3(){
+  const {data, error} = await supabase.rpc('get_events_with_details_v3')
+  if(error) throw error
+  return data;
+}
+
+async getEventsList_vistor(){
+  const {data, error} = await supabase.rpc('get_events_with_details_visitor_list')
+  if(error) throw error
+  return data;
+}
+
 // Get events by artist (for event requests) - all statuses
 // artistId should be the id_profile (auth user ID) from the artists table
 // This matches the created_by column in the events table

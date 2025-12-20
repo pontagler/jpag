@@ -1,44 +1,43 @@
 <div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                <i class="fa-solid fa-list-check"></i>
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-600">
+                <i class="fa-solid fa-circle-check"></i>
             </span>
             <div>
-                <h2 class="text-lg font-semibold text-gray-900">Requests</h2>
-                <p class="text-sm text-gray-500">Review and manage artist requests</p>
+                <h2 class="text-lg font-semibold text-gray-900">All Requests</h2>
+                <p class="text-sm text-gray-500">View all approved artist requests</p>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="flex flex-col">
-            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Request type</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Search by Title</label>
+            <div class="relative mt-1">
+                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input 
+                    type="text" 
+                    class="w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                    placeholder="Search title..." 
+                    [(ngModel)]="searchTitle" 
+                    (input)="onFilterChange()"
+                />
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Event Domain</label>
             <div class="relative mt-1">
                 <i class="fa-solid fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <select class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none" [(ngModel)]="filterType" (change)="onFilterChange()">
                     <option value="">All</option>
-                    <option value="concert">Concert</option>
-                    <option value="exhibition">Exhibition</option>
+                    <option *ngFor="let domain of eventDomains" [value]="domain">{{ domain }}</option>
                 </select>
                 <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
             </div>
         </div>
         <div class="flex flex-col">
-            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Status</label>
-            <div class="relative mt-1">
-                <i class="fa-solid fa-signal absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <select class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none" [(ngModel)]="filterStatus" (change)="onFilterChange()">
-                    <option value="">All</option>
-                    <option value="1">New</option>
-                    <option value="2">Approved</option>
-                    <option value="3">Rejected</option>
-                </select>
-                <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-            </div>
-        </div>
-        <div class="flex flex-col">
-            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Propose date</label>
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Date Order</label>
             <div class="relative mt-1">
                 <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <select class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none" [(ngModel)]="dateOrder" (change)="onDateOrderChange()">
@@ -54,32 +53,10 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50/80 backdrop-blur sticky top-0 z-10">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('id_request')">
-                        <span class="inline-flex items-center gap-2">
-                            <i class="fa-regular fa-hashtag text-gray-400"></i>
-                            <span>ID Request</span>
-                            <i class="fas text-gray-400" [ngClass]="{
-                                'fa-sort-up': sortColumn==='id_request' && sortDirection==='asc',
-                                'fa-sort-down': sortColumn==='id_request' && sortDirection==='desc',
-                                'fa-sort': sortColumn!=='id_request'
-                            }"></i>
-                        </span>
-                    </th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('id_artist')">
-                        <span class="inline-flex items-center gap-2">
-                            <i class="fa-regular fa-user text-gray-400"></i>
-                            <span>ID Artist</span>
-                            <i class="fas text-gray-400" [ngClass]="{
-                                'fa-sort-up': sortColumn==='id_artist' && sortDirection==='asc',
-                                'fa-sort-down': sortColumn==='id_artist' && sortDirection==='desc',
-                                'fa-sort': sortColumn!=='id_artist'
-                            }"></i>
-                        </span>
-                    </th>
                     <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('name')">
                         <span class="inline-flex items-center gap-2">
-                            <i class="fa-regular fa-id-card text-gray-400"></i>
-                            <span>Name</span>
+                            <i class="fa-regular fa-user text-gray-400"></i>
+                            <span>Requestor</span>
                             <i class="fas text-gray-400" [ngClass]="{
                                 'fa-sort-up': sortColumn==='name' && sortDirection==='asc',
                                 'fa-sort-down': sortColumn==='name' && sortDirection==='desc',
@@ -101,7 +78,7 @@
                     <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('request_type')">
                         <span class="inline-flex items-center gap-2">
                             <i class="fa-solid fa-tag text-gray-400"></i>
-                            <span>Request Type</span>
+                            <span>Event Domain</span>
                             <i class="fas text-gray-400" [ngClass]="{
                                 'fa-sort-up': sortColumn==='request_type' && sortDirection==='asc',
                                 'fa-sort-down': sortColumn==='request_type' && sortDirection==='desc',
@@ -109,14 +86,14 @@
                             }"></i>
                         </span>
                     </th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('status')">
+                    <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('propose_date')">
                         <span class="inline-flex items-center gap-2">
-                            <i class="fa-regular fa-flag text-gray-400"></i>
-                            <span>Status</span>
+                            <i class="fa-regular fa-calendar-days text-gray-400"></i>
+                            <span>Date/Period</span>
                             <i class="fas text-gray-400" [ngClass]="{
-                                'fa-sort-up': sortColumn==='status' && sortDirection==='asc',
-                                'fa-sort-down': sortColumn==='status' && sortDirection==='desc',
-                                'fa-sort': sortColumn!=='status'
+                                'fa-sort-up': sortColumn==='propose_date' && sortDirection==='asc',
+                                'fa-sort-down': sortColumn==='propose_date' && sortDirection==='desc',
+                                'fa-sort': sortColumn!=='propose_date'
                             }"></i>
                         </span>
                     </th>
@@ -131,14 +108,14 @@
                             }"></i>
                         </span>
                     </th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('propose_date')">
+                    <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="toggleSort('status')">
                         <span class="inline-flex items-center gap-2">
-                            <i class="fa-regular fa-calendar-days text-gray-400"></i>
-                            <span>Propose Date</span>
+                            <i class="fa-solid fa-circle-info text-gray-400"></i>
+                            <span>Status</span>
                             <i class="fas text-gray-400" [ngClass]="{
-                                'fa-sort-up': sortColumn==='propose_date' && sortDirection==='asc',
-                                'fa-sort-down': sortColumn==='propose_date' && sortDirection==='desc',
-                                'fa-sort': sortColumn!=='propose_date'
+                                'fa-sort-up': sortColumn==='status' && sortDirection==='asc',
+                                'fa-sort-down': sortColumn==='status' && sortDirection==='desc',
+                                'fa-sort': sortColumn!=='status'
                             }"></i>
                         </span>
                     </th>
@@ -146,42 +123,54 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 <tr (click)="navigateToDetail(r.id_request)" *ngFor="let r of filteredRequests" class="hover:bg-gray-50 transition-colors cursor-pointer">
-                    <td class="px-4 py-3 font-mono text-sm text-gray-800" title="{{ r.id_request || r.id }}">{{ ((r.id_request || r.id) + '') | slice:0:8 }}</td>
-                    <td class="px-4 py-3 truncate max-w-[220px] text-gray-800" title="{{ r.id_artist }}">{{ (r.id_artist + '') | slice:0:8 }}</td>
                     <td class="px-4 py-3 text-gray-900">{{ r.name }}</td>
                     <td class="px-4 py-3 truncate max-w-[300px] text-gray-900">{{ r.title }}</td>
                     <td class="px-4 py-3 capitalize text-gray-700">{{ r.request_type }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="{
-                            'bg-gray-100 text-gray-700': r.status === 1,
-                            'bg-green-100 text-green-800': r.status === 2,
-                            'bg-red-100 text-red-800': r.status === 3
-                        }">
-                            <i class="fa-solid" [ngClass]="{
-                                'fa-circle-dot': r.status === 1,
-                                'fa-circle-check': r.status === 2,
-                                'fa-circle-xmark': r.status === 3   
-                            }"></i>
-                            {{ getStatusLabel(r.status) }}
-                        </span>
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-gray-700">{{ r.created_on | date:'yyyy-MM-dd HH:mm' }}</td>
-                    <td class="px-4 py-3">
                         <div class="flex flex-col text-gray-700">
-                            <span *ngIf="r.propose_date && r.propose_date.length; else noDates">
-                                {{ getNearestProposeDate(r.propose_date) | date:'yyyy-MM-dd' }}<span *ngIf="r.propose_date.length>1"> (+{{ r.propose_date.length-1 }} more)</span>
-                            </span>
+                            <ng-container *ngIf="r.propose_date && r.propose_date.length; else checkMinMax">
+                                <span *ngIf="r.propose_date.length === 1">
+                                    {{ r.propose_date[0] | date:'yyyy-MM-dd' }}
+                                </span>
+                                <span *ngIf="r.propose_date.length > 1">
+                                    {{ r.propose_date[0] | date:'yyyy-MM-dd' }} to {{ r.propose_date[r.propose_date.length - 1] | date:'yyyy-MM-dd' }}
+                                </span>
+                            </ng-container>
+                            <ng-template #checkMinMax>
+                                <ng-container *ngIf="r.min; else noDates">
+                                    <span *ngIf="!r.max || r.min === r.max">{{ r.min | date:'yyyy-MM-dd' }}</span>
+                                    <span *ngIf="r.max && r.min !== r.max">{{ r.min | date:'yyyy-MM-dd' }} to {{ r.max | date:'yyyy-MM-dd' }}</span>
+                                </ng-container>
+                            </ng-template>
                             <ng-template #noDates>
                                 <span class="text-gray-400">—</span>
                             </ng-template>
                         </div>
                     </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-gray-700">{{ r.created_on | date:'yyyy-MM-dd HH:mm' }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" [ngClass]="{
+                                'bg-green-100 text-green-800': r.status === 0,
+                                'bg-blue-100 text-blue-800': r.status === 1,
+                                'bg-yellow-100 text-yellow-800': r.status === 2,
+                                'bg-orange-100 text-orange-800': r.status === 3,
+                                'bg-red-100 text-red-800': r.status === 6,
+                                'bg-gray-100 text-gray-800': r.status !== 0 && r.status !== 1 && r.status !== 2 && r.status !== 3 && r.status !== 6
+                            }">
+                                {{ getStatusLabel(r.status) }}
+                            </span>
+                            <span *ngIf="getCommentCount(r.id_request) > 2" class="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-indigo-500 text-white text-xs font-semibold">
+                                {{ getCommentCount(r.id_request) }}
+                            </span>
+                        </div>
+                    </td>
                 </tr>
                 <tr *ngIf="filteredRequests.length === 0">
-                    <td colspan="8" class="px-6 py-12 text-center">
+                    <td colspan="6" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center gap-2 text-gray-500">
                             <i class="fa-regular fa-folder-open text-3xl"></i>
-                            <p class="text-sm">No requests found</p>
+                            <p class="text-sm">No approved requests found</p>
                         </div>
                     </td>
                 </tr>

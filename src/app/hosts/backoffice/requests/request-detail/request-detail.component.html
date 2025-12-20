@@ -5,151 +5,354 @@
         <i class="fa-regular fa-clipboard"></i>
       </span>
       <div>
-        <h2 class="text-lg font-semibold text-gray-900">{{requestArr?.title | titlecase}}</h2>
-        <p class="text-sm text-gray-500"> {{requestArr?.request_type | titlecase}} </p>
+        <h2 class="text-lg font-semibold text-gray-900">{{eventDetails?.title | titlecase}}</h2>
+        <p class="text-sm text-gray-500">{{eventDetails?.event_type}} - {{eventDetails?.event_domain}}</p>
       </div>
     </div>
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-2 border-b">
-    <button class="px-3 py-2 text-sm" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='details', 'text-gray-600': activeTab!=='details' }" (click)="activeTab='details'">Details</button>
-    <button class="px-3 py-2 text-sm" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='media', 'text-gray-600': activeTab!=='media' }" (click)="activeTab='media'">Media</button>
-    <button class="px-3 py-2 text-sm" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='comments', 'text-gray-600': activeTab!=='comments' }" (click)="activeTab='comments'">Comments</button>
+  <div class="flex gap-2 border-b overflow-x-auto">
+    <button class="px-3 py-2 text-sm whitespace-nowrap" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='details', 'text-gray-600': activeTab!=='details' }" (click)="activeTab='details'">Details</button>
+    <button class="px-3 py-2 text-sm whitespace-nowrap" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='dates', 'text-gray-600': activeTab!=='dates' }" (click)="activeTab='dates'">Dates</button>
+    <button class="px-3 py-2 text-sm whitespace-nowrap" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='image', 'text-gray-600': activeTab!=='image' }" (click)="activeTab='image'">Image</button>
+    <button class="px-3 py-2 text-sm whitespace-nowrap" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='media', 'text-gray-600': activeTab!=='media' }" (click)="activeTab='media'">Media</button>
+    <button class="px-3 py-2 text-sm whitespace-nowrap" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='artists', 'text-gray-600': activeTab!=='artists' }" (click)="activeTab='artists'">Artists</button>
+    <button class="px-3 py-2 text-sm whitespace-nowrap" [ngClass]="{ 'border-b-2 border-indigo-600 text-indigo-700 font-semibold': activeTab==='comments', 'text-gray-600': activeTab!=='comments' }" (click)="activeTab='comments'">Comments</button>
   </div>
 
   <!-- Details Tab -->
   <div *ngIf="activeTab==='details'" class="space-y-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="flex flex-col">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Request ID</span>
-        <span class="font-mono text-gray-900">{{requestArr?.id}}</span>
-      </div>
-      <div class="flex flex-col">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Request Type</span>
-        <span class="text-gray-900 capitalize">{{requestArr?.request_type}}</span>
-      </div>
-      <div class="md:col-span-2">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Artist</span>
-        <div class="flex items-center gap-3 mt-1">
-          <img *ngIf="requestArr?.artist?.photo" [src]="requestArr.artist.photo" alt="Artist Photo" class="w-12 h-12 object-cover rounded-full ring-1 ring-gray-200" />
-          <div class="text-gray-900">{{requestArr?.artist?.fname}} {{requestArr?.artist?.lname}}</div>
-        </div>
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Event ID</span>
+        <span class="font-mono text-gray-900">{{eventDetails?.id}}</span>
       </div>
       <div class="flex flex-col">
         <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Title</span>
-        <span class="text-gray-900">{{requestArr?.title}}</span>
+        <span class="text-gray-900">{{eventDetails?.title}}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Event Type</span>
+        <span class="text-gray-900">{{eventDetails?.event_type}}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Event Domain</span>
+        <span class="text-gray-900">{{eventDetails?.event_domain}}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Edition</span>
+        <span class="text-gray-900">{{eventDetails?.edition || 'N/A'}}</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Edition Type</span>
+        <span class="text-gray-900">{{eventDetails?.edition_type || 'N/A'}}</span>
       </div>
       <div class="flex flex-col">
         <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Status</span>
         <span
-  class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-  [ngClass]="{
-    'bg-gray-100 text-gray-700': requestArr?.status === 1,
-    'bg-green-100 text-green-800': requestArr?.status === 2,
-    'bg-red-100 text-red-800': requestArr?.status === 3
-  }"
->
-  <i class="fa-solid"
-    [ngClass]="{
-      'fa-circle-dot': requestArr?.status === 1,
-      'fa-circle-check': requestArr?.status === 2,
-      'fa-circle-xmark': requestArr?.status === 3
-    }"
-  ></i>
-  {{ getStatusLabel(requestArr?.status) }}
-</span>
-
-      </div>
-      <div class="md:col-span-2">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Short Description</span>
-        <p class="text-gray-900 mt-1 bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{requestArr?.short_desc}}</p>
-      </div>
-      <div class="md:col-span-2">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Long Description</span>
-        <p class="text-gray-900 mt-1 whitespace-pre-line bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{requestArr?.long_desc}}</p>
-      </div>
-      <div>
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Proposed Date(s)</span>
-        <div class="flex flex-wrap gap-2 mt-1">
-          <span *ngFor="let d of requestArr?.propose_date" class="px-2.5 py-1 bg-gray-50 ring-1 ring-gray-200 text-gray-800 rounded">{{d | date:'yyyy-MM-dd'}}</span>
-        </div>
-      </div>
-      <div>
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Instruments</span>
-        <div class="flex flex-wrap gap-2 mt-1">
-          <span *ngFor="let ins of requestArr?.instrument" class="px-2.5 py-1 bg-gray-50 ring-1 ring-gray-200 text-gray-800 rounded">{{ins}}</span>
-        </div>
+          class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          [ngClass]="{
+            'bg-blue-100 text-blue-800': eventDetails?.status === 0,
+            'bg-green-100 text-green-800': eventDetails?.status === 1,
+            'bg-gray-100 text-gray-700': eventDetails?.status === 2,
+            'bg-yellow-100 text-yellow-800': eventDetails?.status === 3,
+            'bg-red-100 text-red-800': eventDetails?.status === 6
+          }"
+        >
+          <i class="fa-solid"
+            [ngClass]="{
+              'fa-globe': eventDetails?.status === 0,
+              'fa-circle-check': eventDetails?.status === 1,
+              'fa-circle-dot': eventDetails?.status === 2,
+              'fa-pause-circle': eventDetails?.status === 3,
+              'fa-circle-xmark': eventDetails?.status === 6
+            }"
+          ></i>
+          {{ getStatusLabel(eventDetails?.status) }}
+        </span>
       </div>
       <div class="flex flex-col">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Last status change</span>
-        <span class="text-gray-900">{{requestArr?.last_status_change | date:'yyyy-MM-dd HH:mm'}}</span>
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Active</span>
+        <span class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          [ngClass]="eventDetails?.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'">
+          <i class="fa-solid" [ngClass]="eventDetails?.is_active ? 'fa-check-circle' : 'fa-times-circle'"></i>
+          {{eventDetails?.is_active ? 'Active' : 'Inactive'}}
+        </span>
       </div>
-
-
-         <!-- <div class="flex flex-col">
-        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Last Status</span>
-       
-          <p *ngIf="requestArr.status ==2?true:false" class="text-gray-900">Approved</p>
-          <p *ngIf="requestArr.status ==3 ?true:false" class="text-gray-900">Rejected</p>
-          <p *ngIf="requestArr.status ==1 ?true:false" class="text-gray-900">Open</p>
-
-
-      </div> -->
-
-
+      <div class="flex flex-col">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Completed</span>
+        <span class="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          [ngClass]="eventDetails?.is_completed ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'">
+          <i class="fa-solid" [ngClass]="eventDetails?.is_completed ? 'fa-check-circle' : 'fa-clock'"></i>
+          {{eventDetails?.is_completed ? 'Completed' : 'In Progress'}}
+        </span>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Teaser</span>
+        <p class="text-gray-900 mt-1 bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{eventDetails?.teaser || 'N/A'}}</p>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Long Teaser</span>
+        <p class="text-gray-900 mt-1 whitespace-pre-line bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{eventDetails?.long_teaser || 'N/A'}}</p>
+      </div>
+      <div class="md:col-span-2">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Description</span>
+        <p class="text-gray-900 mt-1 whitespace-pre-line bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3">{{eventDetails?.description || 'N/A'}}</p>
+      </div>
+      <div class="md:col-span-2" *ngIf="eventDetails?.booking_url">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Booking URL</span>
+        <a [href]="eventDetails.booking_url" target="_blank" class="text-blue-600 hover:underline break-all block mt-1">{{eventDetails.booking_url}}</a>
+      </div>
+      <div class="md:col-span-2" *ngIf="eventDetails?.event_instruments?.length">
+        <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide block mb-2">Instruments</span>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let instrument of eventDetails.event_instruments" class="px-2.5 py-1 bg-indigo-50 ring-1 ring-indigo-200 text-indigo-800 rounded capitalize">{{instrument.name}}</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Media Tab -->
-  <div *ngIf="activeTab==='media'" class="space-y-6">
-    <div>
-      <h3 class="text-sm font-semibold text-gray-900">Videos</h3>
-      <div *ngIf="videos?.length; else noVideos" class="grid md:grid-cols-5 gap-4 mt-2">
-        <div *ngFor="let m of videos" class="p-3 rounded-lg ring-1 ring-gray-200">
-          <div class="font-semibold text-gray-900">{{m?.title}}</div>
-          <div class="text-sm text-gray-600">{{m?.description}}</div>
-          <div class="mt-2 text-blue-600 break-all" *ngIf="m?.video_url || m?.description">{{m?.video_url || m?.description}}</div>
-          <img *ngIf="m?.photo || m?.image" [src]="m?.photo || m?.image" alt="media" class="mt-2 w-full h-40 object-cover rounded" />
+  <!-- Dates Tab -->
+  <div *ngIf="activeTab==='dates'" class="space-y-4">
+    <!-- Period Events -->
+    <div *ngIf="eventDetails?.is_period && eventDetails?.period?.length">
+      <div class="space-y-3">
+        <div *ngFor="let periodDate of eventDetails.period; let i = index" class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold text-sm">{{i + 1}}</span>
+            <h3 class="text-sm font-semibold text-gray-900">Period {{i + 1}}</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Start Date</span>
+              <span class="text-gray-900 mt-1">{{periodDate.start_date | date:'fullDate'}}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">End Date</span>
+              <span class="text-gray-900 mt-1">{{periodDate.end_date | date:'fullDate'}}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <ng-template #noVideos>
-        <div class="text-sm text-gray-500">No videos</div>
-      </ng-template>
     </div>
-
-    <div>
-      <h3 class="text-sm font-semibold text-gray-900">CD</h3>
-      <div *ngIf="cds?.length; else noCds" class="grid md:grid-cols-5 gap-4 mt-2">
-        <div *ngFor="let m of cds" class="p-3 rounded-lg ring-1 ring-gray-200">
-          <div class="font-semibold text-gray-900">{{m?.title}}</div>
-          <div class="text-sm text-gray-600">{{m?.description}}</div>
-          <div class="mt-2 text-blue-600 break-all" *ngIf="m?.video_url || m?.description">{{m?.video_url || m?.description}}</div>
-          <img *ngIf="m?.photo || m?.image" [src]="m?.photo || m?.image" alt="media" class="mt-2 w-full h-40 object-cover rounded" />
+    
+    <!-- Single Day Events -->
+    <div *ngIf="!eventDetails?.is_period && eventDetails?.event_dates?.length">
+      <div class="space-y-3">
+        <div *ngFor="let eventDate of eventDetails.event_dates; let i = index" class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold text-sm">{{i + 1}}</span>
+            <h3 class="text-sm font-semibold text-gray-900">Single Day {{i + 1}}</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Date</span>
+              <span class="text-gray-900 mt-1">{{eventDate.start_date | date:'fullDate'}}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Time</span>
+              <span class="text-gray-900 mt-1">{{eventDate.time || 'Not specified'}}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-semibold text-gray-900 uppercase tracking-wide">Location</span>
+              <span class="text-gray-900 mt-1">{{eventDate.location || 'Not specified'}}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <ng-template #noCds>
-        <div class="text-sm text-gray-500">No CDs</div>
-      </ng-template>
+    </div>
+    
+    <!-- No Dates -->
+    <div *ngIf="!eventDetails?.is_period && !eventDetails?.event_dates?.length && !eventDetails?.period?.length" class="text-center py-8 text-gray-500">
+      <i class="fa-regular fa-calendar text-4xl mb-3"></i>
+      <p>No event dates available</p>
     </div>
   </div>
 
-  <!-- Comments Tab -->
-  <div *ngIf="activeTab==='comments'" class="space-y-3">
-    <div *ngIf="requestArr?.status === 1; else readOnlyComment">
-      <label class="block text-xs font-medium text-gray-600 uppercase tracking-wide">Add Comment</label>
-      <textarea [(ngModel)]="commentText" rows="4" class="w-full mt-1 p-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Write your comment..."></textarea>
+  <!-- Image Tab -->
+  <div *ngIf="activeTab==='image'" class="space-y-4">
+    <div *ngIf="eventDetails?.photo; else noImage">
+      <div class="flex flex-col items-center">
+        <img [src]="eventDetails.photo" alt="Event Photo" class="max-w-full max-h-96 object-contain rounded-lg ring-1 ring-gray-200" />
+        <div class="mt-3 text-sm text-gray-600" *ngIf="eventDetails?.credit_photo">
+          <span class="font-semibold">Photo Credit:</span> {{eventDetails.credit_photo}}
+        </div>
+      </div>
     </div>
-    <ng-template #readOnlyComment>
-      <div class="text-gray-700 whitespace-pre-line">{{requestArr?.comments || requestArr?.comment || 'No comment'}}</div>
+    <ng-template #noImage>
+      <div class="text-center py-12 text-gray-500">
+        <i class="fa-regular fa-image text-5xl mb-4"></i>
+        <p>No event photo available</p>
+      </div>
     </ng-template>
   </div>
 
+  <!-- Media Tab -->
+  <div *ngIf="activeTab==='media'" class="space-y-4">
+    <div *ngIf="eventDetails?.event_media?.length; else noMediaContent">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div *ngFor="let media of eventDetails.event_media" class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-3 hover:ring-indigo-300 transition-all">
+          <img *ngIf="media.image" [src]="media.image" alt="Event Media" class="w-full h-48 object-cover rounded mb-2" />
+          <div *ngIf="!media.image" class="w-full h-48 bg-gray-200 rounded mb-2 flex items-center justify-center">
+            <i class="fa-solid fa-image text-gray-400 text-4xl"></i>
+          </div>
+          <div class="text-sm font-semibold text-gray-900" *ngIf="media.title">{{media.title}}</div>
+          <div class="text-xs text-gray-600 mt-1" *ngIf="media.description">{{media.description}}</div>
+          <div class="text-xs text-gray-500 mt-1" *ngIf="media.url">
+            <a [href]="media.url" target="_blank" class="text-indigo-600 hover:underline flex items-center gap-1">
+              <i class="fa-solid fa-external-link-alt"></i>
+              <span>View Media Link</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noMediaContent>
+      <div class="text-center py-12 text-gray-500">
+        <i class="fa-regular fa-photo-film text-5xl mb-4"></i>
+        <p>No media files available</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Artists Tab -->
+  <div *ngIf="activeTab==='artists'" class="space-y-4">
+    <div *ngIf="eventDetails?.event_artists?.length; else noArtists">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div *ngFor="let artist of eventDetails.event_artists" class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4 hover:ring-indigo-300 transition-all">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <img *ngIf="artist.photo" [src]="artist.photo" alt="Artist Photo" class="w-20 h-20 object-cover rounded-full ring-2 ring-gray-200" />
+              <div *ngIf="!artist.photo" class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-user text-gray-400 text-2xl"></i>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-gray-900 text-lg">{{artist.artist}}</h3>
+              <div class="text-sm text-gray-600 mt-2" *ngIf="artist.teaser">{{artist.teaser}}</div>
+              <div class="text-sm text-gray-600 mt-2" *ngIf="artist.short_bio">{{artist.short_bio}}</div>
+              <div class="text-xs text-gray-500 mt-2" *ngIf="artist.credit_photo">
+                <span class="font-semibold">Photo credit:</span> {{artist.credit_photo}}
+              </div>
+              <!-- Artist Media -->
+              <div *ngIf="artist.artist_media?.length" class="mt-3">
+                <div class="flex flex-wrap gap-2">
+                  <img *ngFor="let media of artist.artist_media" [src]="media.url" alt="Artist Media" class="w-16 h-16 object-cover rounded ring-1 ring-gray-200" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noArtists>
+      <div class="text-center py-12 text-gray-500">
+        <i class="fa-solid fa-users text-5xl mb-4"></i>
+        <p>No artists assigned</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Comments Tab -->
+  <div *ngIf="activeTab==='comments'" class="space-y-4">
+    <!-- Comments Thread -->
+    <div class="bg-gray-50 ring-1 ring-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto">
+      <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-comments"></i>
+        Comments & Messages
+      </h3>
+      
+      <div *ngIf="eventDetails?.comments?.length; else noComments" class="space-y-3">
+        <div *ngFor="let comment of eventDetails.comments" 
+          class="flex gap-3"
+          [ngClass]="comment.who === 1 ? 'flex-row-reverse' : 'flex-row'">
+          
+          <!-- Avatar -->
+          <div class="flex-shrink-0">
+            <div class="h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+              [ngClass]="comment.who === 1 ? 'bg-indigo-600' : 'bg-green-600'">
+              {{comment.who === 1 ? 'H' : 'A'}}
+            </div>
+          </div>
+          
+          <!-- Message Bubble -->
+          <div class="flex-1 max-w-xs">
+            <div class="rounded-lg p-3"
+              [ngClass]="comment.who === 1 ? 'bg-indigo-100 text-right' : 'bg-white ring-1 ring-gray-200'">
+              <div class="text-xs font-semibold mb-1"
+                [ngClass]="comment.who === 1 ? 'text-indigo-900' : 'text-gray-900'">
+                {{comment.who === 1 ? comment.host : comment.artist}}
+              </div>
+              <div class="text-sm"
+                [ngClass]="comment.who === 1 ? 'text-indigo-800' : 'text-gray-700'">
+                {{comment.comment}}
+              </div>
+              <div class="text-xs mt-1"
+                [ngClass]="comment.who === 1 ? 'text-indigo-600' : 'text-gray-500'">
+                {{comment.dated | date:'short'}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #noComments>
+        <div class="text-center py-8 text-gray-500">
+          <i class="fa-regular fa-comments text-4xl mb-3"></i>
+          <p>No comments yet. Start the conversation!</p>
+        </div>
+      </ng-template>
+    </div>
+    
+    <!-- Add Comment Form -->
+    <div class="bg-white ring-1 ring-gray-200 rounded-lg p-4">
+      <label class="block text-sm font-semibold text-gray-900 mb-2">
+        <i class="fa-solid fa-pen mr-2"></i>Add Comment
+      </label>
+      <div class="flex gap-2">
+        <textarea 
+          [(ngModel)]="newComment" 
+          rows="3" 
+          class="flex-1 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" 
+          placeholder="Write your message..."
+          [disabled]="isAddingComment"></textarea>
+        <button 
+          (click)="addComment()"
+          [disabled]="!newComment.trim() || isAddingComment"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end">
+          <i class="fa-solid" [ngClass]="isAddingComment ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+        </button>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">
+        <i class="fa-solid fa-info-circle mr-1"></i>
+        Your comment will be visible to the artist and other hosts.
+      </p>
+    </div>
+  </div>
+
   <!-- Footer Actions -->
-  <div class="flex flex-wrap items-center justify-end gap-3 border-t pt-4" *ngIf="requestArr.status == 1? true : false">
-    <button class="px-4 py-2 bg-green-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="statusRequest(2)">Approve</button>
-    <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="approveAndCreateEvent()">Approve & Create Event</button>
-    <button class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-60" [disabled]="isSubmitting || requestArr?.status !== 1" (click)="statusRequest(3)">Reject</button>
+  <div class="flex flex-wrap items-center justify-end gap-3 border-t pt-4" *ngIf="eventDetails?.status == 2 || eventDetails?.status == 3">
+    <button 
+      class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-medium" 
+      [disabled]="isSubmitting" 
+      (click)="statusRequest(1)">
+      <i class="fa-solid fa-check mr-2"></i>Approve
+    </button>
+    <button 
+      class="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-medium" 
+      [disabled]="isSubmitting" 
+      (click)="statusRequest(3)">
+      <i class="fa-solid fa-pause mr-2"></i>On Hold
+    </button>
+    <button 
+      class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-medium" 
+      [disabled]="isSubmitting" 
+      (click)="statusRequest(6)">
+      <i class="fa-solid fa-times mr-2"></i>Reject
+    </button>
   </div>
 
   <!-- Debug -->

@@ -964,16 +964,102 @@ async resetPass(pass:any){
 
 //Get all the artists Requests
 async getAllArtistsRequests(){
-  const {data, error} = await supabase.from('vw_list_request').select()
-  if(error) throw error
-  return data;
+  const {data, error} = await supabase
+    .from('vw_get_artists_request')
+    .select('*')
+  
+  if(error) {
+    console.error('Error fetching artist requests:', error);
+    throw error;
+  }
+  
+  // Transform the data to match the expected format
+  const transformed = (data || []).map((item: any) => ({
+    ...item,
+    id_request: item.id,
+    name: `${item.fname || ''} ${item.lname || ''}`.trim(),
+    request_type: item.domain || '',
+    // If propose_date exists use it, otherwise create array with min date
+    propose_date: item.propose_date || (item.min ? [item.min] : []),
+    // Handle max date for period display if available
+    max: item.max || null,
+    created_on: item.created_on,
+    status: item.status !== undefined ? item.status : 2  // Default to approved if not in view
+  }));
+  
+  return transformed;
 }
 
 //Get single artists Request detail
 async getRequestDetail(id:any){
-  const {data, error} = await supabase.rpc('get_artist_request_details', {p_request_id:id})
+  const {data, error} = await supabase.rpc('get_single_request_with_details_v2', {p_event_id:id})
   if(error) throw error
   return data;
+}
+
+// Get single request with details v1
+async get_single_request_with_details_v1(eventId: any) {
+  const { data, error } = await supabase.rpc('get_single_request_with_details_v1', { p_event_id: eventId });
+  if (error) throw error;
+  return data;
+
+  
+}
+
+
+// Get single request with details v1
+async get_single_request_with_details_v2(eventId: any) {
+  const { data, error } = await supabase.rpc('get_single_request_with_details_v2', { p_event_id: eventId });
+  if (error) throw error;
+  return data;
+
+  
+}
+
+
+// Add comment to event
+async addEventComment(eventId: number, hostId: number | null, comment: string, artistId?: number) {
+  const payload: any = {
+    id_event: eventId,
+    comment: comment
+  };
+  
+  // Determine who is adding the comment
+  if (hostId !== null && hostId !== undefined) {
+    // Host is adding comment
+    payload.id_host = hostId;
+    payload.who = 1; // 1 = host
+    if (artistId) {
+      payload.id_artist = artistId;
+    }
+  } else if (artistId) {
+    // Artist is adding comment
+    payload.id_artist = artistId;
+    payload.who = 2; // 2 = artist
+  }
+  
+  const { data, error } = await supabase
+    .from('event_comments')
+    .insert(payload)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Get comment count for an event
+async getEventCommentCount(eventId: number): Promise<number> {
+  const { count, error } = await supabase
+    .from('event_comments')
+    .select('*', { count: 'exact', head: true })
+    .eq('id_event', eventId);
+  
+  if (error) {
+    console.error('Error getting comment count:', error);
+    return 0;
+  }
+  
+  return count || 0;
 }
 
   // Update request status and optional comment
@@ -1225,6 +1311,45 @@ async editArtistTimeOff(arr:any, id:any){
     } catch (error: any) {
       console.error('Error adding pending artist:', error);
       throw new Error('Failed to add pending artist: ' + error.message);
+    }
+  }
+
+  // Get host ID (integer) from host_users table based on profile ID
+  async getHostIdFromProfile(profileId: string): Promise<number> {
+    try {
+      console.log('Querying host_users table for profile ID:', profileId);
+      console.log('Profile ID type:', typeof profileId);
+      console.log('Profile ID length:', profileId?.length);
+      
+      // First, let's see all records in host_users for debugging
+      const { data: allRecords } = await supabase
+        .from('host_users')
+        .select('*');
+      console.log('All host_users records:', allRecords);
+      
+      const { data, error } = await supabase
+        .from('host_users')
+        .select('id_host')
+        .eq('id_profile', profileId)
+        .single();
+
+      console.log('Query result:', { data, error });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(`Host not found in host_users table: ${error.message}`);
+      }
+
+      if (!data) {
+        console.error('No data returned from host_users table');
+        throw new Error('Host profile not found in host_users table');
+      }
+
+      console.log('Found host ID:', data.id_host);
+      return data.id_host;
+    } catch (error: any) {
+      console.error('Error getting host ID:', error);
+      throw error;
     }
   }
 }

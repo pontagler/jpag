@@ -413,7 +413,7 @@ loggedUser:any;
             booking_url: d.booking_url || null,
             photo: null,
             credit_photo: d.credit_photo || null,
-            status: d.status || 2,
+            status: d.status,
             is_active: d.is_active || false
           });
           this.createdEventId = newId;
@@ -429,7 +429,7 @@ loggedUser:any;
             description: d.description,
             booking_url: d.booking_url || null,
             credit_photo: d.credit_photo || null,
-            status: d.status || 1,
+            status: d.status,
             is_active: d.is_active || false
           });
         }

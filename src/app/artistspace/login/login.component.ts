@@ -14,9 +14,11 @@ export class LoginComponent {
   // email: string = 'psx1ufg37i@daouse.com';
   // password: string = 'Saurabh@123';
 
-  email: string = 'saurtrash@gmail.com';
-  password: string = 'Public@123';
+  // email: string = 'saurtrash@gmail.com';
+  // password: string = 'Public@123';
   
+  email: string = '';
+  password: string = '';
   
   // Forgot password / recovery state
   showForgot: boolean = false;

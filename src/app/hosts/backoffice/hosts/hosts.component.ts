@@ -3,6 +3,7 @@ import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AlertService } from '../../../services/alert.service';
 import { HostsService } from '../../../services/hosts.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-hosts',
@@ -15,13 +16,15 @@ export class HostsComponent implements OnInit{
 constructor(
   private hostsService: HostsService,
   private fb: FormBuilder,
-  private alertService: AlertService
+  private alertService: AlertService,
+  private authService: AuthService
 ){
 
 }
 
 hostsArray:any = [];
-id_host: any = '116ad27e-45bd-48d7-a2f7-096f8418ea65';
+id_host: number | null = null;
+id_profile: string | null = null;
  editMode: boolean = false;
  form!: FormGroup;
 ngOnInit(): void {
@@ -35,7 +38,7 @@ ngOnInit(): void {
     country: [''],
     host_per_year: [''],
     capacity: [null],
-    id_type: [null],
+    id_host_type: [null],
     contact_fname: [''],
     contact_lname: [''],
     contact_phone1: [''],
@@ -50,12 +53,21 @@ ngOnInit(): void {
 }
 
 async getHostsProfile(){
-  
-    let row = await this.hostsService.getHostsProfile(this.id_host);
+  try {
+    const currentUser = await this.authService.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      this.alertService.showAlert('Error', 'You must be logged in to view host profile', 'error');
+      return;
+    }
+    
+    this.id_profile = currentUser.id;
+    let row = await this.hostsService.getHostsByProfile(this.id_profile);
     this.hostsArray = row;
-    console.log(this.hostsArray)
+    console.log('Hosts array:', this.hostsArray);
+    
     const h = this.hostsArray && this.hostsArray.length ? this.hostsArray[0] : null;
     if (h) {
+      this.id_host = h.id; // Store the integer host ID for updates
       this.form.patchValue({
         name: h.name ?? '',
         public_name: h.public_name ?? '',
@@ -66,7 +78,7 @@ async getHostsProfile(){
         country: h.country ?? '',
         host_per_year: h.host_per_year ?? '',
         capacity: h.capacity ?? null,
-        id_type: h.id_type ?? null,
+        id_host_type: h.id_host_type ?? null,
         contact_fname: h.contact_fname ?? '',
         contact_lname: h.contact_lname ?? '',
         contact_phone1: h.contact_phone1 ?? '',
@@ -78,6 +90,9 @@ async getHostsProfile(){
         last_update_on: new Date()
       });
     }
+  } catch (e: any) {
+    this.alertService.showAlert('Error', e.message || 'Failed to load host profile', 'error');
+  }
 }
 
   buildMapsLink(host: any): string | null {
@@ -105,7 +120,7 @@ async getHostsProfile(){
         country: h.country ?? '',
         host_per_year: h.host_per_year ?? '',
         capacity: h.capacity ?? null,
-        id_type: h.id_type ?? null,
+        id_host_type: h.id_host_type ?? null,
         contact_fname: h.contact_fname ?? '',
         contact_lname: h.contact_lname ?? '',
         contact_phone1: h.contact_phone1 ?? '',
@@ -120,8 +135,14 @@ async getHostsProfile(){
 
   async save(): Promise<void> {
     try {
+      if (!this.id_host) {
+        this.alertService.showAlert('Error', 'Host ID not found', 'error');
+        return;
+      }
       const payload = { ...this.form.value };
-      console.log(payload);
+      // Remove last_update_on from payload as it's handled by the database
+      delete payload.last_update_on;
+      console.log('Updating host with payload:', payload);
       const updated = await this.hostsService.updateHostProfile(this.id_host, payload);
       if (updated) {
         this.alertService.showAlert('Saved', 'Host profile updated successfully.', 'success');
@@ -138,7 +159,12 @@ async getHostsProfile(){
     if (!input.files || input.files.length === 0) return;
     const file = input.files[0];
     try {
-      const url = await this.hostsService.uploadHostLogo(this.id_host, file);
+      if (!this.id_host) {
+        this.alertService.showAlert('Error', 'Host ID not found', 'error');
+        return;
+      }
+      // Convert host ID to string for the upload function (it expects a string path)
+      const url = await this.hostsService.uploadHostLogo(this.id_host.toString(), file);
       this.form.patchValue({ photo: url, last_update_on: new Date() });
       this.alertService.showAlert('Uploaded', 'Logo uploaded successfully.', 'success');
     } catch (e: any) {

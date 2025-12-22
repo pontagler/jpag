@@ -29,10 +29,10 @@
         <i class="fa-solid fa-trash"></i>
         {{ isDeleting ? 'Deleting...' : 'Delete Event' }}
       </button>
-      <a routerLink="/hosts/console/events" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+      <button (click)="navigateToEvents()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
         <i class="fa-solid fa-arrow-left"></i>
         Back to Events
-      </a>
+      </button>
     </div>
   </div>
 

@@ -119,13 +119,7 @@
             </div>
             <div class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
               <span class="text-gray-600">Type</span>
-             <span class="font-medium text-gray-900" [ngSwitch]="hostsArray[0].id_type">
-  <ng-container *ngSwitchCase="1">Association</ng-container>
-  <ng-container *ngSwitchCase="2">Particular</ng-container>
-  <ng-container *ngSwitchCase="3">Enterprise</ng-container>
-  <ng-container *ngSwitchDefault>—</ng-container>
-</span>
-
+              <span class="font-medium text-gray-900">{{ hostsArray[0].host_type || '—' }}</span>
             </div>
           </div>
         </div>
@@ -140,11 +134,11 @@
           <div class="space-y-2 text-sm">
             <div class="flex items-center justify-between">
               <span class="text-gray-600">Created</span>
-              <span class="text-gray-900">{{ hostsArray[0].created_on | date:'yyyy-MM-dd HH:mm' }}</span>
+              <span class="text-gray-900">{{ hostsArray[0].created_on ? (hostsArray[0].created_on | date:'yyyy-MM-dd HH:mm') : '—' }}</span>
             </div>
             <div class="flex items-center justify-between">
               <span class="text-gray-600">Last Updated</span>
-              <span class="text-gray-900">{{ hostsArray[0].last_update_on | date:'yyyy-MM-dd HH:mm' }}</span>
+              <span class="text-gray-900">{{ hostsArray[0].last_update ? (hostsArray[0].last_update | date:'yyyy-MM-dd HH:mm') : '—' }}</span>
             </div>
           </div>
         </div>
@@ -279,7 +273,7 @@
             </div>
             <div class="flex flex-col">
               <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Type</label>
-              <select formControlName="id_type" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <select formControlName="id_host_type" class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option [ngValue]="null">—</option>
                 <option [ngValue]="1">Association</option>
                 <option [ngValue]="2">Particular</option>

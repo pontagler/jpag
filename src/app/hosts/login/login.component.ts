@@ -11,8 +11,10 @@ import { ArtistService } from '../../services/artist.service';
   templateUrl: './login.component.html'
 })
 export class LoginComponent {
-  email: string = 'veronique.gaudrat@wanadoo.fr';
-  password: string = 'Pontargler0809$';
+  // email: string = 'veronique.gaudrat@wanadoo.fr';
+  // password: string = 'Pontargler0809$';
+  email: string = '';
+  password: string = '';
   loading: boolean = false;
 
   constructor(

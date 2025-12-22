@@ -555,6 +555,10 @@ loggedUser:any;
     }
   }
 
+  navigateToEvents(): void {
+    this.router.navigate(['/hosts/console/events']);
+  }
+
   private async prefillForEdit(id_event: number): Promise<void> {
     try {
       // Load base event row

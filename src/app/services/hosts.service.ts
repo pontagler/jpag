@@ -24,15 +24,44 @@ import { ArtistService } from './artist.service';
         return data;
       }
 
+      async getHostsByProfile(p_id_profile: string){
+        const {data, error} = await supabase.rpc('get_hosts_by_profile', { p_id_profile });
+        if(error) throw error;
+        console.log('Hosts by profile:', data);
+        return data || [];
+      }
+
       async uploadHostLogo(hostId: string, file: File): Promise<string> {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split('.').pop() || 'jpg';
         const filePath = `${hostId}/logo-${Date.now()}.${fileExt}`;
-        // Use service-role client for storage operations if RLS or storage policies block anon
-        const { data, error } = await supabase1.storage.from('hosts').upload(filePath, file, {
+        
+        // Try service-role client first (supabase1) to bypass RLS/bucket policies
+        let data, error;
+        ({ data, error } = await supabase1.storage.from('hosts').upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true
-        });
-        if (error) throw error;
+          upsert: true,
+          contentType: file.type || 'image/jpeg'
+        }));
+        
+        // If service-role fails, try authenticated client as fallback
+        if (error) {
+          console.warn('Service-role upload failed, trying authenticated client:', error);
+          ({ data, error } = await supabase.storage.from('hosts').upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true,
+            contentType: file.type || 'image/jpeg'
+          }));
+        }
+        
+        if (error) {
+          console.error('Storage upload error:', error);
+          throw new Error(`Failed to upload logo: ${error.message || 'Unknown error'}`);
+        }
+        
+        if (!data) {
+          throw new Error('Upload succeeded but no data returned');
+        }
+        
         const { data: publicUrlData } = supabase1.storage.from('hosts').getPublicUrl(data.path);
         return publicUrlData.publicUrl;
       }

@@ -333,6 +333,69 @@ async getEventsByArtist(artistId: string): Promise<any[]> {
     return data;
   }
 
+  // List all editions with edition type name
+  async listAllEditions(){
+    const { data, error } = await supabase
+      .from('event_edition')
+      .select('id, name, year, id_edition_type, created_on, created_by, last_update, update_by, sys_event_edition(name)')
+      .order('year', { ascending: false });
+    if (error) throw error;
+    return data;
+  }
+
+  // Create new edition
+  async createEdition(edition: { name: string; year: string; id_edition_type: number | null }): Promise<number> {
+    const userId = await this.getAuthUserId();
+    const { data, error } = await supabase
+      .from('event_edition')
+      .insert({
+        name: edition.name,
+        year: edition.year,
+        id_edition_type: edition.id_edition_type,
+        created_by: userId
+      })
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data.id;
+  }
+
+  // Update edition
+  async updateEdition(id: number, edition: { name: string; year: string; id_edition_type: number | null }): Promise<void> {
+    const userId = await this.getAuthUserId();
+    const { error } = await supabase
+      .from('event_edition')
+      .update({
+        name: edition.name,
+        year: edition.year,
+        id_edition_type: edition.id_edition_type,
+        update_by: userId,
+        last_update: new Date().toISOString()
+      })
+      .eq('id', id);
+    if (error) throw error;
+  }
+
+  // Delete edition
+  async deleteEdition(id: number): Promise<void> {
+    const { error } = await supabase
+      .from('event_edition')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  }
+
+  // Get edition by ID with edition type name
+  async getEditionWithType(id: number){
+    const { data, error } = await supabase
+      .from('event_edition')
+      .select('id, name, year, id_edition_type, created_on, created_by, last_update, update_by, sys_event_edition(name)')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
   async listSysEventTypes(){
     const { data, error } = await supabase.from('sys_event_type').select('id, name').order('name');
     if (error) throw error;

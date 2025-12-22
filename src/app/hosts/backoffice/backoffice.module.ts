@@ -11,6 +11,7 @@ import { EventsComponent } from './events/events.component';
 import { AccountComponent } from './account/account.component';
 import { AccountDetailComponent } from './account/detail/detail.component';
 import { StripHtmlPipe } from '../../shared/strip-html.pipe';
+import { EditionsComponent } from './editions/editions.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { StripHtmlPipe } from '../../shared/strip-html.pipe';
     ArtistCreateComponent,
     EventsComponent,
     AccountComponent,
-    AccountDetailComponent
+    AccountDetailComponent,
+    EditionsComponent
   ],
   imports: [
     CommonModule,

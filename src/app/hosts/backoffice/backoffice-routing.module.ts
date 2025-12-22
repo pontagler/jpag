@@ -17,6 +17,8 @@ import { RequestDetailComponent } from './requests/request-detail/request-detail
 import { CreateEventComponent } from './events/create-event/create-event.component';
 import { AccountDetailComponent } from './account/detail/detail.component';
 import { CreateAccountComponent } from './account/create-account/create-account.component';
+import { EditionsComponent } from './editions/editions.component';
+import { EditionCreateComponent } from './editions/edition-create/edition-create.component';
 
 const routes: Routes = [
   {path:'', component: BackofficeComponent, children:[
@@ -38,6 +40,9 @@ const routes: Routes = [
     {path:'account/:id', component: AccountDetailComponent, data:{urlID:461}},
     {path:'requests', component: RequestsComponent, data:{urlID:47}},
     {path:'requests/:id', component: RequestDetailComponent, data:{urlID:48}},
+    {path:'editions', component: EditionsComponent, data:{urlID:49}},
+    {path:'editions/create', component: EditionCreateComponent, data:{urlID:490}},
+    {path:'editions/:id/edit', component: EditionCreateComponent, data:{urlID:491}},
   ]}
 ];
 

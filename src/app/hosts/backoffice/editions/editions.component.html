@@ -1,0 +1,150 @@
+<div class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+        <i class="fa-regular fa-book"></i>
+      </span>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Editions</h2>
+        <p class="text-sm text-gray-500">Browse and manage event editions</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="hidden md:block">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input [(ngModel)]="searchQuery" type="text" placeholder="Search by name, year, type" class="w-64 md:w-80 pl-10 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+      </div>
+      <div class="md:hidden">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input [(ngModel)]="searchQuery" type="text" placeholder="Search" class="w-40 pl-10 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+      </div>
+      <button (click)="toggleFilters()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+        <i class="fa-solid fa-sliders"></i>
+        <span>{{ showFilters ? 'Hide Filters' : 'Show Filters' }}</span>
+      </button>
+      <button (click)="createNew()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800">
+        <i class="fa-solid fa-plus"></i>
+        <span>Create New</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Row -->
+  <div *ngIf="showFilters" class="space-y-4">
+    <div class="flex justify-end">
+      <button (click)="clearFilters()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Clear filters</span>
+      </button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Edition Type</label>
+        <div class="relative mt-1">
+          <i class="fa-solid fa-list absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <select [(ngModel)]="editionTypeFilter" class="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+            <option value="All">All</option>
+            <option *ngFor="let t of uniqueEditionTypes" [value]="t">{{ t }}</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center py-12">
+    <div class="flex flex-col items-center gap-2 text-gray-500">
+      <i class="fa-solid fa-spinner fa-spin text-3xl"></i>
+      <p class="text-sm">Loading editions...</p>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!isLoading" class="overflow-x-auto rounded-lg ring-1 ring-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50/80 backdrop-blur sticky top-0 z-10 text-left">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('id')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-hashtag text-gray-400"></i>
+              <span>ID</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='id' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='id' && sortDirection==='desc',
+                'fa-sort': sortKey!=='id'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('name')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-id-card text-gray-400"></i>
+              <span>Name</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='name' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='name' && sortDirection==='desc',
+                'fa-sort': sortKey!=='name'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('year')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-regular fa-calendar-days text-gray-400"></i>
+              <span>Year</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='year' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='year' && sortDirection==='desc',
+                'fa-sort': sortKey!=='year'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase cursor-pointer select-none" (click)="setSort('editionTypeName')">
+            <span class="inline-flex items-center gap-2">
+              <i class="fa-solid fa-list text-gray-400"></i>
+              <span>Edition Type</span>
+              <i class="fas text-gray-400" [ngClass]="{
+                'fa-sort-up': sortKey==='editionTypeName' && sortDirection==='asc',
+                'fa-sort-down': sortKey==='editionTypeName' && sortDirection==='desc',
+                'fa-sort': sortKey!=='editionTypeName'
+              }"></i>
+            </span>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">Created On</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold tracking-wider text-gray-600 uppercase">Last Update</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <tr *ngFor="let e of displayedEditions" class="hover:bg-gray-50 transition-colors cursor-pointer" (click)="navigateTo(e.id)">
+          <td class="px-4 py-3 font-mono text-gray-800 text-sm">{{ e.id }}</td>
+          <td class="px-4 py-3 text-gray-900 text-sm font-medium">{{ e.name }}</td>
+          <td class="px-4 py-3 text-gray-700 text-sm">{{ e.year }}</td>
+          <td class="px-4 py-3 text-gray-700 text-sm">{{ e.editionTypeName || '-' }}</td>
+          <td class="px-4 py-3 text-gray-600 text-sm">
+            <span *ngIf="e.created_on">{{ e.created_on | date:'yyyy-MM-dd' }}</span>
+            <span *ngIf="!e.created_on" class="text-gray-400">-</span>
+          </td>
+          <td class="px-4 py-3 text-gray-600 text-sm">
+            <span *ngIf="e.last_update">{{ e.last_update | date:'yyyy-MM-dd' }}</span>
+            <span *ngIf="!e.last_update" class="text-gray-400">-</span>
+          </td>
+        </tr>
+        <tr *ngIf="displayedEditions.length === 0 && !isLoading">
+          <td colspan="6" class="px-6 py-12 text-center">
+            <div class="flex flex-col items-center gap-2 text-gray-500">
+              <i class="fa-regular fa-folder-open text-3xl"></i>
+              <p class="text-sm">No editions found</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!isLoading" class="flex items-center justify-between text-sm text-gray-500">
+    <div>Showing {{ displayedEditions.length }} result<span *ngIf="displayedEditions.length !== 1">s</span></div>
+  </div>
+</div>

@@ -44,6 +44,10 @@ export class BackofficeComponent implements OnInit {
         this.router.navigate(['hosts/console/requests']);
         break;
 
+      case 9:
+        this.router.navigate(['hosts/console/editions']);
+        break;
+
       case 8:
         this.authService.signOut();
         this.router.navigate(['hosts']);

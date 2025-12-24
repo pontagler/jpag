@@ -357,26 +357,56 @@ next2(){
   aFirstName:any;
   aLastName:any;
   aEmail:any;
-  setp1() {
-    let email = this.form.value['personal'].email;
+  
+  async setp1(): Promise<void> {
+    // Validate email is provided
+    const email = this.form.value['personal']?.email?.trim();
+    if (!email) {
+      this.alertService.showAlert('Validation Error', 'Email is required', 'error');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      this.alertService.showAlert('Validation Error', 'Please enter a valid email address', 'error');
+      return;
+    }
+
     this.form.addControl('id_auth', new FormControl(this.loggedUser));
     const formValue = this.form.value['personal'];
     
     this.aFirstName = formValue.firstName;
     this.aLastName = formValue.lastName;
-    this.aEmail = formValue.email;
+    this.aEmail = email;
 
-
-    const dataX = this.artistService
-      .createSingleArtist_step01(this.form.value)
-      .then((res) => {
-        return res;
-      })
-      .catch((error) => {
-        return error.message;
-      });
-
-    console.log(dataX);
+    try {
+      console.log('Creating artist with email:', email);
+      const result = await this.artistService.createSingleArtist_step01(this.form.value);
+      
+      if (result.code === 1) {
+        console.log('Artist created successfully:', result.data);
+        this.alertService.showAlert(
+          'Success', 
+          'Artist profile created. Activation email sent to the artist.', 
+          'success'
+        );
+      } else {
+        console.error('Artist creation failed:', result.data);
+        this.alertService.showAlert(
+          'Error', 
+          result.data || 'Failed to create artist profile', 
+          'error'
+        );
+      }
+    } catch (error: any) {
+      console.error('Error in setp1:', error);
+      this.alertService.showAlert(
+        'Internal Error', 
+        error.message || 'Failed to create artist', 
+        'error'
+      );
+    }
   }
 
   // --- Selected Instruments (UI List) ---

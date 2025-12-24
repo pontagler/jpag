@@ -139,3 +139,4 @@ export interface EditionRow {
   created_on: Date | null;
   last_update: Date | null;
 }
+

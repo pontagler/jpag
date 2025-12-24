@@ -510,82 +510,114 @@ async createSingleArtist_temp(arrData: any) {
 }
 
 async createSingleArtist_step01(arrData: any) {
-  console.log('Signup stage initiated');
+  console.log('🎨 Artist creation stage initiated');
 
-  let signupData: any;
+  const email = arrData.personal.email?.trim() || '';
+  if (!email) {
+    return { code: 0, data: 'Email is required' };
+  }
+
+  // Validate email format
+  if (!email.includes('@')) {
+    return { code: 0, data: 'Invalid email format' };
+  }
+
+  let authUserId: string;
 
   try {
-    signupData = await this.authService.createNewUser(arrData.personal.email).then((res)=>{
-      return { code: 1, data:res}
-    })
+    // Step 1: Create user in auth.users using admin API
+    console.log('Step 1: Creating auth user with email:', email);
+    authUserId = await this.createOrUpdateAuthUser(
+      email,
+      arrData.personal.firstName,
+      arrData.personal.lastName
+    );
+    console.log('✓ Auth user created, ID:', authUserId);
+
+    // Verify email was set
+    const { data: verifyData } = await this.getAuthUserById(authUserId);
+    if (!verifyData?.user?.email) {
+      console.warn('Email not set after creation, attempting fix...');
+      await this.fixMissingEmail(authUserId, email);
+    }
+
+    // Step 2: Send activation email
+    console.log('Step 2: Sending activation email...');
+    try {
+      await this.authService.resendConfirmation(email);
+      console.log('✓ Activation email sent');
+    } catch (emailError: any) {
+      console.warn('Activation email failed, trying password reset:', emailError);
+      try {
+        await this.sendPasswordResetLink(email);
+        console.log('✓ Password reset link sent as fallback');
+      } catch (resetError) {
+        console.warn('Password reset also failed:', resetError);
+        // Don't fail the whole process if email sending fails
+      }
+    }
+
+    // Step 3: Create/update user_profile with id_role = 3
+    console.log('Step 3: Creating user_profile...');
+    await this.createOrUpdateUserProfile(
+      authUserId,
+      {
+        fname: arrData.personal.firstName,
+        lname: arrData.personal.lastName,
+        email: email,
+        phone: arrData.personal.phone,
+        city: arrData.personal.city,
+        proviance: arrData.personal.province || arrData.personal.proviance,
+        country: arrData.personal.country
+      },
+      arrData.id_auth
+    );
+    console.log('✓ user_profile created/updated');
+
+    // Step 4: Create artist record
+    console.log('Step 4: Creating artist record...');
+    const id_artist = uuidv4();
+    const artistData = {
+      id_profile: authUserId, // Use auth user ID
+      fname: arrData.personal.firstName,
+      lname: arrData.personal.lastName,
+      teaser: arrData.personal.tagline,
+      short_bio: arrData.personal.shortBio,
+      long_bio: arrData.personal.longBio,
+      email: email,
+      phone: arrData.personal.phone,
+      website: arrData.personal.website,
+      city: arrData.personal.city,
+      country: arrData.personal.country,
+      photo: arrData.personal.profilePic,
+      created_by: arrData.id_auth
+    };
+
+    const artistResult = await this.createArtist(artistData);
+    
+    if (artistResult.code !== 1) {
+      return { code: 0, data: `Failed to create artist: ${artistResult.data}` };
+    }
+
+    // Update the artist ID for subsequent steps
+    this.setHostNewArtistID(artistResult.data.id || id_artist);
+
+    console.log('✓ Artist created successfully, ID:', artistResult.data.id || id_artist);
+    console.log('🎉 Artist creation completed successfully');
+
+    return { 
+      code: 1, 
+      data: {
+        id: artistResult.data.id || id_artist,
+        id_profile: authUserId,
+        email: email
+      }
+    };
+
   } catch (error: any) {
-    return { code: 0, data: error.message };
+    console.error('❌ Error in createSingleArtist_step01:', error);
+    return { code: 0, data: error.message || 'Failed to create artist' };
   }
-
-  console.log('Signup response:', signupData);
-
-  if (signupData.code !== 1) {
-    return signupData; // Stop if signup failed
-  }
-
-  console.log('Signup stage cleared', signupData);
-
-  // Step 2: Create profile
-  const idProfile = uuidv4();
-
-  const profileData = {
-    id: idProfile,
-    id_user: signupData.data.user.id, // From created Supabase user
-    id_role: 3,
-    first_name: arrData.personal.firstName,
-    last_name: arrData.personal.lastName,
-    email: arrData.personal.email, // fixed typo
-    phone: arrData.personal.phone,
-    city: arrData.personal.city,
-    // proviance: arrData.personal.province,
-    country: arrData.personal.country,
-    created_by: arrData.id_auth
-  };
-
-  console.log('Profile stage initiated', profileData);
-
-  const resCode = await this.createProfile(profileData);
-
-  if (resCode.code !== 1) {
-    return resCode; // Stop if profile creation failed
-  }
-
-  console.log('Profile stage cleared', resCode);
-  const id_artist = uuidv4();
-
-  // Step 3: Create artist
-  const artistData = {
-    //id: id_artist,
-    id_profile: profileData.id_user, // fixed to use profile ID only
-    fname: arrData.personal.firstName,
-    lname: arrData.personal.lastName,
-    teaser: arrData.personal.tagline,
-    short_bio: arrData.personal.shortBio,
-    long_bio: arrData.personal.longBio,
-    email: arrData.personal.email,
-    phone: arrData.personal.phone,
-    website: arrData.personal.website,
-    city: arrData.personal.city,
-    //proviance: arrData.personal.province,
-    country: arrData.personal.country,
-    photo: arrData.personal.profilePic,
-    created_by: arrData.id_auth
-  };
-
-  this.setHostNewArtistID(id_artist);
-
-  console.log('Artist stage initiated', artistData);
-
-  const artCode = await this.createArtist(artistData);
-
-  console.log('Artist stage cleared', artCode);
-
-  return artCode;
 }
 
 
@@ -623,17 +655,24 @@ try {
 
 async createArtist(arr:any){
 
- console.log('Artist Sage started', arr);
+ console.log('Artist stage started', arr);
   try {
     const { data, error } = await supabase
       .from('artists')
-      .insert(arr);
+      .insert(arr)
+      .select(); // Select to get the inserted record with ID
 
     if (error) {
+      console.error('Error creating artist:', error);
       return { code: 0, data: error.message };
     }
-    return { code: 1, data };
+    
+    // Return the first inserted record (should be only one)
+    const insertedRecord = Array.isArray(data) ? data[0] : data;
+    console.log('Artist created successfully:', insertedRecord);
+    return { code: 1, data: insertedRecord };
   } catch (err: any) {
+    console.error('Exception creating artist:', err);
     return { code: 0, data: err.message };
   }
 }
@@ -1255,15 +1294,542 @@ async editArtistTimeOff(arr:any, id:any){
   }
 
   /**
+   * Gets a user from Supabase auth.users by ID
+   * @param userId - The user ID
+   * Note: Uses service role key (supabase1) for admin privileges
+   */
+  async getAuthUserById(userId: string): Promise<any> {
+    const { data, error } = await supabase1.auth.admin.getUserById(userId);
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * Fixes missing email in auth.users and user_profile for existing users
+   * @param userId - The auth user ID
+   * @param email - The email to set
+   */
+  async fixMissingEmail(userId: string, email: string): Promise<void> {
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      console.log('🔧 Fixing missing email for user:', userId, 'email:', normalizedEmail);
+
+      // Step 1: Update auth.users with retry logic
+      let authUpdate: any = null;
+      let authError: any = null;
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        const result = await supabase1.auth.admin.updateUserById(userId, {
+          email: normalizedEmail,
+          email_confirm: false
+        });
+
+        authUpdate = result.data;
+        authError = result.error;
+
+        if (!authError && authUpdate?.user?.email) {
+          const updatedEmail = authUpdate.user.email.trim().toLowerCase();
+          if (updatedEmail === normalizedEmail) {
+            console.log('✓ Email updated in auth.users:', updatedEmail);
+            break;
+          }
+        }
+
+        retryCount++;
+        if (retryCount < maxRetries) {
+          console.warn(`Retry ${retryCount} for auth.users email update...`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      if (authError || !authUpdate?.user?.email) {
+        console.error('❌ Failed to update email in auth.users after', maxRetries, 'attempts');
+        throw new Error(`Failed to update email in auth.users: ${authError?.message || 'Email still empty after update'}`);
+      }
+
+      // Step 2: Update user_profile with retry logic
+      retryCount = 0;
+      let profileUpdate: any = null;
+      let profileError: any = null;
+
+      while (retryCount < maxRetries) {
+        const result = await supabase
+          .from('user_profile')
+          .update({ email: normalizedEmail })
+          .eq('id_user', userId)
+          .select()
+          .single();
+
+        profileUpdate = result.data;
+        profileError = result.error;
+
+        if (!profileError && profileUpdate?.email) {
+          const updatedEmail = profileUpdate.email.trim().toLowerCase();
+          if (updatedEmail === normalizedEmail) {
+            console.log('✓ Email updated in user_profile:', updatedEmail);
+            break;
+          }
+        }
+
+        retryCount++;
+        if (retryCount < maxRetries) {
+          console.warn(`Retry ${retryCount} for user_profile email update...`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      if (profileError) {
+        console.error('❌ Error updating email in user_profile:', profileError);
+        // Don't throw - auth.users update succeeded, but log the error
+        console.warn('⚠️ Email updated in auth.users but failed in user_profile. Manual fix may be needed.');
+      } else if (!profileUpdate?.email) {
+        console.warn('⚠️ user_profile update returned but email is still empty');
+      } else {
+        console.log('✓ Email successfully updated in both auth.users and user_profile');
+      }
+
+      // Final verification
+      const { data: finalAuthCheck } = await supabase1.auth.admin.getUserById(userId);
+      const { data: finalProfileCheck } = await supabase
+        .from('user_profile')
+        .select('email')
+        .eq('id_user', userId)
+        .single();
+
+      console.log('Final verification:', {
+        'auth.users.email': finalAuthCheck?.user?.email || 'MISSING',
+        'user_profile.email': finalProfileCheck?.email || 'MISSING'
+      });
+    } catch (error: any) {
+      console.error('❌ Error in fixMissingEmail:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Deletes a user from Supabase auth.users
    * @param userId - The user ID (from id_user or id_profile)
    * Note: Uses service role key (supabase1) for admin privileges
    */
   async deleteAuthUser(userId: string): Promise<any> {
-    // Using the service role client (supabase1) with admin privileges
+    // Using the service role client (supabase1) for admin privileges
     const { data, error } = await supabase1.auth.admin.deleteUser(userId);
     if (error) throw error;
     return data;
+  }
+
+  /**
+   * Creates or updates a user in auth.users and returns the user ID
+   * @param email - The email address
+   * @param firstName - First name
+   * @param lastName - Last name
+   * @returns The auth user ID
+   */
+  async createOrUpdateAuthUser(email: string, firstName?: string, lastName?: string): Promise<string> {
+    try {
+      console.log('Creating/updating auth user:', { email, firstName, lastName });
+
+      // Check if user with this email already exists
+      const { data: existingUsers, error: listError } = await supabase1.auth.admin.listUsers();
+      
+      if (listError) {
+        console.warn('Could not list users, proceeding with creation:', listError);
+      }
+
+      const existingUser = existingUsers?.users?.find((u: any) => u.email === email);
+
+      if (existingUser) {
+        console.log('User already exists in auth.users:', existingUser.id);
+        // Update email if different
+        if (existingUser.email !== email) {
+          const { data: updateData, error: updateError } = await supabase1.auth.admin.updateUserById(existingUser.id, {
+            email: email,
+            email_confirm: false
+          });
+          if (updateError) throw updateError;
+          console.log('Email updated for existing user');
+        }
+        return existingUser.id;
+      }
+
+      // Create new user in auth.users
+      // Note: email must be a valid email string
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        throw new Error('Invalid email address provided');
+      }
+
+      const normalizedEmail = email.trim().toLowerCase();
+      console.log('Creating auth user with email:', normalizedEmail);
+      
+      // Try creating user with email
+      let createData: any;
+      let createError: any;
+      
+      try {
+        const result = await supabase1.auth.admin.createUser({
+          email: normalizedEmail,
+          email_confirm: false,
+          user_metadata: {
+            first_name: firstName || '',
+            last_name: lastName || ''
+          }
+        });
+        createData = result.data;
+        createError = result.error;
+      } catch (err: any) {
+        createError = err;
+        console.error('Exception creating user:', err);
+      }
+
+      if (createError) {
+        console.error('Error creating auth user:', createError);
+        throw new Error(`Failed to create auth user: ${createError.message}`);
+      }
+
+      if (!createData?.user?.id) {
+        throw new Error('User created but no ID returned');
+      }
+
+      const createdUserId = createData.user.id;
+      console.log('New auth user created with ID:', createdUserId);
+      console.log('Initial created user data:', {
+        id: createData.user.id,
+        email: createData.user.email || 'MISSING',
+        email_confirmed_at: createData.user.email_confirmed_at
+      });
+      
+      // CRITICAL: Immediately update the email if it's missing
+      // Sometimes createUser doesn't set email correctly
+      if (!createData.user.email || createData.user.email.trim() === '') {
+        console.warn('Email is missing after creation! Attempting immediate fix...');
+        const { data: immediateFix, error: immediateError } = await supabase1.auth.admin.updateUserById(createdUserId, {
+          email: normalizedEmail,
+          email_confirm: false
+        });
+        
+        if (immediateError) {
+          console.error('Immediate email fix failed:', immediateError);
+          throw new Error(`User created but email not set and fix failed: ${immediateError.message}`);
+        }
+        
+        if (!immediateFix?.user?.email) {
+          throw new Error('Email update returned but email is still empty');
+        }
+        
+        console.log('Email fixed immediately after creation:', immediateFix.user.email);
+        createData.user.email = immediateFix.user.email; // Update local reference
+      }
+
+      // Final verification - fetch user again to ensure email is set
+      let retryCount = 0;
+      const maxRetries = 3;
+      let emailSet = false;
+      
+      while (retryCount < maxRetries && !emailSet) {
+        const { data: verifyData, error: verifyError } = await supabase1.auth.admin.getUserById(createdUserId);
+        
+        if (verifyError) {
+          console.warn(`Verification attempt ${retryCount + 1} failed:`, verifyError);
+          retryCount++;
+          if (retryCount < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+            continue;
+          }
+          break;
+        }
+        
+        const verifiedEmail = verifyData.user.email?.trim().toLowerCase() || '';
+        
+        if (verifiedEmail === normalizedEmail) {
+          console.log('✓ Email verified successfully:', verifiedEmail);
+          emailSet = true;
+          break;
+        }
+        
+        console.warn(`Verification attempt ${retryCount + 1}: Email mismatch. Expected: ${normalizedEmail}, Got: ${verifiedEmail}`);
+        
+        // Try to fix it
+        const { data: fixData, error: fixError } = await supabase1.auth.admin.updateUserById(createdUserId, {
+          email: normalizedEmail,
+          email_confirm: false
+        });
+        
+        if (fixError) {
+          console.error(`Fix attempt ${retryCount + 1} failed:`, fixError);
+        } else if (fixData?.user?.email) {
+          console.log(`Fix attempt ${retryCount + 1} succeeded:`, fixData.user.email);
+          if (fixData.user.email.trim().toLowerCase() === normalizedEmail) {
+            emailSet = true;
+            break;
+          }
+        }
+        
+        retryCount++;
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 500)); // Wait before next retry
+        }
+      }
+      
+      if (!emailSet) {
+        throw new Error(`Failed to set email after ${maxRetries} attempts. User ID: ${createdUserId}, Expected email: ${normalizedEmail}`);
+      }
+
+      return createdUserId;
+    } catch (error: any) {
+      console.error('Error in createOrUpdateAuthUser:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Creates or updates user_profile record
+   * @param userId - The auth user ID
+   * @param artistData - Artist data
+   * @param loggedUser - Logged in user ID
+   * @returns The user_profile record
+   */
+  async createOrUpdateUserProfile(userId: string, artistData: any, loggedUser: string): Promise<any> {
+    try {
+      console.log('Creating/updating user_profile:', { userId, artistData });
+
+      // Check if user_profile already exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('user_profile')
+        .select('*')
+        .eq('id_user', userId)
+        .single();
+
+      // Ensure email is properly extracted and normalized
+      let email = artistData.email?.trim() || '';
+      
+      // ALWAYS fetch email from auth.users to ensure we have the correct one
+      try {
+        const { data: authUser, error: authError } = await supabase1.auth.admin.getUserById(userId);
+        if (!authError && authUser?.user?.email) {
+          const authEmail = authUser.user.email.trim().toLowerCase();
+          if (authEmail) {
+            email = authEmail;
+            console.log('Using email from auth.users:', email);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch email from auth.users:', e);
+      }
+      
+      // If still no email, use the one from artistData
+      if (!email && artistData.email) {
+        email = artistData.email.trim().toLowerCase();
+        console.log('Using email from artistData:', email);
+      }
+      
+      if (!email) {
+        throw new Error('Email is required for user_profile. Please ensure email is set in auth.users or artist profile.');
+      }
+
+      email = email.toLowerCase(); // Normalize email
+      console.log('Creating/updating user_profile with email:', email);
+
+      const profileData: any = {
+        id_user: userId,
+        id_role: 3, // Artist role
+        first_name: artistData.fname || artistData.first_name || '',
+        last_name: artistData.lname || artistData.last_name || '',
+        email: email, // Ensure email is set
+        phone: artistData.phone || null,
+        city: artistData.city || null,
+        proviance: artistData.proviance || artistData.province || null,
+        country: artistData.country || null,
+        updated_by: loggedUser,
+        last_update: new Date().toISOString()
+      };
+
+      if (fetchError && fetchError.code === 'PGRST116') {
+        // No existing profile, create new one
+        profileData.created_by = loggedUser;
+        const { data: insertData, error: insertError } = await supabase
+          .from('user_profile')
+          .insert(profileData)
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating user_profile:', insertError);
+          throw new Error(`Failed to create user_profile: ${insertError.message}`);
+        }
+
+        console.log('New user_profile created:', insertData);
+        console.log('user_profile email verification:', insertData?.email);
+        
+        // Verify email was stored
+        if (!insertData?.email || insertData.email !== email) {
+          console.error('Email not stored correctly in user_profile!', {
+            expected: email,
+            got: insertData?.email
+          });
+          // Try to update it
+          const { data: fixData, error: fixError } = await supabase
+            .from('user_profile')
+            .update({ email: email })
+            .eq('id_user', userId)
+            .select()
+            .single();
+          
+          if (fixError) {
+            console.error('Failed to fix email in user_profile:', fixError);
+          } else {
+            console.log('Email fixed in user_profile:', fixData?.email);
+            return fixData;
+          }
+        }
+        
+        return insertData;
+      } else if (existingProfile) {
+        // Update existing profile
+        const { data: updateData, error: updateError } = await supabase
+          .from('user_profile')
+          .update(profileData)
+          .eq('id_user', userId)
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error('Error updating user_profile:', updateError);
+          throw new Error(`Failed to update user_profile: ${updateError.message}`);
+        }
+
+        console.log('user_profile updated:', updateData);
+        console.log('user_profile email verification:', updateData?.email);
+        
+        // Verify email was stored
+        if (!updateData?.email || updateData.email !== email) {
+          console.error('Email not stored correctly in user_profile update!', {
+            expected: email,
+            got: updateData?.email
+          });
+          // Try to update it again
+          const { data: fixData, error: fixError } = await supabase
+            .from('user_profile')
+            .update({ email: email })
+            .eq('id_user', userId)
+            .select()
+            .single();
+          
+          if (fixError) {
+            console.error('Failed to fix email in user_profile:', fixError);
+          } else {
+            console.log('Email fixed in user_profile:', fixData?.email);
+            return fixData;
+          }
+        }
+        
+        return updateData;
+      } else {
+        throw new Error('Unexpected error checking user_profile');
+      }
+    } catch (error: any) {
+      console.error('Error in createOrUpdateUserProfile:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates a user's email in Supabase auth.users and sends confirmation
+   * @param userId - The user ID (from id_user or id_profile)
+   * @param newEmail - The new email address
+   * Note: Uses service role key (supabase1) for admin privileges
+   */
+  async updateAuthUserEmail(userId: string, newEmail: string): Promise<any> {
+    try {
+      console.log('Updating auth user email:', { userId, newEmail, userIdType: typeof userId });
+      
+      // Validate userId format (should be UUID)
+      if (!userId || typeof userId !== 'string') {
+        throw new Error('Invalid user ID provided');
+      }
+
+      // Step 1: Verify user exists (optional check, but helpful for debugging)
+      try {
+        const { data: userData, error: getUserError } = await supabase1.auth.admin.getUserById(userId);
+        if (getUserError) {
+          console.warn('Could not fetch user before update (may not exist):', getUserError);
+        } else {
+          console.log('User found before update:', {
+            id: userData.user?.id,
+            email: userData.user?.email,
+            email_confirmed_at: userData.user?.email_confirmed_at
+          });
+        }
+      } catch (checkError) {
+        console.warn('User check failed (continuing anyway):', checkError);
+      }
+      
+      // Step 2: Update the email in auth.users with email_confirm: false
+      // This marks the email as unconfirmed
+      const { data: updateData, error: updateError } = await supabase1.auth.admin.updateUserById(userId, {
+        email: newEmail,
+        email_confirm: false  // Mark as unconfirmed to trigger confirmation
+      });
+      
+      if (updateError) {
+        console.error('Error updating auth user email:', updateError);
+        console.error('Error details:', {
+          message: updateError.message,
+          status: updateError.status,
+          name: updateError.name
+        });
+        throw new Error(`Failed to update auth user email: ${updateError.message}`);
+      }
+      
+      if (!updateData || !updateData.user) {
+        throw new Error('Update succeeded but no user data returned');
+      }
+      
+      console.log('Auth user email updated successfully:', updateData);
+      console.log('Updated user data:', {
+        id: updateData.user.id,
+        email: updateData.user.email,
+        email_confirmed_at: updateData.user.email_confirmed_at,
+        created_at: updateData.user.created_at
+      });
+
+      // Verify the update worked
+      if (updateData.user.email !== newEmail) {
+        console.warn('Email mismatch! Expected:', newEmail, 'Got:', updateData.user.email);
+      } else {
+        console.log('✓ Email successfully updated in auth.users');
+      }
+
+      // Step 2: Use admin API to generate an invitation link
+      // This creates a link that can be used for account activation
+      const redirectTo = `${window.location.origin}/confirm-artist`;
+      
+      try {
+        // Generate an invitation link (best option for existing users with email change)
+        const { data: inviteData, error: inviteError } = await supabase1.auth.admin.generateLink({
+          type: 'invite',
+          email: newEmail,
+          options: {
+            redirectTo: redirectTo
+          }
+        });
+
+        if (inviteError) {
+          console.warn('Invite link generation failed:', inviteError);
+          // Don't throw - email update succeeded, we'll use password reset as fallback
+        } else {
+          console.log('Invite link generated:', inviteData.properties?.action_link);
+        }
+      } catch (linkGenError) {
+        console.warn('Link generation error (non-critical):', linkGenError);
+      }
+
+      return updateData;
+    } catch (error: any) {
+      console.error('Error in updateAuthUserEmail:', error);
+      throw error;
+    }
   }
     
   // Send signup email to new artist

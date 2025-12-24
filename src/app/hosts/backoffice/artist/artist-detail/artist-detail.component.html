@@ -83,7 +83,16 @@
         
         <div class="mb-4">
           <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Email</label>
-          <div class="mt-1 text-gray-900">{{ artistProfile.email || "N/A" }}</div>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.email || "No email set" }}</div>
+          <div *ngIf="!updateDetailBtn" class="space-y-2">
+            <input type="email" [(ngModel)]="artistProfile.email"
+              class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter email address" />
+            <p class="text-xs text-gray-500 italic">
+              <i class="fas fa-info-circle mr-1"></i>
+              Changing email will send a reactivation link to the new address
+            </p>
+          </div>
         </div>
         
         <div class="mb-4">
@@ -987,17 +996,34 @@
 
        <div class="mt-6 mb-6">
          <h2 class="text-lg font-semibold text-gray-900 mb-3">Resend Activation</h2>
-        <button (click)="activationemail()" class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
-          Send Activation Link
+         <p class="text-sm text-gray-600 mb-3">
+           <span *ngIf="isEmailAuthenticated" class="inline-flex items-center gap-2 text-green-600">
+             <i class="fas fa-check-circle"></i>
+             Email is authenticated
+           </span>
+           <span *ngIf="!isEmailAuthenticated" class="inline-flex items-center gap-2 text-orange-600">
+             <i class="fas fa-exclamation-circle"></i>
+             Email is not authenticated
+           </span>
+         </p>
+        <button 
+          (click)="activationemail()" 
+          [disabled]="isEmailAuthenticated || !artistProfile?.email"
+          class="px-4 py-2 rounded-lg text-white transition-colors"
+          [ngClass]="isEmailAuthenticated || !artistProfile?.email 
+            ? 'bg-gray-400 cursor-not-allowed' 
+            : 'bg-pont-green hover:bg-pont-green/90'">
+          <span *ngIf="isEmailAuthenticated">Email Already Authenticated</span>
+          <span *ngIf="!isEmailAuthenticated">Send Activation Link</span>
         </button>
       </div>
-
+<!-- 
       <div class="mt-6">
          <h2 class="text-lg font-semibold text-gray-900 mb-3">Magic Link</h2>
         <button (click)="magicLink()" class="px-4 py-2 rounded-lg bg-pont-green text-white hover:bg-pont-green/90">
           Send Activation Link
         </button>
-      </div>
+      </div> -->
 
 
     </div>

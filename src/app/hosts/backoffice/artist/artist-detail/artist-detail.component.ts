@@ -84,6 +84,8 @@ export class ArtistDetailComponent implements OnInit {
   updateAwardBtn:boolean = true;
   // Profile image upload state
   isUploadingProfile: boolean = false;
+  // Email authentication status
+  isEmailAuthenticated: boolean = false;
   performance_type:any = [];
   media_video:any = [];
   media_cd:any = [];
@@ -144,6 +146,9 @@ export class ArtistDetailComponent implements OnInit {
         this.media = profile?.media || [];
         this.media_video = this.media.filter((item: { id_media: any; }) => item.id_media !== 2);
         this.media_cd = this.media.filter((item: { id_media: any; }) => item.id_media !== 1);
+
+        // Check email authentication status
+        await this.checkEmailAuthenticationStatus();
 
 
 
@@ -448,12 +453,23 @@ export class ArtistDetailComponent implements OnInit {
   /**
    * Updates artist profile details
    */
-  updateDetail(): void {
+  async updateDetail(): Promise<void> {
+    // Store original email for comparison
+    const originalEmail = this.artistProfile.email;
+    const newEmail = this.artistProfile.email?.trim() || '';
+
+    // Validate email if provided
+    if (newEmail && !this.isValidEmail(newEmail)) {
+      this.alertService.showAlert('Validation Error', 'Please enter a valid email address', 'error');
+      return;
+    }
+
     // Prepare detail update payload
     let arr = {
       fname: this.artistProfile.fname,
       lname: this.artistProfile.lname,
       phone: this.artistProfile.phone,
+      email: newEmail,
       teaser: this.artistProfile.tagline,
       website: this.artistProfile.website,
       city: this.artistProfile.city,
@@ -467,16 +483,154 @@ export class ArtistDetailComponent implements OnInit {
     };
 
     try {
-      // Call service to update artist details
-      this.artistService.updateArtistDetail(arr, this.artistID).then(() => {
-        // Show success alert
-        this.alertService.showAlert('Successful', 'Artist profile is updated', 'success');
-        this.updateDetailBtn = true; // Exit edit mode
+      // Update artist details in database
+      await this.artistService.updateArtistDetail(arr, this.artistID);
+
+      // Check if email was changed/added
+      const existingUserId = this.artistProfile.id_user || this.artistProfile.id_profile;
+      const emailChanged = originalEmail !== newEmail;
+      const emailAdded = (!originalEmail || originalEmail.trim() === '') && newEmail && newEmail.trim() !== '';
+
+      console.log('Email update check:', {
+        existingUserId,
+        originalEmail,
+        newEmail,
+        emailChanged,
+        emailAdded,
+        artistProfile: this.artistProfile
       });
+
+      if ((emailChanged || emailAdded) && newEmail) {
+        try {
+          let authUserId: string;
+
+          if (existingUserId) {
+            // User exists, check if email is missing and fix it
+            console.log('Checking existing auth user:', existingUserId);
+            const { data: existingUserData, error: getUserError } = await this.artistService.getAuthUserById(existingUserId);
+            
+            if (getUserError) {
+              console.error('Error fetching existing user:', getUserError);
+              throw new Error(`Failed to fetch existing user: ${getUserError.message}`);
+            }
+
+            const existingEmail = existingUserData?.user?.email?.trim() || '';
+            const normalizedNewEmail = newEmail.trim().toLowerCase();
+
+            if (!existingEmail || existingEmail.toLowerCase() !== normalizedNewEmail) {
+              // Email is missing or different, update it
+              console.log('Updating existing auth user email. Current:', existingEmail, 'New:', normalizedNewEmail);
+              const updateResult = await this.artistService.updateAuthUserEmail(existingUserId, normalizedNewEmail);
+              authUserId = updateResult.user.id;
+              
+              // Verify email was set
+              const { data: verifyData } = await this.artistService.getAuthUserById(authUserId);
+              if (!verifyData?.user?.email || verifyData.user.email.trim().toLowerCase() !== normalizedNewEmail) {
+                // Email still missing, try to fix it
+                console.warn('Email not set correctly after update, attempting fix...');
+                await this.artistService.fixMissingEmail(authUserId, normalizedNewEmail);
+              }
+              
+              console.log('Auth email updated, userId:', authUserId);
+            } else {
+              authUserId = existingUserId;
+              console.log('Email already set correctly in auth.users');
+            }
+          } else {
+            // No user exists, create new one
+            console.log('Creating new auth user for email:', newEmail);
+            authUserId = await this.artistService.createOrUpdateAuthUser(
+              newEmail,
+              this.artistProfile.fname,
+              this.artistProfile.lname
+            );
+            console.log('New auth user created, userId:', authUserId);
+            
+            // Verify email was set
+            const { data: verifyData } = await this.artistService.getAuthUserById(authUserId);
+            if (!verifyData?.user?.email) {
+              // Email missing, try to fix it
+              console.warn('Email not set after creation, attempting fix...');
+              await this.artistService.fixMissingEmail(authUserId, newEmail);
+            }
+          }
+
+          // Step 2: Create or update user_profile with id_role = 3
+          console.log('Creating/updating user_profile...');
+          await this.artistService.createOrUpdateUserProfile(
+            authUserId,
+            {
+              fname: this.artistProfile.fname,
+              lname: this.artistProfile.lname,
+              email: newEmail,
+              phone: this.artistProfile.phone,
+              city: this.artistProfile.city,
+              proviance: this.artistProfile.proviance,
+              country: this.artistProfile.country
+            },
+            this.loggedUser
+          );
+
+          // Step 3: Update artists.id_profile with auth user ID
+          console.log('Updating artists.id_profile...');
+          await this.artistService.updateArtistDetail(
+            { id_profile: authUserId, updated_by: this.loggedUser },
+            this.artistID
+          );
+
+          // Step 4: Send activation email
+          try {
+            await this.authService.resendConfirmation(newEmail);
+            console.log('Activation email sent via resendConfirmation');
+          } catch (resendError: any) {
+            console.warn('Resend confirmation failed, trying password reset:', resendError);
+            try {
+              await this.artistService.sendPasswordResetLink(newEmail);
+              console.log('Password reset link sent as fallback');
+            } catch (resetError: any) {
+              console.warn('Password reset also failed:', resetError);
+            }
+          }
+
+          // Refresh profile to get updated data
+          await this.ngOnInit();
+          
+          // Refresh email authentication status
+          await this.checkEmailAuthenticationStatus();
+
+          this.alertService.showAlert(
+            'Success',
+            `Artist profile updated. Auth account created/updated. Activation email sent to ${newEmail}. The artist can use this link to activate their account and set a password.`,
+            'success'
+          );
+        } catch (authError: any) {
+          console.error('Error in email/auth flow:', authError);
+          this.alertService.showAlert(
+            'Partial Success',
+            `Profile updated, but failed to complete authentication setup: ${authError.message || 'Unknown error'}. Please try again or contact support.`,
+            'warning'
+          );
+        }
+      } else {
+        // No email change or no email provided
+        this.alertService.showAlert('Successful', 'Artist profile is updated', 'success');
+      }
+
+      this.updateDetailBtn = true; // Exit edit mode
     } catch (error: any) {
       // Show error alert
       this.alertService.showAlert('Internal Error', error.message, 'error');
     }
+  }
+
+  /**
+   * Validates email format
+   * @param email - Email string to validate
+   * @returns boolean indicating if email is valid
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 
   // Change profile picture handler
@@ -998,17 +1152,60 @@ sendPasswordReset(){
   
 }
 
-activationemail(){
-  try{
-this.authService.resendConfirmation(this.artistProfile.email).then(()=>{
-  this.alertService.showAlert('Email Sent', 'Activation email has send', 'success');
-})
-  }catch(error:any){
-          this.alertService.showAlert('Internal Error', error.message, 'error');
-  }
-  
+  /**
+   * Checks if the artist's email is authenticated
+   */
+  async checkEmailAuthenticationStatus(): Promise<void> {
+    try {
+      const userId = this.artistProfile?.id_user || this.artistProfile?.id_profile;
+      if (!userId || !this.artistProfile?.email) {
+        this.isEmailAuthenticated = false;
+        return;
+      }
 
-}
+      // Get user from auth.users to check email_confirmed_at
+      const { data: userData, error } = await this.artistService.getAuthUserById(userId);
+      
+      if (error || !userData) {
+        console.warn('Could not check email authentication status:', error);
+        this.isEmailAuthenticated = false;
+        return;
+      }
+
+      // Email is authenticated if email_confirmed_at is not null
+      this.isEmailAuthenticated = !!userData.user?.email_confirmed_at;
+      console.log('Email authentication status:', {
+        email: userData.user?.email,
+        isAuthenticated: this.isEmailAuthenticated,
+        confirmedAt: userData.user?.email_confirmed_at
+      });
+    } catch (error: any) {
+      console.error('Error checking email authentication:', error);
+      this.isEmailAuthenticated = false;
+    }
+  }
+
+  /**
+   * Sends reactivation email to the artist
+   */
+  async activationemail(): Promise<void> {
+    if (!this.artistProfile?.email) {
+      this.alertService.showAlert('Error', 'No email address found for this artist', 'error');
+      return;
+    }
+
+    if (this.isEmailAuthenticated) {
+      this.alertService.showAlert('Info', 'Email is already authenticated. No reactivation needed.', 'info');
+      return;
+    }
+
+    try {
+      await this.authService.resendConfirmation(this.artistProfile.email);
+      this.alertService.showAlert('Email Sent', 'Activation email has been sent', 'success');
+    } catch (error: any) {
+      this.alertService.showAlert('Internal Error', error.message, 'error');
+    }
+  }
 
 magicLink(){
     try{

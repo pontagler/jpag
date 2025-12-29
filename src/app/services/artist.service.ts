@@ -735,15 +735,167 @@ async updateArtistStatus(arr:any, id_artist:any){
 
 // Ipdate artist Detail
 
-async updateArtistDetail(arr:any, id_artist:any){
+// async updateArtistDetail(arr:any, id_artist:any){
 
-const {data, error} = await supabase.from('artists').update(arr)
-  .eq('id', id_artist)
+// const {data, error} = await supabase.from('artists').update(arr)
+//   .eq('id', id_artist)
     
-    if(error) throw error
+// // add supabase function to update artist email 
+
+//     if(error) throw error
+//     return data;
+
+    
+  
+// }
+
+async updateArtistDetail(arr: any, id_artist: any) {
+  // If email is included in the update payload, check and create user_profile if needed
+  if (arr.email !== undefined && arr.email !== null) {
+    // Step 1: Get the artist record to check id_profile
+    const { data: artistData, error: fetchError } = await supabase
+      .from('artists')
+      .select('id_profile, fname, lname, phone, city, country')
+      .eq('id', id_artist)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    let authUserId: string | null = artistData?.id_profile || null;
+    let needsUserProfile = false;
+
+    // Step 2: Check if user_profile exists with this id_user
+    if (authUserId) {
+      const { data: existingProfile, error: profileCheckError } = await supabase
+        .from('user_profile')
+        .select('id_user')
+        .eq('id_user', authUserId)
+        .single();
+
+      // If profile doesn't exist, we need to create user_profile (but reuse authUserId)
+      if (profileCheckError && profileCheckError.code === 'PGRST116') {
+        console.log('user_profile not found for id_user:', authUserId);
+        needsUserProfile = true; // Need to create user_profile, but auth user exists
+      } else if (profileCheckError) {
+        // Some other error occurred
+        console.warn('Error checking user_profile:', profileCheckError);
+      }
+    }
+
+    // Step 3: If no authUserId or no user_profile exists, create them
+    if (!authUserId) {
+      console.log('Creating new auth user and user_profile for artist:', id_artist);
+      
+      // Get artist data for creating user_profile
+      const email = arr.email.trim().toLowerCase();
+      const firstName = artistData?.fname || arr.fname || '';
+      const lastName = artistData?.lname || arr.lname || '';
+
+      // Create auth user
+      authUserId = await this.createOrUpdateAuthUser(email, firstName, lastName);
+      console.log('Auth user created with ID:', authUserId);
+
+      // Create user_profile
+      // Get logged user ID if available (you may need to pass this as parameter)
+      // For now, using a default or getting from current session
+      let loggedUser: string | null = null;
+      try {
+        const currentUser = await this.authService.getCurrentUser();
+        loggedUser = currentUser?.id || null;
+      } catch (e) {
+        console.warn('Could not get current user for created_by:', e);
+      }
+
+      await this.createOrUpdateUserProfile(
+        authUserId,
+        {
+          fname: firstName,
+          lname: lastName,
+          email: email,
+          phone: artistData?.phone || arr.phone || null,
+          city: artistData?.city || arr.city || null,
+          country: artistData?.country || arr.country || null
+        },
+        loggedUser || authUserId // Use authUserId as fallback
+      );
+      console.log('user_profile created');
+
+      // Update artist's id_profile to link to the new auth user
+      const { error: updateProfileError } = await supabase
+        .from('artists')
+        .update({ id_profile: authUserId })
+        .eq('id', id_artist);
+
+      if (updateProfileError) {
+        console.warn('Failed to update artist id_profile:', updateProfileError);
+        // Don't throw - continue with email update
+      }
+    } else if (needsUserProfile && authUserId) {
+      // Auth user exists but user_profile doesn't - create user_profile only
+      console.log('Creating user_profile for existing auth user:', authUserId);
+      
+      const email = arr.email.trim().toLowerCase();
+      const firstName = artistData?.fname || arr.fname || '';
+      const lastName = artistData?.lname || arr.lname || '';
+
+      // Get logged user ID if available
+      let loggedUser: string | null = null;
+      try {
+        const currentUser = await this.authService.getCurrentUser();
+        loggedUser = currentUser?.id || null;
+      } catch (e) {
+        console.warn('Could not get current user for created_by:', e);
+      }
+
+      await this.createOrUpdateUserProfile(
+        authUserId,
+        {
+          fname: firstName,
+          lname: lastName,
+          email: email,
+          phone: artistData?.phone || arr.phone || null,
+          city: artistData?.city || arr.city || null,
+          country: artistData?.country || arr.country || null
+        },
+        loggedUser || authUserId // Use authUserId as fallback
+      );
+      console.log('user_profile created for existing auth user');
+    }
+
+    // Step 4: Now update the artists table with the provided data
+    const { data, error } = await supabase
+      .from('artists')
+      .update(arr)
+      .eq('id', id_artist);
+
+    if (error) throw error;
+
+    // Step 5: Call fx_update_email to sync email to user_profile and auth.users
+    const { error: emailError } = await supabase
+      .rpc('fx_update_email', {
+        p_email: arr.email,
+        p_id_artists: id_artist,
+      });
+
+    if (emailError) {
+      // Optional: Log or handle email sync failure separately
+      console.warn('Email sync to user_profile/auth.users failed:', emailError);
+      // Decide: throw emailError? Or let artist update succeed but flag inconsistency?
+      // For strict consistency, uncomment:
+      // throw emailError;
+    }
+
     return data;
-  
-  
+  } else {
+    // No email update, just update the artists table
+    const { data, error } = await supabase
+      .from('artists')
+      .update(arr)
+      .eq('id', id_artist);
+
+    if (error) throw error;
+    return data;
+  }
 }
 
 async updateVideoMedia(

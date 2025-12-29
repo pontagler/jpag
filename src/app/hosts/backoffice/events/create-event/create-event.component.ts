@@ -385,7 +385,7 @@ loggedUser:any;
     if (this.step === 1) {
       this.showAnILoader = true;
       // Validate Details (exclude dates/shows)
-      const controlsToCheck = ['id_edition','id_event_type','title','description','status'];
+      const controlsToCheck = ['id_edition','id_event_type','title'];
       let valid = true;
       for (const key of controlsToCheck) {
         const c = this.detailsForm.get(key);

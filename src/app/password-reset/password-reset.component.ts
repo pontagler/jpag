@@ -29,10 +29,10 @@ export class PasswordResetComponent  implements OnInit{
      this.token = this.route.snapshot.queryParamMap.get('token') || '';
     
     // If no token, this might be a direct access to reset page
-    if (!this.token) {
-      this.showError = true;
-      this.errorMessage = 'Invalid reset link. Please request a new one.';
-    }
+    // if (!this.token) {
+    //   this.showError = true;
+    //   this.errorMessage = 'Invalid reset link. Please request a new one.';
+    // }
 
   }
   newPassword: string = '';

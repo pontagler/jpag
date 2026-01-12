@@ -134,7 +134,7 @@
           {{ artistProfile.short_bio | titlecase }}
         </p>
 
-        <textarea *ngIf="shortBio" maxlength="100" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
+        <textarea *ngIf="shortBio" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
           [(ngModel)]="artistProfile.short_bio"></textarea>
       </div>
     </div>
@@ -185,7 +185,7 @@
         {{ artistProfile.long_bio | titlecase }}
       </p>
 
-       <textarea *ngIf="longBio" maxlength="500" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
+       <textarea *ngIf="longBio" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"
           [(ngModel)]="artistProfile.long_bio"></textarea>
 
     </div>

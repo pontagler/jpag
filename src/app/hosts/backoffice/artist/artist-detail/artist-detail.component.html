@@ -106,8 +106,8 @@
       <div class="bg-gray-50 p-5 rounded-lg">
         <div class="mb-4">
           <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Teaser</label>
-          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.tagline || "N/A" }}</div>
-          <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.tagline"
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.teaser || "N/A" }}</div>
+          <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.teaser"
             class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
         
@@ -122,7 +122,7 @@
         
         <div class="mb-4">
           <label class="text-xs font-medium text-gray-600 uppercase tracking-wide">Address</label>
-          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.proviance || "N/A" }}</div>
+          <div *ngIf="updateDetailBtn" class="mt-1 text-gray-900 font-medium">{{ artistProfile.address || "N/A" }}</div>
           <input *ngIf="!updateDetailBtn" type="text" [(ngModel)]="artistProfile.address" class="w-full mt-1 px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
         </div>
 

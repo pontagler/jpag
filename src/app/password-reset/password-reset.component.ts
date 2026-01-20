@@ -76,7 +76,7 @@ export class PasswordResetComponent  implements OnInit{
   }
 
   navigateToLogin() {
-    this.router.navigate(['artistspace/login']);
+    this.router.navigate(['artistspace']);
   }
 
 

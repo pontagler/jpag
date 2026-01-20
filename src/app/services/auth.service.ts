@@ -137,7 +137,7 @@ export class AuthService {
    * The redirect returns the user to the login page where recovery is handled.
    */
   async requestPasswordReset(email: string) {
-    const redirectTo = `${window.location.origin}/artistspace/login`;
+    const redirectTo = `${window.location.origin}/reset`;
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo
     });
@@ -146,7 +146,7 @@ export class AuthService {
     return data;
   }
 
-  /**
+  /**git add
    * Creates a new user account via email and optional password.
    * Sends confirmation email to the provided address.
    */

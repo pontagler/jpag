@@ -37,13 +37,27 @@ import { SignInAnonymouslyCredentials } from '@supabase/supabase-js';
 export class ArtistCreateComponent implements OnInit {
   // Current step in the multi-step form (0 = personal, 1 = portfolio, 2 = achievements)
   stepIndex: number = 0;
+  
+  // Flag to track if step 1 (Personal Details) has been successfully completed
+  step1Completed: boolean = false;
+  
   next1(){
-  this.stepIndex = 2;
-}
+    // Only allow navigation if step 1 is completed
+    if (this.step1Completed) {
+      this.stepIndex = 2;
+    } else {
+      this.alertService.showAlert('Validation Required', 'Please complete Step 1 (Personal Details) first', 'warning');
+    }
+  }
 
-next2(){
-  this.stepIndex = 3;
-}
+  next2(){
+    // Only allow navigation if step 1 is completed
+    if (this.step1Completed) {
+      this.stepIndex = 3;
+    } else {
+      this.alertService.showAlert('Validation Required', 'Please complete Step 1 (Personal Details) first', 'warning');
+    }
+  }
 
   // Main reactive form controlling the entire artist creation process
   form: FormGroup;
@@ -255,9 +269,22 @@ next2(){
 
   // --- Stepper Navigation Methods ---
 
-  next(): void {
-    this.setp1();
-    if (this.stepIndex < 3) this.stepIndex += 1;
+  async next(): Promise<void> {
+    // Only validate and proceed if we're on step 0 (Personal Details)
+    if (this.stepIndex === 0) {
+      const success = await this.setp1();
+      if (!success) {
+        return; // Don't proceed if validation fails
+      }
+      // step1Completed is set to true inside setp1() if successful
+    }
+    // Only allow navigation forward if step 1 is completed
+    if (this.step1Completed && this.stepIndex < 3) {
+      this.stepIndex += 1;
+    } else if (!this.step1Completed && this.stepIndex === 0) {
+      // This shouldn't happen, but as a safety check
+      this.alertService.showAlert('Validation Required', 'Please complete Step 1 (Personal Details) first', 'warning');
+    }
   }
 
   back(): void {
@@ -358,19 +385,41 @@ next2(){
   aLastName:any;
   aEmail:any;
   
-  async setp1(): Promise<void> {
+  async setp1(): Promise<boolean> {
     // Validate email is provided
     const email = this.form.value['personal']?.email?.trim();
     if (!email) {
       this.alertService.showAlert('Validation Error', 'Email is required', 'error');
-      return;
+      return false;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       this.alertService.showAlert('Validation Error', 'Please enter a valid email address', 'error');
-      return;
+      return false;
+    }
+
+    // Check if email already exists
+    try {
+      const emailCheck = await this.artistService.checkEmailExists(email);
+      if (emailCheck.exists) {
+        const artistName = emailCheck.artistName || 'another artist';
+        this.alertService.showAlert(
+          'Email Already Exists', 
+          `This email is already being used by ${artistName}. Please use a different email address.`, 
+          'error'
+        );
+        return false;
+      }
+    } catch (error: any) {
+      console.error('Error checking email uniqueness:', error);
+      this.alertService.showAlert(
+        'Validation Error', 
+        'Unable to verify email uniqueness. Please try again.', 
+        'error'
+      );
+      return false;
     }
 
     this.form.addControl('id_auth', new FormControl(this.loggedUser));
@@ -391,6 +440,7 @@ next2(){
           'Artist profile created. Activation email sent to the artist.', 
           'success'
         );
+        return true;
       } else {
         console.error('Artist creation failed:', result.data);
         this.alertService.showAlert(
@@ -398,6 +448,7 @@ next2(){
           result.data || 'Failed to create artist profile', 
           'error'
         );
+        return false;
       }
     } catch (error: any) {
       console.error('Error in setp1:', error);
@@ -406,6 +457,7 @@ next2(){
         error.message || 'Failed to create artist', 
         'error'
       );
+      return false;
     }
   }
 

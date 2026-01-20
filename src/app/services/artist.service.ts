@@ -684,6 +684,34 @@ async getAllArtists(){
   return data;
 }
 
+//Check if email already exists in artists table
+async checkEmailExists(email: string): Promise<{ exists: boolean; artistName?: string }> {
+  try {
+    const normalizedEmail = email.trim().toLowerCase();
+    // Query artists table for existing email (case-insensitive by normalizing to lowercase)
+    const { data, error } = await supabase
+      .from('artists')
+      .select('fname, lname')
+      .eq('email', normalizedEmail)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error checking email:', error);
+      throw error;
+    }
+    
+    if (data) {
+      const artistName = `${data.fname || ''} ${data.lname || ''}`.trim();
+      return { exists: true, artistName: artistName || 'Unknown Artist' };
+    }
+    
+    return { exists: false };
+  } catch (err: any) {
+    console.error('Error in checkEmailExists:', err);
+    throw err;
+  }
+}
+
 //Get all the artists instruments
 async getArtistInstruments(arr:any){
   const {data, error} = await supabase.from('vw_artist_instruments')
@@ -1991,7 +2019,7 @@ async editArtistTimeOff(arr:any, id:any){
       const { data, error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/artist/signup`,
+          emailRedirectTo: `${window.location.origin}/confirm-artist`,
           data: {
             name: name,
             invited_as: 'artist'

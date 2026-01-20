@@ -151,7 +151,7 @@ export class AuthService {
    * Sends confirmation email to the provided address.
    */
   async createNewUser(email: any, password: any = 'qwerty') {
-    const redirectTo = `${window.location.origin}/confirm-artist`;
+    const redirectTo = `${window.location.origin}/reset/`;
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,

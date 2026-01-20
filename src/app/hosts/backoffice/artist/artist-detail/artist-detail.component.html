@@ -994,7 +994,7 @@
       </div>
 
 
-       <div class="mt-6 mb-6">
+       <div class="mt-6 mb-6" *ngIf="!activeArtist">
          <h2 class="text-lg font-semibold text-gray-900 mb-3">Resend Activation</h2>
          <p class="text-sm text-gray-600 mb-3">
            <span *ngIf="isEmailAuthenticated" class="inline-flex items-center gap-2 text-green-600">

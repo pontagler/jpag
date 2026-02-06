@@ -1,0 +1,50 @@
+<app-header></app-header>
+
+<main class="bg-gray-50 min-h-screen py-12 px-4">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+      <button (click)="goBack()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 transition">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Changelog</h1>
+        <p class="text-sm text-gray-500">All notable changes to the platform</p>
+      </div>
+    </div>
+
+    <div class="space-y-8">
+      <div *ngFor="let release of changelog" class="bg-white rounded-xl shadow-sm ring-1 ring-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-50 text-indigo-700">
+            v{{ release.version }}
+          </span>
+          <span class="text-sm text-gray-500">{{ release.date }}</span>
+        </div>
+
+        <div class="space-y-4">
+          <div *ngFor="let entry of release.entries" class="flex gap-3">
+            <span *ngIf="entry.type === 'feature'"
+              class="mt-0.5 inline-flex h-6 min-w-[4rem] items-center justify-center rounded-full text-xs font-medium bg-green-50 text-green-700">
+              Feature
+            </span>
+            <span *ngIf="entry.type === 'fix'"
+              class="mt-0.5 inline-flex h-6 min-w-[4rem] items-center justify-center rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+              Fix
+            </span>
+            <span *ngIf="entry.type === 'improvement'"
+              class="mt-0.5 inline-flex h-6 min-w-[4rem] items-center justify-center rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+              Improved
+            </span>
+            <div>
+              <p class="font-medium text-gray-900">{{ entry.title }}</p>
+              <p class="text-sm text-gray-600 mt-0.5">{{ entry.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer></app-footer>

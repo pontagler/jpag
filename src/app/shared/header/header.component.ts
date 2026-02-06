@@ -26,6 +26,9 @@ urlID:any;
     });
     effect(() => {
       this.isLoggedIn = !!this.auth.userEmailAuth();
+      if (this.isLoggedIn) {
+        this.loadUserRole();
+      }
     });
   }
   
@@ -86,6 +89,27 @@ async logout(){
 
 isMenuOpen: boolean = false;
 isLoggedIn: boolean = false;
+userRole: string = '';
+
+async loadUserRole() {
+  try {
+    const currentUser = await this.auth.getCurrentUser();
+    if (currentUser) {
+      const userInfo = await this.auth.getUserInfo(currentUser.id);
+      this.userRole = userInfo?.rolename || '';
+    }
+  } catch (error) {
+    console.error('Error loading user role:', error);
+  }
+}
+
+goToMyHome() {
+  if (this.userRole === 'admin') {
+    this.router.navigate(['/hosts/console/home']);
+  } else {
+    this.router.navigate(['/artistspace/profile']);
+  }
+}
 
 
 

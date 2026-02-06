@@ -105,7 +105,7 @@ export class ArtistCreateComponent implements OnInit {
       personal: this.fb.group({
         email: ['', [Validators.required, Validators.email]],
         firstName: ['', Validators.required],
-        lastName: ['', Validators.required],
+        lastName: [''],
         tagline: [''],
         shortBio: [''],
         longBio: [''],
@@ -300,6 +300,9 @@ export class ArtistCreateComponent implements OnInit {
   // Flag to disable "Next" button during upload
   nextBtnDisabled: boolean = false;
 
+  // Loading state for step 1 submission
+  loadingStep1: boolean = false;
+
   async onProfileFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files[0];
@@ -386,6 +389,13 @@ export class ArtistCreateComponent implements OnInit {
   aEmail:any;
   
   async setp1(): Promise<boolean> {
+    // Validate firstName is provided
+    const firstName = this.form.value['personal']?.firstName?.trim();
+    if (!firstName) {
+      this.alertService.showAlert('Validation Error', 'First Name is required', 'error');
+      return false;
+    }
+
     // Validate email is provided
     const email = this.form.value['personal']?.email?.trim();
     if (!email) {
@@ -430,22 +440,24 @@ export class ArtistCreateComponent implements OnInit {
     this.aEmail = email;
 
     try {
+      this.loadingStep1 = true;
       console.log('Creating artist with email:', email);
       const result = await this.artistService.createSingleArtist_step01(this.form.value);
-      
+
       if (result.code === 1) {
         console.log('Artist created successfully:', result.data);
+        this.step1Completed = true;
         this.alertService.showAlert(
-          'Success', 
-          'Artist profile created. Activation email sent to the artist.', 
+          'Success',
+          'Artist profile created. Activation email sent to the artist.',
           'success'
         );
         return true;
       } else {
         console.error('Artist creation failed:', result.data);
         this.alertService.showAlert(
-          'Error', 
-          result.data || 'Failed to create artist profile', 
+          'Error',
+          result.data || 'Failed to create artist profile',
           'error'
         );
         return false;
@@ -453,11 +465,13 @@ export class ArtistCreateComponent implements OnInit {
     } catch (error: any) {
       console.error('Error in setp1:', error);
       this.alertService.showAlert(
-        'Internal Error', 
-        error.message || 'Failed to create artist', 
+        'Internal Error',
+        error.message || 'Failed to create artist',
         'error'
       );
       return false;
+    } finally {
+      this.loadingStep1 = false;
     }
   }
 

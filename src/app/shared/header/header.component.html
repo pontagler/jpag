@@ -102,11 +102,14 @@ Accueil
         >
         Connexion artiste
         </Button>
-  <Button  *ngIf="isLoggedIn"  (click)="logout()"
+        <Button *ngIf="isLoggedIn" (click)="goToMyHome()"
+          class="bg-gradient-to-r from-lime-600 to-lime-700 hover:from-lime-700 hover:to-lime-800 rounded-lg text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          My Home
+        </Button>
+        <Button *ngIf="isLoggedIn" (click)="logout()"
           class="bg-pont-rust hover:bg-pont-rust/90 text-white px-8 py-2.5 font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           Déconnexion
         </Button>
-
       </div>
 
     
@@ -132,6 +135,9 @@ Accueil
         <div class="flex flex-col space-y-3 pt-6 border-t border-gray-100">
           <button *ngIf="!isLoggedIn" (click)="goToArtistLogin()" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white w-fit bg-transparent px-4 py-2 rounded-md">
             Connexion artiste
+          </button>
+          <button *ngIf="isLoggedIn" (click)="goToMyHome()" class="border border-pont-green text-pont-green hover:bg-pont-green hover:text-white w-fit bg-transparent px-4 py-2 rounded-md">
+            My Home
           </button>
           <button *ngIf="isLoggedIn" (click)="logout()" class="bg-pont-rust hover:bg-pont-rust/90 text-white w-fit px-6 py-2 rounded-full font-semibold shadow-lg">
             Déconnexion

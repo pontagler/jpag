@@ -31,6 +31,10 @@ export class ArtistHeaderComponent {
   goToArtistLogin(){
     this.router.navigate(['/artistspace']);
   }
+
+  goToMyProfile(){
+    this.router.navigate(['/artistspace/profile']);
+  }
   ngOnInit() {
     // You can access route data here if needed
    

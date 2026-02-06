@@ -143,9 +143,17 @@
     </div>
 
     <div class="flex justify-end gap-2">
-      <button class="px-4 py-2 rounded-lg  text-white " (click)="next()" [disabled]="nextBtnDisabled"
-    [ngClass]="nextBtnDisabled ? 'bg-gray-300' : 'bg-pont-rust'"
-      >Next</button>
+      <button class="px-4 py-2 rounded-lg text-white" (click)="next()" [disabled]="nextBtnDisabled || loadingStep1"
+        [ngClass]="(nextBtnDisabled || loadingStep1) ? 'bg-gray-300' : 'bg-pont-rust'">
+        <span *ngIf="!loadingStep1">Next</span>
+        <span *ngIf="loadingStep1" class="inline-flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Saving...
+        </span>
+      </button>
     </div>
   </div>
 

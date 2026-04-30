@@ -47,6 +47,25 @@
 				</div>
 			</div>
 
+			<div class="mb-8 flex flex-wrap items-center gap-3">
+				<button (click)="showUpcomingEvents()"
+					class="inline-flex items-center gap-2 px-4 py-2 rounded-md border transition"
+					[ngClass]="activeEventSection === 'upcoming' ? 'bg-pont-green border-pont-green text-white' : 'border-gray-300 text-gray-700 hover:border-pont-green hover:text-pont-green'">
+					<i class="fa-regular fa-calendar"></i>
+					Événements à venir
+					<span class="inline-flex min-w-6 justify-center rounded-full px-2 py-0.5 text-xs"
+						[ngClass]="activeEventSection === 'upcoming' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'">{{ upcomingEventsCount }}</span>
+				</button>
+				<button (click)="showArchivedEvents()"
+					class="inline-flex items-center gap-2 px-4 py-2 rounded-md border transition"
+					[ngClass]="activeEventSection === 'archived' ? 'bg-pont-rust border-pont-rust text-white' : 'border-gray-300 text-gray-700 hover:border-pont-rust hover:text-pont-rust'">
+					<i class="fa-solid fa-box-archive"></i>
+					Événements archivés
+					<span class="inline-flex min-w-6 justify-center rounded-full px-2 py-0.5 text-xs"
+						[ngClass]="activeEventSection === 'archived' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'">{{ archivedEventsCount }}</span>
+				</button>
+			</div>
+
 			@if(showFilters){
 			<div class="mb-8 border border-pont-green/20 rounded-lg p-4">
 				<div class="grid md:grid-cols-4 gap-4">
@@ -110,7 +129,7 @@
 			}
 
 			<div class="mb-6">
-				<p class="text-gray-600">Afficher  {{filteredEvents.length || 0}} événements sur {{allEvents.length || 0}} </p>
+				<p class="text-gray-600">Afficher {{filteredEvents.length || 0}} {{ activeEventSection === 'archived' ? 'événements archivés' : 'événements à venir' }} sur {{ activeEventSection === 'archived' ? archivedEventsCount : upcomingEventsCount }} </p>
 			</div>
 
 			@if(isLoading){
@@ -128,6 +147,10 @@
 					</div>
 				</div>
 				}
+			</div>
+			} @else if(filteredEvents.length === 0){
+			<div class="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-600">
+				{{ activeEventSection === 'archived' ? 'Aucun événement archivé trouvé.' : 'Aucun événement à venir trouvé.' }}
 			</div>
 			} @else if(viewMode === 'grid'){
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
@@ -290,9 +313,9 @@
 
 							</div>
 							@if(e?.isCompleted){
-							<p
-								class="inline-flex items-center justify-center bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-default">
-								Completed</p>
+							<p (click)="goToEventDetail(e.id)"
+								class="cursor-pointer inline-flex items-center justify-center bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded">
+								Détail</p>
 							} @else {
 							<p (click)="goToEventDetail(e.id)"
 								class="cursor-pointer inline-flex items-center justify-center bg-pont-rust hover:bg-pont-rust/90 text-white px-4 py-2 rounded">

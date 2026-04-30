@@ -79,7 +79,7 @@ Pour leur permettre de roder leur programme et de développer leur répertoire.
       </div>
 
       <div class="grid lg:grid-cols-2 gap-8 mb-12">
-        <article class="group border-0 shadow-lg bg-white overflow-hidden rounded" *ngFor="let event of limitedEvents; let i = index" [attr.aria-label]="event.title">
+        <article class="group border-0 shadow-lg bg-white overflow-hidden rounded" *ngFor="let event of festivalUpcomingEvents; let i = index" [attr.aria-label]="event.title">
           <div class="grid md:grid-cols-5 gap-0 h-full">
             <div class="md:col-span-2 relative h-full">
               <img [src]="event.photo" [alt]="event.title" class="w-full h-full object-cover" loading="lazy" decoding="async" />
@@ -182,13 +182,16 @@ Pour leur permettre de roder leur programme et de développer leur répertoire.
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
         <div class="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg bg-white rounded overflow-hidden" *ngFor="let artist of artistArray; trackBy: trackByArtistId">
           <div class="relative overflow-hidden">
-            <img [src]="artist.photo" [alt]="artist.fname + ' ' + artist.lname" class="w-full h-80 object-cover" />
+            <img [src]="artist.photo || '/assets/images/profile/user-b.png'" [alt]="artist.fname + ' ' + artist.lname" class="w-full h-80 object-cover" />
           </div>
           <div class="p-6">
-            <h3 class="font-bold text-xl text-gray-900 mb-2"><a [routerLink]="['/artists', artist.id_artist]" class="hover:text-pont-green">{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</a></h3>
+            <h3 class="font-bold text-xl text-gray-900 mb-2">
+              <a *ngIf="artist.id_artist; else plainArtistName" [routerLink]="['/artists', artist.id_artist]" class="hover:text-pont-green">{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</a>
+              <ng-template #plainArtistName>{{ artist.fname | titlecase }} {{ artist.lname | titlecase}}</ng-template>
+            </h3>
             <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
               <div class="flex flex-wrap space-x-2">
-                @for(x of (artist.instruments ?? []); track x.id_instrument){
+                @for(x of (artist.instruments ?? []); track x.id_instrument || x.instrument || $index){
               <span class="bg-pont-light-green text-pont-green px-2 py-1 rounded-full text-xs font-medium">{{ x.instrument | titlecase }}</span>
                 }
               </div>  
@@ -197,7 +200,7 @@ Pour leur permettre de roder leur programme et de développer leur répertoire.
             <p class="text-sm text-gray-600 mb-3">{{ artist.tagline | stripHtml | titlecase}}</p>
 </div>
             <div class="flex flex-wrap gap-2 mb-4">
-              @for(p of (artist.performance ?? []); track p.id_performance){
+              @for(p of (artist.performance ?? []); track p.id_performance || p.performance || $index){
               <span class="bg-pont-yellow/20 text-pont-rust px-2 py-1 rounded-full text-[11px] font-medium">{{ p.performance | titlecase }}</span>
               }
             </div>

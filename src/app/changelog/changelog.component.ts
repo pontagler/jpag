@@ -17,6 +17,38 @@ export class ChangelogComponent {
 
   changelog = [
     {
+      version: '1.2.2',
+      date: '2026-04-30',
+      entries: [
+        {
+          type: 'feature',
+          title: 'Archived events section',
+          description: 'Added a separate archived events view on the visitor events page so users can switch between upcoming events and past events.'
+        },
+        {
+          type: 'improvement',
+          title: 'Accueil artists ordering',
+          description: 'Updated the Accueil Artistes a Suivre section to show artists from upcoming events first, then featured artists, and only include artists with photos.'
+        },
+        {
+          type: 'improvement',
+          title: 'Event detail time format',
+          description: 'Updated visitor event detail pages to display show times in 24-hour HH:mm format.'
+        }
+      ]
+    },
+    {
+      version: '1.2.1',
+      date: '2026-04-30',
+      entries: [
+        {
+          type: 'improvement',
+          title: 'Accueil Festival upcoming events',
+          description: 'Updated the visitor home page upcoming events section to show all upcoming events from the Festival edition type.'
+        }
+      ]
+    },
+    {
       version: '1.2.0',
       date: '2026-02-06',
       entries: [

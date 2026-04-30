@@ -37,12 +37,17 @@ ngOnInit(): void {
     this.router.navigate(['artists']);
   }
 
+private readonly festivalEditionTypeId = 1;
+
 eventArray:any = [];
 expandedEvents: boolean[] = [];
-limitedEvents: any[] = [];
+festivalUpcomingEvents: any[] = [];
 
 newsletter: { name: string; phone: string; email: string } = { name: '', phone: '', email: '' };
 isSubmitting: boolean = false;
+artistArray:any = [];
+private upcomingEventArtists: any[] = [];
+private featuredArtists: any[] = [];
 
 goYoutube(){
   window.open('https://www.youtube.com/watch?v=wTH9TkJVHQY', '_blank');
@@ -63,11 +68,15 @@ try{
   this.visitorService.getUpcomingEvents().then((res)=>{
     console.log('Raw API response:', res);
     const arr = Array.isArray(res) ? res : [];
-    this.eventArray = arr.map((raw: any) => this.normalizeHomeEvent(raw));
+    this.eventArray = arr
+      .filter((raw: any) => this.isFestivalEdition(raw))
+      .map((raw: any) => this.normalizeHomeEvent(raw));
     console.log('Normalized eventArray:', this.eventArray);
     this.expandedEvents = new Array(this.eventArray?.length || 0).fill(false);
-    this.limitedEvents = this.eventArray.slice(0, 4);
-    console.log('Limited events:', this.limitedEvents);
+    this.festivalUpcomingEvents = this.eventArray;
+    this.upcomingEventArtists = this.getArtistsFromUpcomingEvents(this.eventArray);
+    this.updateArtistArray();
+    console.log('Festival upcoming events:', this.festivalUpcomingEvents);
   })
 }catch(error:any){
 this.alertService.showAlert('Internal Error', error.message, 'error');
@@ -124,13 +133,13 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
 
-artistArray:any = [];
-  
 async getFeaturedArtist(){
 
 try{
   this.visitorService.getFeaturedArtist().then((res)=>{
-    this.artistArray = res;
+    const arr = Array.isArray(res) ? res : [];
+    this.featuredArtists = arr.map((artist: any) => this.normalizeArtistForHome(artist));
+    this.updateArtistArray();
   })
 }catch(error:any){
 this.alertService.showAlert('Internal Error', error.message, 'error');
@@ -139,7 +148,8 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
 }
  
   trackByArtistId(index: number, artist: any): number | string {
-    return artist?.id_artist ?? index;
+    const nameKey = `${artist?.fname || ''}-${artist?.lname || ''}`.trim();
+    return artist?.id_artist ?? (nameKey || index);
   }
 
   isShowPast(d: any): boolean {
@@ -225,6 +235,187 @@ this.alertService.showAlert('Internal Error', error.message, 'error');
       dates,
       period
     };
+  }
+
+  private isFestivalEdition(raw: any): boolean {
+    const editionTypeIds = [
+      raw?.id_edition_type,
+      raw?.edition_type_id,
+      raw?.id_sys_event_edition,
+      raw?.event_edition?.id_edition_type,
+      raw?.edition?.id_edition_type,
+      raw?.event_edition?.sys_event_edition?.id,
+      raw?.sys_event_edition?.id,
+      raw?.edition_type?.id
+    ].filter((value) => value !== null && value !== undefined && value !== '');
+
+    if (editionTypeIds.length > 0) {
+      return editionTypeIds.some((value) => Number(value) === this.festivalEditionTypeId);
+    }
+
+    const editionTypeNames = [
+      raw?.edition_type,
+      raw?.editionType,
+      raw?.event_edition?.sys_event_edition?.name,
+      raw?.sys_event_edition?.name,
+      raw?.edition_type?.name
+    ].filter((value) => typeof value === 'string' && value.trim().length > 0);
+
+    if (editionTypeNames.length > 0) {
+      return editionTypeNames.some((value) => value.trim().toLowerCase() === 'festival');
+    }
+
+    const editionNames = [
+      raw?.edition,
+      raw?.edition_name,
+      raw?.editionDisplay
+    ].filter((value) => typeof value === 'string' && value.trim().length > 0);
+
+    return editionNames.some((value) => value.trim().toLowerCase().includes('festival'));
+  }
+
+  private getArtistsFromUpcomingEvents(events: any[]): any[] {
+    const artists = new Map<string, any>();
+
+    for (const event of events) {
+      const eventArtists = Array.isArray(event?.event_artists) ? event.event_artists : [];
+
+      for (const rawArtist of eventArtists) {
+        const artist = this.normalizeArtistForHome(rawArtist);
+        const key = this.getArtistKey(artist);
+
+        if (!key) continue;
+
+        const existing = artists.get(key);
+        artists.set(key, existing ? this.mergeArtistForHome(existing, artist) : artist);
+      }
+    }
+
+    return Array.from(artists.values());
+  }
+
+  private updateArtistArray(): void {
+    const artists = new Map<string, any>();
+
+    for (const artist of [...this.upcomingEventArtists, ...this.featuredArtists]) {
+      const normalizedArtist = this.normalizeArtistForHome(artist);
+      const key = this.getArtistKey(normalizedArtist);
+
+      if (!key) continue;
+
+      const existing = artists.get(key);
+      artists.set(key, existing ? this.mergeArtistForHome(existing, normalizedArtist) : normalizedArtist);
+    }
+
+    this.artistArray = Array.from(artists.values()).filter((artist: any) => this.hasArtistPhoto(artist));
+  }
+
+  private normalizeArtistForHome(raw: any): any {
+    const fullName = (
+      raw?.artist
+      || raw?.name
+      || raw?.full_name
+      || `${(raw?.fname || raw?.first_name || '').trim()} ${(raw?.lname || raw?.last_name || '').trim()}`.trim()
+    ).toString().trim();
+    const nameParts = this.splitArtistName(fullName);
+    const fname = (raw?.fname || raw?.first_name || nameParts.fname || '').toString().trim();
+    const lname = (raw?.lname || raw?.last_name || nameParts.lname || '').toString().trim();
+
+    return {
+      ...raw,
+      id_artist: raw?.id_artist ?? raw?.artist_id ?? raw?.id ?? raw?.id_user ?? raw?.user_id ?? null,
+      fname,
+      lname,
+      photo: raw?.photo || raw?.image || raw?.avatar || '',
+      tagline: raw?.tagline || raw?.teaser || raw?.short_bio || '',
+      instruments: this.normalizeArtistInstruments(raw),
+      performance: this.normalizeArtistPerformance(raw)
+    };
+  }
+
+  private splitArtistName(name: string): { fname: string; lname: string } {
+    const parts = name.split(/\s+/).filter((part) => part.length > 0);
+
+    if (parts.length <= 1) {
+      return { fname: parts[0] || '', lname: '' };
+    }
+
+    return {
+      fname: parts.slice(0, -1).join(' '),
+      lname: parts[parts.length - 1]
+    };
+  }
+
+  private normalizeArtistInstruments(raw: any): any[] {
+    const instruments = Array.isArray(raw?.instruments)
+      ? raw.instruments
+      : (Array.isArray(raw?.event_instruments) ? raw.event_instruments : []);
+
+    return instruments
+      .map((instrument: any, index: number) => ({
+        ...instrument,
+        id_instrument: instrument?.id_instrument ?? instrument?.id ?? instrument?.instrument_id ?? `instrument-${index}`,
+        instrument: instrument?.instrument || instrument?.name || ''
+      }))
+      .filter((instrument: any) => !!instrument.instrument);
+  }
+
+  private normalizeArtistPerformance(raw: any): any[] {
+    const performance = Array.isArray(raw?.performance)
+      ? raw.performance
+      : (Array.isArray(raw?.performances) ? raw.performances : []);
+
+    return performance
+      .map((item: any, index: number) => ({
+        ...item,
+        id_performance: item?.id_performance ?? item?.id ?? item?.performance_id ?? `performance-${index}`,
+        performance: item?.performance || item?.name || ''
+      }))
+      .filter((item: any) => !!item.performance);
+  }
+
+  private getArtistKey(artist: any): string {
+    const id = artist?.id_artist ?? artist?.artist_id ?? artist?.id;
+
+    if (id !== null && id !== undefined && id !== '') {
+      return `id:${id}`;
+    }
+
+    const name = `${artist?.fname || ''} ${artist?.lname || ''}`.trim().toLowerCase();
+    return name ? `name:${name}` : '';
+  }
+
+  private hasArtistPhoto(artist: any): boolean {
+    return typeof artist?.photo === 'string' && artist.photo.trim().length > 0;
+  }
+
+  private mergeArtistForHome(primary: any, secondary: any): any {
+    return {
+      ...secondary,
+      ...primary,
+      photo: primary?.photo || secondary?.photo || '',
+      tagline: primary?.tagline || secondary?.tagline || '',
+      instruments: this.mergeArtistItems(primary?.instruments, secondary?.instruments, 'id_instrument', 'instrument'),
+      performance: this.mergeArtistItems(primary?.performance, secondary?.performance, 'id_performance', 'performance')
+    };
+  }
+
+  private mergeArtistItems(primaryItems: any[] = [], secondaryItems: any[] = [], idKey: string, labelKey: string): any[] {
+    const items = new Map<string, any>();
+    const primaryList = Array.isArray(primaryItems) ? primaryItems : [];
+    const secondaryList = Array.isArray(secondaryItems) ? secondaryItems : [];
+
+    for (const item of [...primaryList, ...secondaryList]) {
+      const label = (item?.[labelKey] || item?.name || '').toString().trim();
+      const id = item?.[idKey] ?? item?.id ?? label;
+      const key = id !== null && id !== undefined && id !== '' ? `id:${id}` : `label:${label.toLowerCase()}`;
+
+      if (!label || items.has(key)) continue;
+
+      items.set(key, { ...item, [idKey]: id, [labelKey]: label });
+    }
+
+    return Array.from(items.values());
   }
 
 }

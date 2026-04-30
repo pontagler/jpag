@@ -224,9 +224,20 @@ export class DetailComponent implements OnInit {
 
   formatTime(timeString: string | null | undefined): string {
     if (!timeString) return '';
-    // Ensure we can format time-only strings by anchoring to a date
-    const d = new Date(`1970-01-01T${timeString}`);
+    const value = String(timeString).trim();
+    const timeMatch = value.match(/(\d{1,2}):(\d{2})/);
+
+    if (timeMatch) {
+      const hours = Number(timeMatch[1]);
+      const minutes = Number(timeMatch[2]);
+
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      }
+    }
+
+    const d = new Date(value);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
   }
 }

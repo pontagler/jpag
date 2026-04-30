@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
-  version: any = '1.2.0';
+  version: any = '1.2.2';
 
   constructor(private router: Router) {}
 

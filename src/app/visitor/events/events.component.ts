@@ -28,6 +28,7 @@ export class EventsComponent implements OnInit {
 	isLoading: boolean = true;
 	showFilters: boolean = false;
 	viewMode: 'grid' | 'list' = 'grid';
+	activeEventSection: 'upcoming' | 'archived' = 'upcoming';
 	searchTerm: string = '';
 
 	// Filter selections
@@ -56,7 +57,6 @@ export class EventsComponent implements OnInit {
 			console.log('data', data)
 			const arr = Array.isArray(data) ? data : [];
 			this.allEvents = arr.map((raw: any) => this.normalizeEvent(raw));
-			this.filteredEvents = [...this.allEvents];
 			console.log(this.filteredEvents)
 			this.computeOptionLists();
 			this.applyFilters();
@@ -131,15 +131,10 @@ export class EventsComponent implements OnInit {
 		const editionDisplay = (raw?.edition && String(raw.edition))
 			? String(raw.edition)
 			: [raw?.edition_name, raw?.edition_year].filter((v: any) => !!v).join(' ');
-		const showTimes: number[] = Array.isArray(shows)
-			? shows.map(s => new Date(s?.date as any).getTime()).filter(t => !isNaN(t))
-			: [];
-		const startOfToday = new Date();
-		startOfToday.setHours(0, 0, 0, 0);
+		const lastShowMs = this.getLastShowMsFromShows(shows);
 		let statusNormalized: 'upcoming' | 'completed' | '' = '';
-		if (showTimes.length > 0) {
-			const latestShow = Math.max(...showTimes);
-			statusNormalized = latestShow < startOfToday.getTime() ? 'completed' : 'upcoming';
+		if (!isNaN(lastShowMs)) {
+			statusNormalized = lastShowMs < Date.now() ? 'completed' : 'upcoming';
 		}
 		const isCompleted = Boolean((raw as any)?.is_completed) || statusNormalized === 'completed';
 		const instruments = Array.isArray(raw?.event_instruments)
@@ -195,12 +190,23 @@ export class EventsComponent implements OnInit {
 		this.applyFilters();
 	}
 
+	showUpcomingEvents(): void {
+		this.activeEventSection = 'upcoming';
+		this.applyFilters();
+	}
+
+	showArchivedEvents(): void {
+		this.activeEventSection = 'archived';
+		this.applyFilters();
+	}
+
 	clearFilters(): void {
 		this.searchTerm = '';
 		this.selectedProgramme = '';
 		this.selectedType = '';
+		this.selectedEditionName = '';
 		this.sortBy = 'date';
-		this.filteredEvents = [...this.allEvents];
+		this.applyFilters();
 	}
 
 	goToEventDetail(eventId: any): void {
@@ -213,8 +219,6 @@ export class EventsComponent implements OnInit {
 		const progLc = (this.selectedProgramme || '').toLowerCase();
 		const typeLc = (this.selectedType || '').toLowerCase();
 		const edNameLc = (this.selectedEditionName || '').toLowerCase();
-
-		const now = new Date().getTime();
 
 		this.filteredEvents = this.allEvents
 			.filter((ev: any) => {
@@ -234,11 +238,11 @@ export class EventsComponent implements OnInit {
 				const editionNameStr = (ev?.editionDisplay || ev?.edition || '').toString().toLowerCase();
 				const matchesEditionName = edNameLc.length === 0 ? true : editionNameStr === edNameLc;
 
-				const dateMs = this.getPrimaryDateMs(ev);
-				const derivedStatus: 'upcoming' | 'completed' | '' = isNaN(dateMs) ? ((ev?.status as any) || '') : (dateMs >= now ? 'upcoming' : 'completed');
-				const _evStatus = ((ev?.status as any) || derivedStatus) as 'upcoming' | 'completed' | '';
+				const matchesEventSection = this.activeEventSection === 'archived'
+					? this.isEventArchived(ev)
+					: !this.isEventArchived(ev);
 
-				return matchesSearch && matchesProgramme && matchesType && matchesEditionName;
+				return matchesSearch && matchesProgramme && matchesType && matchesEditionName && matchesEventSection;
 			})
 			.sort((a: any, b: any) => {
 				if (this.sortBy === 'date' || this.sortBy === 'date-asc') {
@@ -262,6 +266,14 @@ export class EventsComponent implements OnInit {
 			});
 	}
 
+	get upcomingEventsCount(): number {
+		return this.allEvents.filter((ev: any) => !this.isEventArchived(ev)).length;
+	}
+
+	get archivedEventsCount(): number {
+		return this.allEvents.filter((ev: any) => this.isEventArchived(ev)).length;
+	}
+
 	private getPrimaryDateMs(ev: any): number {
 		// Try multiple possible shapes
 		const fromShows = Array.isArray(ev?.shows) && ev.shows.length > 0 ? new Date(ev.shows[0]?.date).getTime() : NaN;
@@ -272,6 +284,42 @@ export class EventsComponent implements OnInit {
 			if (!isNaN(t)) return t;
 		}
 		return NaN;
+	}
+
+	private getLastShowMsFromShows(shows: any[]): number {
+		const showTimes = (Array.isArray(shows) ? shows : [])
+			.map((show: any) => this.getShowEndMs(show))
+			.filter((time: number) => !isNaN(time));
+
+		return showTimes.length > 0 ? Math.max(...showTimes) : NaN;
+	}
+
+	private getShowEndMs(show: any): number {
+		const dateInput = show?.isPeriod && show?.end_date ? show.end_date : show?.date;
+		if (!dateInput) return NaN;
+
+		const dt = new Date(dateInput);
+		if (isNaN(dt.getTime())) return NaN;
+
+		const timeStr = (show?.time || '').toString();
+		if (timeStr) {
+			const parts = timeStr.split(':');
+			const hours = parseInt(parts[0] || '0', 10);
+			const minutes = parseInt(parts[1] || '0', 10);
+			if (!isNaN(hours) && !isNaN(minutes)) {
+				dt.setHours(hours, minutes, 0, 0);
+			}
+		} else {
+			dt.setHours(23, 59, 59, 999);
+		}
+
+		return dt.getTime();
+	}
+
+	private isEventArchived(ev: any): boolean {
+		if (ev?.isCompleted === true || ev?.status === 'completed') return true;
+		const lastShowMs = this.getLastShowMsFromShows(ev?.shows);
+		return !isNaN(lastShowMs) && lastShowMs < Date.now();
 	}
 
 	private computeOptionLists(): void {

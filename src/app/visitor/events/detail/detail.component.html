@@ -65,6 +65,10 @@
               <i class="fa-regular fa-calendar text-pont-green mr-3"></i>
               <ng-container *ngIf="d?.isPeriod && d?.end_date">
                 <span class="text-sm">{{ formatDate(d.date) }} - {{ formatDate(d.end_date) }} : </span>
+                <ng-container *ngIf="formatTime(d.time)">
+                  <span class="text-sm">{{ formatTime(d.time) }}</span>
+                  <span class="mx-1">:</span>
+                </ng-container>
                 <span class="text-sm text-gray-600 ml-1">
                   <i class="fa-solid fa-location-dot text-pont-green mr-1"></i>
                   <a *ngIf="d.id_location; else plainLocPeriod" [routerLink]="['/locations', d.id_location]" class="underline hover:opacity-80">{{ d.location }}</a>

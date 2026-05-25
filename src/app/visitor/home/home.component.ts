@@ -68,20 +68,68 @@ try{
   this.visitorService.getUpcomingEvents().then((res)=>{
     console.log('Raw API response:', res);
     const arr = Array.isArray(res) ? res : [];
-    this.eventArray = arr
-      .filter((raw: any) => this.isFestivalEdition(raw))
-      .map((raw: any) => this.normalizeHomeEvent(raw));
+    const normalized = arr.map((raw: any) => this.normalizeHomeEvent(raw));
+    
+    // Sort chronologically (earliest date first)
+    normalized.sort((a: any, b: any) => {
+      const da = this.getEventMinDateMs(a);
+      const db = this.getEventMinDateMs(b);
+      if (isNaN(da) && isNaN(db)) return 0;
+      if (isNaN(da)) return 1;
+      if (isNaN(db)) return -1;
+      return da - db;
+    });
+
+    this.eventArray = normalized.slice(0, 4);
     console.log('Normalized eventArray:', this.eventArray);
     this.expandedEvents = new Array(this.eventArray?.length || 0).fill(false);
     this.festivalUpcomingEvents = this.eventArray;
     this.upcomingEventArtists = this.getArtistsFromUpcomingEvents(this.eventArray);
     this.updateArtistArray();
-    console.log('Festival upcoming events:', this.festivalUpcomingEvents);
+    console.log('Upcoming events:', this.festivalUpcomingEvents);
   })
 }catch(error:any){
 this.alertService.showAlert('Internal Error', error.message, 'error');
 }
 
+}
+
+private getEventMinDateMs(event: any): number {
+  const dates = Array.isArray(event?.dates) ? event.dates : [];
+  const periods = Array.isArray(event?.period) ? event.period : [];
+  
+  let minMs = Infinity;
+  
+  for (const d of dates) {
+    const dateToCheck = d?.date;
+    if (dateToCheck) {
+      const t = new Date(dateToCheck).getTime();
+      if (!isNaN(t) && t < minMs) {
+        minMs = t;
+      }
+    }
+  }
+  
+  for (const p of periods) {
+    const dateToCheck = p?.start_date;
+    if (dateToCheck) {
+      const t = new Date(dateToCheck).getTime();
+      if (!isNaN(t) && t < minMs) {
+        minMs = t;
+      }
+    }
+  }
+  
+  if (minMs === Infinity) {
+    const fallbackDate = event?.date || event?.event_date || event?.start_date;
+    if (fallbackDate) {
+      const t = new Date(fallbackDate).getTime();
+      if (!isNaN(t)) return t;
+    }
+    return 0;
+  }
+  
+  return minMs;
 }
   toggleDates(index: number): void {
     this.expandedEvents[index] = !this.expandedEvents[index];

@@ -35,7 +35,7 @@ export class EventsComponent implements OnInit {
 	selectedProgramme: string = '';
 	selectedType: string = '';
 	selectedEditionName: string = '';
-	sortBy: 'date-asc' | 'date' | 'edition' | 'event_type' | 'edition_type' | 'event_domain' = 'date';
+	sortBy: 'date-asc' | 'date' | 'edition' | 'event_type' | 'edition_type' | 'event_domain' = 'date-asc';
 
 	// Option lists
 	programmeOptions: string[] = [];
@@ -192,11 +192,13 @@ export class EventsComponent implements OnInit {
 
 	showUpcomingEvents(): void {
 		this.activeEventSection = 'upcoming';
+		this.sortBy = 'date-asc';
 		this.applyFilters();
 	}
 
 	showArchivedEvents(): void {
 		this.activeEventSection = 'archived';
+		this.sortBy = 'date';
 		this.applyFilters();
 	}
 
@@ -205,7 +207,7 @@ export class EventsComponent implements OnInit {
 		this.selectedProgramme = '';
 		this.selectedType = '';
 		this.selectedEditionName = '';
-		this.sortBy = 'date';
+		this.sortBy = this.activeEventSection === 'upcoming' ? 'date-asc' : 'date';
 		this.applyFilters();
 	}
 

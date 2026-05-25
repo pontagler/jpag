@@ -17,6 +17,22 @@ export class ChangelogComponent {
 
   changelog = [
     {
+      version: '1.2.3',
+      date: '2026-05-25',
+      entries: [
+        {
+          type: 'improvement',
+          title: 'Upcoming events default sorting',
+          description: 'Updated the visitor events page to sort upcoming events chronologically ascending (soonest first) by default, and archived events reverse-chronologically (most recent past first).'
+        },
+        {
+          type: 'improvement',
+          title: 'Accueil upcoming events display',
+          description: 'Updated the visitor homepage to display the top 4 upcoming events from all editions chronologically, instead of filtering exclusively by the Festival edition.'
+        }
+      ]
+    },
+    {
       version: '1.2.2',
       date: '2026-04-30',
       entries: [

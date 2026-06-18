@@ -136,8 +136,8 @@ export class AuthService {
    * Sends a password reset email via Supabase.
    * The redirect returns the user to the login page where recovery is handled.
    */
-  async requestPasswordReset(email: string) {
-    const redirectTo = `${window.location.origin}/reset`;
+  async requestPasswordReset(email: string, from: 'hosts' | 'artist' = 'artist') {
+    const redirectTo = `${window.location.origin}/reset?from=${from}`;
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo
     });

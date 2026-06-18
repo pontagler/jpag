@@ -11,11 +11,11 @@ import { ArtistService } from '../../services/artist.service';
   templateUrl: './login.component.html'
 })
 export class LoginComponent {
-  // email: string = 'veronique.gaudrat@wanadoo.fr';
-  // password: string = 'Pontargler0809$';
   email: string = '';
   password: string = '';
   loading: boolean = false;
+  showForgot = false;
+  resetEmail = '';
 
   constructor(
     private alertService: AlertService,
@@ -24,9 +24,7 @@ export class LoginComponent {
     private artistService: ArtistService
   ) {}
 
-  ngOnInit() {
-    // Initialization logic can go here
-  }
+  ngOnInit() {}
 
   async login() {
     this.loading = true;
@@ -62,6 +60,18 @@ export class LoginComponent {
           }
         }
 
-   
-  
+  async sendResetEmail(): Promise<void> {
+    try {
+      if (!this.resetEmail) {
+        this.alertService.showAlert('Missing Email', 'Please enter your email to reset.', 'error');
+        return;
+      }
+      await this.authService.requestPasswordReset(this.resetEmail, 'hosts');
+      this.alertService.showAlert('Email Sent', 'Check your inbox for the reset link.', 'success');
+      this.showForgot = false;
+      this.resetEmail = '';
+    } catch (err: any) {
+      this.alertService.showAlert('Reset Failed', err?.message || 'Could not send reset email.', 'error');
+    }
+  }
 }

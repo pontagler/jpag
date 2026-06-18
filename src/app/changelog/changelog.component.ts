@@ -17,6 +17,27 @@ export class ChangelogComponent {
 
   changelog = [
     {
+      version: '1.2.4',
+      date: '2026-06-18',
+      entries: [
+        {
+          type: 'feature',
+          title: 'Host forgot password flow',
+          description: 'Added a working forgot-password flow on the host login page. Hosts can request a reset link by email and receive a Supabase recovery message.'
+        },
+        {
+          type: 'fix',
+          title: 'Password reset from email link',
+          description: 'Fixed the /reset page so it correctly verifies Supabase recovery tokens from email links and displays the new-password form instead of failing silently.'
+        },
+        {
+          type: 'improvement',
+          title: 'Context-aware reset redirect',
+          description: 'Password reset emails now include the login context (host or artist). After a successful reset, users are returned to the correct login page.'
+        }
+      ]
+    },
+    {
       version: '1.2.3',
       date: '2026-05-25',
       entries: [

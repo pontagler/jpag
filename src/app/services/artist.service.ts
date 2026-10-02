@@ -1465,7 +1465,14 @@ async editArtistTimeOff(arr:any, id:any){
    * @param artistId - The artist ID to delete
    */
   async deleteArtist(artistId: string): Promise<any> {
-    const { data, error } = await supabase.rpc('pont_delete_artist', { 
+    // pont_delete_artist does not clear event_instruments, whose FK blocks the delete
+    const { error: delInstErr } = await supabase
+      .from('event_instruments')
+      .delete()
+      .eq('id_artist', parseInt(artistId));
+    if (delInstErr) throw delInstErr;
+
+    const { data, error } = await supabase.rpc('pont_delete_artist', {
       artist_id: parseInt(artistId) 
     });
 

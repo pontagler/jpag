@@ -17,6 +17,17 @@ export class ChangelogComponent {
 
   changelog = [
     {
+      version: '1.2.5',
+      date: '2026-10-02',
+      entries: [
+        {
+          type: 'fix',
+          title: 'Artist deletion from backoffice',
+          description: 'Fixed an error that prevented admins from deleting an artist who was assigned to instruments on an event. The artist\'s event instrument assignments are now removed as part of the deletion.'
+        }
+      ]
+    },
+    {
       version: '1.2.4',
       date: '2026-06-18',
       entries: [
